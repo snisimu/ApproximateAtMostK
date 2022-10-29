@@ -12,18 +12,15 @@ import Data.List
 import Base
 import Pairwise
 
-numNewVars :: KN -> Int
-numNewVars kn = length $ newVars $ atMost kn
-numLiterals :: KN -> Int
-numLiterals kn = sum $ map length $ cnf $ atMost kn
-numClauses :: KN -> Int
-numClauses kn = length $ cnf $ atMost kn
-
 report :: KN -> IO ()
 report kn = do
   putStrLn $ "numNewVars: " ++ show (numNewVars kn)
   putStrLn $ "numLiterals: " ++ show (numLiterals kn)
   putStrLn $ "numClauses: " ++ show (numClauses kn)
+  where
+    numNewVars kn = length $ newVars $ atMost kn
+    numLiterals kn = sum $ map length $ cnf $ atMost kn
+    numClauses kn = length $ cnf $ atMost kn
 
 generateDIMACStoCheck :: KN -> IO ()
 generateDIMACStoCheck (k, n) = do
