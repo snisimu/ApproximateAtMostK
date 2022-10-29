@@ -17,7 +17,7 @@ atMost (k, n) = cnf
     theMin i = min i k
     log2n = head $ filter (\i -> n <= 2^i) [1..] -- floor (logBase 2 n) + if ..
     sOf i = allFTssOf log2n !! (i - 1)
-    phi i g j = (sOf i !! (j + 1), VarNew $ B g j)
+    phi i g j = (sOf i !! (j - 1), VarNew $ B g j)
     cnf = 
         let a = flip map [1..n] \i ->
                     (:) (False, X i) $
