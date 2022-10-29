@@ -13,11 +13,9 @@ combinations xs n | n > 0 =
 
 data Var a
     = X Int
-    | New a
+    | VarNew a
     deriving (Eq, Show)
 
 type CNF a = [[(Bool, Var a)]]
-
-data Result a = Result { newVars :: [a], cnf :: CNF a}
 
 type KN = (Int, Int)

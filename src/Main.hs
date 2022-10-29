@@ -7,30 +7,39 @@ import System.Exit
 
 import Control.Monad
 
+import Data.Maybe
 import Data.List
 
 import Base
-import Binomial
+-- import Binomial
+import Binary
 
 report :: KN -> IO ()
 report kn = do
   putStrLn $ "numNewVars: " ++ show (numNewVars kn)
-  putStrLn $ "numLiterals: " ++ show (numLiterals kn)
   putStrLn $ "numClauses: " ++ show (numClauses kn)
+  putStrLn $ "numLiterals: " ++ show (numLiterals kn)
   where
-    numNewVars kn = length $ newVars $ atMost kn
-    numLiterals kn = sum $ map length $ cnf $ atMost kn
-    numClauses kn = length $ cnf $ atMost kn
+    numNewVars kn = length $ newVarsOf $ atMost kn
+    numClauses kn = length $ atMost kn
+    numLiterals kn = sum $ map length $ atMost kn
+
+newVarsOf :: Eq a => CNF a -> [a]
+newVarsOf cnf = nub $ flip concatMap cnf \bvs ->
+  catMaybes $ flip map bvs \case
+    (_, VarNew v) -> Just v
+    _ -> Nothing
 
 generateDIMACStoCheck :: KN -> IO ()
 generateDIMACStoCheck (k, n) = do
-  let Result newVar's cnf' = atMost (k, n)
-  vNumAtMostss <- forM cnf' \bvs -> do
+  let cnf = atMost (k, n)
+      newVars = newVarsOf cnf 
+  vNumAtMostss <- forM cnf \bvs -> do
     forM bvs \(bl, var) -> do
       vNum <- case var of
         X m -> return m
-        New v -> case elemIndex v newVar's of
-          Nothing -> die $ "cannot determine a number for newVar: " ++ show v
+        VarNew nv -> case elemIndex nv newVars of
+          Nothing -> die $ "cannot determine a number for newVar: " ++ show nv
           Just index -> return $ n + index + 1
       return $ (if bl then 1 else -1) * vNum
   let vNumFixss bl = map return [1..(k + (if bl then 0 else 1))]
@@ -42,4 +51,4 @@ generateDIMACStoCheck (k, n) = do
 
 main :: IO ()
 main = do
-  print $ cnf $ atMost (2, 4)
+  mapM_ print $ atMost (1, 3)
