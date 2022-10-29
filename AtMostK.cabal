@@ -28,3 +28,6 @@ executable AtMostK
                        -Wmissing-home-modules
                        -Wpartial-fields
                        -Wredundant-constraints
+  other-modules:        Base
+                      , Binomial
+                      , Binary
