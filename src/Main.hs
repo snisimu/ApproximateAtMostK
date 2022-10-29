@@ -10,7 +10,7 @@ import Control.Monad
 import Data.List
 
 import Base
-import Pairwise
+import Binomial
 
 report :: KN -> IO ()
 report kn = do

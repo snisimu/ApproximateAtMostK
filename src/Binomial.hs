@@ -1,4 +1,4 @@
-module Pairwise(atMost) where
+module Binomial(atMost) where
 
 import Base
 
