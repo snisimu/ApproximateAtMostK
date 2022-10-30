@@ -1,4 +1,4 @@
-module Binomial where
+module Binomial (atMost) where
 
 import Base
 

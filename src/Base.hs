@@ -3,8 +3,10 @@
 
 module Base where
 
+import Control.Monad
+
 import Data.Maybe
-import Data.List (nub)
+import Data.List (nub, intercalate)
 
 combinations :: [a] -> Int -> [[a]]
 combinations xs n | n > 0 = 
@@ -39,3 +41,12 @@ auxVarsOf cnf = nub $ flip concatMap cnf \bvs ->
     _ -> Nothing
 
 type KN = (Int, Int)
+
+printCNF :: Show a => CNFwith a -> IO ()
+printCNF bvss = do
+  forM_ bvss \bvs -> do
+    putStrLn $ intercalate " or " $ flip map bvs \(bl, v) ->
+      (if bl then "" else "~ ") ++
+        case v of
+          VarAux va -> show va
+          _ -> show v

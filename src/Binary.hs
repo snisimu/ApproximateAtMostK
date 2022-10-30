@@ -1,7 +1,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE BlockArguments #-}
 
-module Binary(atMost) where
+module Binary (atMost) where
 
 import Base
 
