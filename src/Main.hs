@@ -13,12 +13,7 @@ import Base
 import qualified Binomial
 import qualified Binary
 import qualified Counter
-
-{-
-  Binomial.atMost
-  Binary.atMost
-  Counter.atMost
--}
+import qualified Commander
 
 report :: KN -> IO ()
 report kn = do
@@ -48,8 +43,9 @@ generateDIMACStoCheck atMst (k, n) = do
         intercalate " " $ map show $ vNums ++ [0]
   writeFile "ShouldBeSAT.cnf" $ vNumssToStr (vNumAtMostss ++ vNumFixss True)
   writeFile "ShouldBeUNSAT.cnf" $ vNumssToStr (vNumAtMostss ++ vNumFixss False)
-  -- > wsl -- ./minisat ShouldBeSAT.cnf
+  -- ghci> generateDIMACStoCheck Counter.atMost (5,10)
+  -- PowerShell> wsl -- ./minisat ShouldBeSAT.cnf
 
 main :: IO ()
 main = do
-  printCNF $ Counter.atMost (1, 3)
+  printCNF $ Commander.atMostOn 2 (1, 4)
