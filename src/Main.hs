@@ -10,23 +10,30 @@ import Control.Monad
 import Data.List (elemIndex, intercalate)
 
 import Base
--- import Binomial
--- import Binary
-import Counter
+import qualified Binomial
+import qualified Binary
+import qualified Counter
+
+{-
+  Binomial.atMost
+  Binary.atMost
+  Counter.atMost
+-}
 
 report :: KN -> IO ()
 report kn = do
-  putStrLn $ "aux vars: " ++ show numAuxVars
-  putStrLn $ "clauses : " ++ show numClauses
-  putStrLn $ "literals: " ++ show numLiterals
+  putStrLn "Binomial"; reportOf $ Binomial.atMost kn
+  putStrLn "Binary"; reportOf $ Binary.atMost kn
+  putStrLn "Counter"; reportOf $ Counter.atMost kn
   where
-    numAuxVars = length $ auxVarsOf $ atMost kn
-    numClauses = length $ atMost kn
-    numLiterals = sum $ map length $ atMost kn
+    reportOf cnf = do
+      putStrLn $ " aux vars: " ++ show (length $ auxVarsOf cnf)
+      putStrLn $ " clauses : " ++ show (length cnf)
+      putStrLn $ " literals: " ++ show (sum $ map length cnf)
 
-generateDIMACStoCheck :: KN -> IO ()
-generateDIMACStoCheck (k, n) = do
-  let cnf = atMost (k, n)
+generateDIMACStoCheck :: (Eq a, Show a) => (KN -> CNFwith a) -> KN -> IO ()
+generateDIMACStoCheck atMst (k, n) = do
+  let cnf = atMst (k, n)
       auxVars = auxVarsOf cnf 
   vNumAtMostss <- forM cnf \bvs -> do
     forM bvs \(bl, var) -> do
@@ -45,4 +52,4 @@ generateDIMACStoCheck (k, n) = do
 
 main :: IO ()
 main = do
-  printCNF $ atMost (1, 3)
+  printCNF $ Counter.atMost (1, 3)
