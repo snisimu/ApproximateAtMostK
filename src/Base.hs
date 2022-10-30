@@ -27,12 +27,15 @@ allFTssOf n = filter (\ss -> length ss == n) allFTss
     then bss
     else makeFTss (m - 1) $ bss ++ [ bs ++ [False] | bs <- bss ] ++ [ bs ++ [True] | bs <- bss ]
 
-data VarWith a
+data Var a b
     = X Int
-    | VarAux a
+    | Vaux a
+    | Vlocal String b
     deriving (Eq, Show)
 
-type CNFwith a = [[(Bool, VarWith a)]]
+type Literal a b = (Bool, Var a b)
+
+type CNF a b = [[Literal a b]]
 
 auxVarsOf :: Eq a => CNFwith a -> [a]
 auxVarsOf cnf = nub $ flip concatMap cnf \bvs ->
