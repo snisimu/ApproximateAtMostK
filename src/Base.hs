@@ -37,19 +37,21 @@ type Literal a b = (Bool, Var a b)
 
 type CNF a b = [[Literal a b]]
 
-auxVarsOf :: Eq a => CNFwith a -> [a]
-auxVarsOf cnf = nub $ flip concatMap cnf \bvs ->
-  catMaybes $ flip map bvs \case
-    (_, VarAux v) -> Just v
+auxVarsOf :: (Eq a, Eq b) => CNF a b -> [Either a (String, b)]
+auxVarsOf cnf = nub $ flip concatMap cnf \literals ->
+  catMaybes $ flip map literals \case
+    (_, Vaux v) -> Just (Left v)
+    (_, Vlocal idn v) -> Just (Right (idn, v))
     _ -> Nothing
 
-type KN = (Int, Int)
-
-printCNF :: Show a => CNFwith a -> IO ()
-printCNF bvss = do
-  forM_ bvss \bvs -> do
-    putStrLn $ intercalate " or " $ flip map bvs \(bl, v) ->
+printCNF :: (Show a, Show b) => CNF a b -> IO ()
+printCNF literalss = do
+  forM_ literalss \literals -> do
+    putStrLn $ intercalate " or " $ map showLiteral literals
+  where
+    showLiteral (bl, v) =
       (if bl then "" else "~ ") ++
         case v of
-          VarAux va -> show va
+          Vaux va -> show va
+          Vlocal idn vb -> idn ++ " " ++ show vb
           _ -> show v
