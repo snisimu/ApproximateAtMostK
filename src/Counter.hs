@@ -10,16 +10,17 @@ data Vaux = R Int Int
 
 atMost :: KN -> CNFwith Vaux
 atMost (k, n) = 
-    let e1 = flip map [1 .. n-1] \i ->
-                [(False, X i), (True, VarAux $ R i 1)]
-        e2 = flip map [2..k] \j -> 
-                [(False, VarAux $ R 1 j)]
-        e3 = flip concatMap [2 .. n-1] \i ->
-                flip map [1..k] \j ->
-                    [(False, VarAux $ R (i-1) j), (True, VarAux $ R i j)]
-        e4 = flip concatMap [2 .. n-1] \i ->
-                flip map [2..k] \j ->
-                    [(False, X i), (False, VarAux $ R (i-1) (j-1)), (True, VarAux $ R i j)]
-        e5 = flip map [2 {- 1 on the paper -} .. n] \i ->
-                [(False, X i), (False {- True on the paper -}, VarAux $ R (i-1) k)]
+    let e1 = [ [(False, X i), (True, VarAux $ R i 1)] | i <- [1 .. n-1] ]
+        e2 = [ [(False, VarAux $ R 1 j)] | j <- [2..k] ]
+        e3 = [ [(False, VarAux $ R (i-1) j), (True, VarAux $ R i j)]
+                | i <- [2 .. n-1]
+                , j <- [1..k]
+             ]
+        e4 = [ [(False, X i), (False, VarAux $ R (i-1) (j-1)), (True, VarAux $ R i j)]
+                | i <- [2 .. n-1]
+                , j <- [2..k]
+             ]
+        e5 = [ [(False, X i), (False {- True on the paper -}, VarAux $ R (i-1) k)]
+                | i <- [2 {- 1 on the paper -} .. n]
+             ] 
     in  foldr1 (++) [e1, e2, e3, e4, e5]

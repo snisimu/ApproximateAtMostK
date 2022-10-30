@@ -18,9 +18,11 @@ atMost (k, n) =
         sFor i = allFTssOf log2n !! (i - 1)
         phi i g j = (sFor i !! (j - 1), VarAux $ B g j)
         a = flip map [1..n] \i ->
-                (:) (False, X i) $
-                    flip map [theMax i .. theMin i] \g -> (True, VarAux $ T g i)
-        b = flip concatMap [1..n] \i ->
-                flip concatMap [theMax i .. theMin i] \g ->
-                    flip map [1..log2n] \j -> [(False, VarAux $ T g i), phi i g j]
+                (False, X i) :
+                    [ (True, VarAux $ T g i) | g <- [theMax i .. theMin i] ]
+        b = [ [(False, VarAux $ T g i), phi i g j]
+             | i <- [1..n]
+             , g <- [theMax i .. theMin i]
+             , j <- [1..log2n]
+            ]
     in  a ++ b
