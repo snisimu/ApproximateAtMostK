@@ -12,7 +12,7 @@ data Vbinary
     | T Int Int
     deriving (Eq, Show)
 
-binary :: NumberConstraint (Either VarX (Either Vbinary a)) -- Vbinary
+binary :: NumberConstraint Vbinary
 binary literals k = 
     let n = length literals
         x i = literals !! (i-1)
