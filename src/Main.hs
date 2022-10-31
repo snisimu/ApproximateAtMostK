@@ -49,3 +49,4 @@ generateDIMACStoCheck atMost (k, n) = do
 main :: IO ()
 main = do
   printCNF $ binomial (literalXs 3) 1
+
