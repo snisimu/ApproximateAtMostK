@@ -31,44 +31,36 @@ allFTssOf n = filter (\ss -> length ss == n) allFTss
     then bss
     else makeFTss (m - 1) $ bss ++ [ bs ++ [False] | bs <- bss ] ++ [ bs ++ [True] | bs <- bss ]
 
-data Var a
-    = X Int
-    | Aux a
+newtype VarX = X Int
     deriving (Eq, Show)
-instance Functor Var where
-  fmap f = \case
-    X i -> X i
-    Aux v -> Aux $ f v
 
-type Literal a = (Bool, Var a)
-literalMap:: (a -> b) -> Literal a -> Literal b
-literalMap = fmap . fmap
-liftX :: Literal a -> Literal (Either a b)
-liftX = literalMap Left
+type Literal a = (Bool, a)
 
-literalXs :: Int -> [Literal a]
+literalXs :: Int -> [Literal VarX]
 literalXs n = [ (True, X i) | i <- [1..n] ]
 
 not :: Literal a -> Literal a
 not (b, v) = (Prelude.not b, v)
 
 type CNF a = [[Literal a]]
+{-
 cnfMap :: (a -> b) -> CNF a -> CNF b
 cnfMap = fmap . fmap . fmap . fmap
+-}
 
-auxsOf :: Eq a => CNF a -> [a]
-auxsOf cnf = nub $ flip concatMap cnf \bvs ->
-  catMaybes $ flip map bvs \case
-    (_, Aux v) -> Just v
-    _ -> Nothing
+auxsOf :: Eq b => CNF (Either a b) -> [b]
+auxsOf cnf = nub $ flip concatMap cnf \literals ->
+  catMaybes $ flip map literals \case
+    (_, Left _) -> Nothing
+    (_, Right v) -> Just v
 
-printCNF bvss = do
-  forM_ bvss \bvs -> do
-    putStrLn $ intercalate " or " $ flip map bvs \(bl, v) ->
-      (if bl then "" else "~ ") ++
+printCNF cnf = do
+  forM_ cnf \literals -> do
+    putStrLn $ intercalate " or " $ flip map literals \(b, v) ->
+      (if b then "" else "~ ") ++
         case v of
-          Aux va -> show va
-          _ -> show v
+          Right v' -> show v'
+          Left v' -> show v'
 
 type NumberConstraint a b = [Literal a] -> Int -> CNF (Either a b)
 
