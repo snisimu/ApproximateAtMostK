@@ -1,7 +1,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE BlockArguments #-}
 
-module Commander(atMostOn) where
+module Commander(commander) where
 
 import Base
 
@@ -14,16 +14,17 @@ divideInto n xs = splitBy (((length xs) + n - 1) `div` n) xs
         where
         (xs1, xs2) = splitAt m x's
 
-data VAux = C Int Int
+data VcounterWith vaux
+    = C Int Int
+    | Imported Int vaux
     deriving (Eq, Show)
-
 
 atMostBinomial :: Int -> [(Bool, VarWith a)] -> CNFwith a
 atMostBinomial k bvs = map (map \(bl,v) -> (not bl, v)) $
     combinations bvs $ k + 1
 
-atMostOn :: Int -> KN -> CNFwith VAux
-atMostOn g (k, n) =
+commander :: NumberConstraint Vcounter
+commander g (k, n) =
     let hss = divideInto g [1..n]
         c1M = flip concatMap [1..g] \i -> 
                 atMostBinomial k $
@@ -43,7 +44,7 @@ atMostOn g (k, n) =
 {-
 appendCnfWhenAtMostCommander3 :: String -> Variable -> Int -> [Variable] -> GenCnfConstraint ()
 appendCnfWhenAtMostCommander3 strId v n vs = do
-  let strId' = strId ++ ":WhenAtMostCommander3:AtMost" ++ show n
+  let strId' = strId ++ ":WhenAtMostCommander3:NumberConstraint" ++ show n
   let vss = divideInto 3 vs
       ns = [0 .. n]
   withNewVarsDivided strId (VarCountCommander strId <$> [0..2]) ns $ do

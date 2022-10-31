@@ -60,6 +60,9 @@ printCNF bvss = do
           Aux va -> show va
           _ -> show v
 
-type AtMost vaux = [Literal vaux] -> Int -> CNF vaux
+type NumberConstraint vaux = [Literal vaux] -> Int -> CNF vaux
+
+atLeastBy :: NumberConstraint vaux -> NumberConstraint vaux
+atLeastBy atMost literals k = atMost (map not literals) (length literals - k + 1)
 
 type KN = (Int, Int)

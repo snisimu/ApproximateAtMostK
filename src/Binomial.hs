@@ -1,8 +1,10 @@
-module Binomial (atMost) where
+module Binomial (binomial) where
+         
+import Prelude hiding (not)
 
 import Base
 
 type Vbinomial = ()
 
-atMost :: AtMost Vbinomial
-atMost literals k = combinations (map not' literals) $ k + 1
+binomial :: NumberConstraint Vbinomial
+binomial literals k = combinations (map not literals) $ k + 1
