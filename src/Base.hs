@@ -36,17 +36,20 @@ newtype VarX = X Int
 
 type Literal a = (Bool, a)
 
+lift :: Literal (Either a b) -> Literal (Either a (Either b c))
+lift = fmap \case
+  Left v -> Left v
+  Right v -> Right $ Left v
+lifts :: [Literal (Either a b)] -> [Literal (Either a (Either b c))]
+lifts = map lift
+
 literalXs :: Int -> [Literal VarX]
 literalXs n = [ (True, X i) | i <- [1..n] ]
 
 not :: Literal a -> Literal a
-not (b, v) = (Prelude.not b, v)
+not (bl, v) = (Prelude.not bl, v)
 
 type CNF a = [[Literal a]]
-{-
-cnfMap :: (a -> b) -> CNF a -> CNF b
-cnfMap = fmap . fmap . fmap . fmap
--}
 
 auxsOf :: Eq b => CNF (Either a b) -> [b]
 auxsOf cnf = nub $ flip concatMap cnf \literals ->
@@ -54,17 +57,19 @@ auxsOf cnf = nub $ flip concatMap cnf \literals ->
     (_, Left _) -> Nothing
     (_, Right v) -> Just v
 
+printCNF :: (Show a, Show b) => CNF (Either a b) -> IO ()
 printCNF cnf = do
   forM_ cnf \literals -> do
-    putStrLn $ intercalate " or " $ flip map literals \(b, v) ->
-      (if b then "" else "~ ") ++
+    putStrLn $ intercalate " or " $ flip map literals \(bl, v) ->
+      (if bl then "" else "~ ") ++
         case v of
           Right v' -> show v'
           Left v' -> show v'
 
-type NumberConstraint a b = [Literal a] -> Int -> CNF (Either a b)
+type NumberConstraint a b c
+  = [Literal (Either a b)] -> Int -> CNF (Either a (Either b c))
 
-atLeastBy :: NumberConstraint a b -> NumberConstraint a b
+atLeastBy :: NumberConstraint a b c -> NumberConstraint a b c
 atLeastBy atMost literals k = atMost (map not literals) (length literals - k + 1)
 
 type KN = (Int, Int)

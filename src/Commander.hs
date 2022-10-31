@@ -11,23 +11,17 @@ splitBy m xs = xs1:(splitBy m xs2)
     where
     (xs1, xs2) = splitAt m xs
 
-data VcounterWith vaux
+data Vcounter
     = C Int Int
-    | Imported Int vaux
     deriving (Eq, Show)
 
-importVars :: CNF (VcounterWith vaux) -> CNF (VcounterWith vaux)
-importVars = map $ \literals ->
-    flip map literals \(b, v) ->
-        case v of
-
-
-commander :: NumberConstraint vaux -> Int -> NumberConstraint (VcounterWith vaux)
+commander :: NumberConstraint a b -> Int -> NumberConstraint (Either a b) Vcounter
 commander atMost s literals k =
     let hss = splitBy s [1..n]
         g = length hss
         n = length literals
-        c i j = (True, Aux $ C i j)
+        literal's = map liftLeft literals
+        c i j = (True, Right $ C i j)
         c1 = flip concatMap [1..g] \i -> 
                 let lits = [ literals !! (h-1) | h <- hss !! (i-1) ]
                         ++ [ c i j | j <- [1..k] ]
@@ -37,7 +31,7 @@ commander atMost s literals k =
                 , j <- [1 .. k-1]
              ]
         c3 = atMost [ c i j | i <- [1..g], j <- [1..k] ] k
-    in  c1 ++ c2 ++ c3
+    in  c1 ++ c2 ++ c3 
 
 {-
 appendCnfWhenAtMostCommander3 :: String -> Variable -> Int -> [Variable] -> GenCnfConstraint ()

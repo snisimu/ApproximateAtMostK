@@ -12,30 +12,30 @@ import Data.List (elemIndex, intercalate)
 import Base
 import Binomial
 import Binary
--- import Counter
+import Counter
 -- import Commander
 
 report :: KN -> IO ()
 report (k, n) = do
   putStrLn "Binomial"; reportOf $ binomial (literalXs n) k
   putStrLn "Binary"; reportOf $ binary (literalXs n) k
-  -- putStrLn "Counter"; reportOf $ counter (literalXs n) k
+  putStrLn "Counter"; reportOf $ counter (literalXs n) k
   where
     reportOf cnf = do
       putStrLn $ " aux vars: " ++ show (length $ auxsOf cnf)
       putStrLn $ " clauses : " ++ show (length cnf)
       putStrLn $ " literals: " ++ show (sum $ map length cnf)
 
-generateDIMACStoCheck :: (Eq a, Eq b, Show a, Show b) => NumberConstraint a b -> KN -> IO ()
+generateDIMACStoCheck :: (Eq a, Show a) => NumberConstraint VarX a -> KN -> IO ()
 generateDIMACStoCheck atMost (k, n) = do
   let cnf = atMost (literalXs n) k
       auxs = auxsOf cnf 
-  vNumAtMostss <- forM cnf \bvs -> do
-    forM bvs \(bl, var) -> do
+  vNumAtMostss <- forM cnf \literals -> do
+    forM literals \(bl, var) -> do
       vNum <- case var of
-        X m -> return m
-        Aux nv -> case elemIndex nv auxs of
-          Nothing -> die $ "cannot determine a number for auxVar: " ++ show nv
+        Left (X m) -> return m
+        Right v -> case elemIndex v auxs of
+          Nothing -> die $ "cannot determine a number for auxVar: " ++ show v
           Just index -> return $ n + index + 1
       return $ (if bl then 1 else -1) * vNum
   let vNumFixss bl = map return [1..(k + (if bl then 0 else 1))]
@@ -48,4 +48,4 @@ generateDIMACStoCheck atMost (k, n) = do
 
 main :: IO ()
 main = do
-  (printCNF :: CNF Vbinary -> IO) binary (literalXs 3) 1
+  printCNF $ binary (literalXs 3) 1

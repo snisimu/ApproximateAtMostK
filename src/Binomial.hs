@@ -4,5 +4,7 @@ import Prelude hiding (not)
 
 import Base
 
-binomial :: NumberConstraint () a
-binomial literals k = combinations (map (not . liftX) $ literals) $ k + 1
+binomial :: NumberConstraint a b ()
+binomial literals k =
+    let literal's = lifts literals
+    in  combinations (map not literal's) $ k + 1
