@@ -31,34 +31,37 @@ allFTssOf n = filter (\ss -> length ss == n) allFTss
     then bss
     else makeFTss (m - 1) $ bss ++ [ bs ++ [False] | bs <- bss ] ++ [ bs ++ [True] | bs <- bss ]
 
-data Var vaux
+data Var a
     = X Int
-    | Aux vaux
+    | Aux a
     deriving (Eq, Show)
 instance Functor Var where
   fmap f = \case
     X i -> X i
     Aux v -> Aux $ f v
 
-type Literal vaux = (Bool, Var vaux)
+type Literal a = (Bool, Var a)
+literalMap:: (a -> b) -> Literal a -> Literal b
+literalMap = fmap . fmap
+liftX :: Literal a -> Literal (Either a b)
+liftX = literalMap Left
 
-literalXs :: Int -> [Literal vaux]
+literalXs :: Int -> [Literal a]
 literalXs n = [ (True, X i) | i <- [1..n] ]
 
-not :: Literal vaux -> Literal vaux
+not :: Literal a -> Literal a
 not (b, v) = (Prelude.not b, v)
 
-type CNF vaux = [[Literal vaux]]
+type CNF a = [[Literal a]]
 cnfMap :: (a -> b) -> CNF a -> CNF b
 cnfMap = fmap . fmap . fmap . fmap
 
-auxsOf :: Eq vaux => CNF vaux -> [vaux]
+auxsOf :: Eq a => CNF a -> [a]
 auxsOf cnf = nub $ flip concatMap cnf \bvs ->
   catMaybes $ flip map bvs \case
     (_, Aux v) -> Just v
     _ -> Nothing
 
-printCNF :: Show vaux => CNF vaux -> IO ()
 printCNF bvss = do
   forM_ bvss \bvs -> do
     putStrLn $ intercalate " or " $ flip map bvs \(bl, v) ->

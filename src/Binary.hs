@@ -12,16 +12,16 @@ data Vbinary
     | T Int Int
     deriving (Eq, Show)
 
-binary :: NumberConstraint Vbinary
+binary :: NumberConstraint a Vbinary
 binary literals k = 
     let n = length literals
-        x i = literals !! (i-1)
-        t g i = (True, Aux $ T g i)
+        x i = liftX $ literals !! (i-1)
+        t g i = (True, Aux $ Right $ T g i)
         theMax i = max 1 $ k - n + i
         theMin i = min i k
         log2n = head $ filter (\i -> n <= 2^i) [1..] -- floor (logBase 2 n) + if ..
         s i = allFTssOf log2n !! (i - 1)
-        phi i g j = (s i !! (j - 1), Aux $ B g j)
+        phi i g j = (s i !! (j - 1), Aux $ Right $ B g j)
     in  [ not (x i) : [ t g i | g <- [theMax i .. theMin i] ]
         | i <- [1..n]
         ]

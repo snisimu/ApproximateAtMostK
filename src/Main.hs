@@ -12,21 +12,21 @@ import Data.List (elemIndex, intercalate)
 import Base
 import Binomial
 import Binary
-import Counter
+-- import Counter
 -- import Commander
 
 report :: KN -> IO ()
 report (k, n) = do
   putStrLn "Binomial"; reportOf $ binomial (literalXs n) k
   putStrLn "Binary"; reportOf $ binary (literalXs n) k
-  putStrLn "Counter"; reportOf $ counter (literalXs n) k
+  -- putStrLn "Counter"; reportOf $ counter (literalXs n) k
   where
     reportOf cnf = do
       putStrLn $ " aux vars: " ++ show (length $ auxsOf cnf)
       putStrLn $ " clauses : " ++ show (length cnf)
       putStrLn $ " literals: " ++ show (sum $ map length cnf)
 
-generateDIMACStoCheck :: (Eq vaux, Show vaux) => NumberConstraint vaux -> KN -> IO ()
+generateDIMACStoCheck :: (Eq a, Eq b, Show a, Show b) => NumberConstraint a b -> KN -> IO ()
 generateDIMACStoCheck atMost (k, n) = do
   let cnf = atMost (literalXs n) k
       auxs = auxsOf cnf 
@@ -48,4 +48,4 @@ generateDIMACStoCheck atMost (k, n) = do
 
 main :: IO ()
 main = do
-  printCNF $ binary (literalXs 3) 1
+  (printCNF :: CNF Vbinary -> IO) binary (literalXs 3) 1
