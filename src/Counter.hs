@@ -12,9 +12,10 @@ data Vcounter = R Int Int
 
 counter :: NumberConstraint a Vcounter
 counter literals k = 
-    let n = length literals
-        x i = liftLeft $ literals !! (i-1)
-        r i j = (True, Right $ R i j)
+    let literal's = lifts literals
+        n = length literal's
+        x i = literal's !! (i-1)
+        r i j = (True, Aux $ Right $ R i j)
     in  [ [not $ x i, r i 1] | i <- [1 .. n-1] ] -- (1)
         ++
         [ [not $ r 1 j] | j <- [2..k] ] -- (2)

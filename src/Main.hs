@@ -26,15 +26,15 @@ report (k, n) = do
       putStrLn $ " clauses : " ++ show (length cnf)
       putStrLn $ " literals: " ++ show (sum $ map length cnf)
 
-generateDIMACStoCheck :: (Eq a, Show a) => NumberConstraint VarX a -> KN -> IO ()
+generateDIMACStoCheck :: (Eq a, Show a) => NumberConstraint () a -> KN -> IO ()
 generateDIMACStoCheck atMost (k, n) = do
   let cnf = atMost (literalXs n) k
       auxs = auxsOf cnf 
   vNumAtMostss <- forM cnf \literals -> do
     forM literals \(bl, var) -> do
       vNum <- case var of
-        Left (X m) -> return m
-        Right v -> case elemIndex v auxs of
+        X i -> return i
+        Aux v -> case elemIndex v auxs of
           Nothing -> die $ "cannot determine a number for auxVar: " ++ show v
           Just index -> return $ n + index + 1
       return $ (if bl then 1 else -1) * vNum
