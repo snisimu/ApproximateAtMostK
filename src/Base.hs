@@ -3,6 +3,9 @@
 
 module Base where
 
+import Prelude hiding (not)
+import qualified Prelude (not)
+
 import Control.Monad
 
 import Data.Maybe
@@ -14,7 +17,7 @@ combinations xs n | n > 0 =
     where
     go n' b p ~(x:x's)
         | n' == 0 = [[]]
-        | not b  = []
+        | Prelude.not b  = []
         | null p = [(x:x's)]
         | otherwise = map (x:) (go (n'-1) b p x's)
                         ++ go n' b (tail p) x's
@@ -27,31 +30,36 @@ allFTssOf n = filter (\ss -> length ss == n) allFTss
     then bss
     else makeFTss (m - 1) $ bss ++ [ bs ++ [False] | bs <- bss ] ++ [ bs ++ [True] | bs <- bss ]
 
-data Var a b
+data Var vaux
     = X Int
-    | Vaux a
-    | Vlocal String b
+    | Aux vaux
     deriving (Eq, Show)
 
-type Literal a b = (Bool, Var a b)
+type Literal vaux = (Bool, Var vaux)
 
-type CNF a b = [[Literal a b]]
+literalXs :: Int -> [Literal vaux]
+literalXs n = [ (True, X i) | i <- [1..n] ]
 
-auxVarsOf :: (Eq a, Eq b) => CNF a b -> [Either a (String, b)]
-auxVarsOf cnf = nub $ flip concatMap cnf \literals ->
-  catMaybes $ flip map literals \case
-    (_, Vaux v) -> Just (Left v)
-    (_, Vlocal idn v) -> Just (Right (idn, v))
+not :: Literal vaux -> Literal vaux
+not (b, v) = (Prelude.not b, v)
+
+type CNF vaux = [[Literal vaux]]
+
+auxsOf :: Eq vaux => CNF vaux -> [vaux]
+auxsOf cnf = nub $ flip concatMap cnf \bvs ->
+  catMaybes $ flip map bvs \case
+    (_, Aux v) -> Just v
     _ -> Nothing
 
-printCNF :: (Show a, Show b) => CNF a b -> IO ()
-printCNF literalss = do
-  forM_ literalss \literals -> do
-    putStrLn $ intercalate " or " $ map showLiteral literals
-  where
-    showLiteral (bl, v) =
+printCNF :: Show vaux => CNF vaux -> IO ()
+printCNF bvss = do
+  forM_ bvss \bvs -> do
+    putStrLn $ intercalate " or " $ flip map bvs \(bl, v) ->
       (if bl then "" else "~ ") ++
         case v of
-          Vaux va -> show va
-          Vlocal idn vb -> idn ++ " " ++ show vb
+          Aux va -> show va
           _ -> show v
+
+type AtMost vaux = [Literal vaux] -> Int -> CNF vaux
+
+type KN = (Int, Int)
