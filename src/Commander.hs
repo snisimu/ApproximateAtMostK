@@ -5,41 +5,39 @@ module Commander(commander) where
 
 import Base
 
-divideInto :: Int -> [a] -> [[a]]
-divideInto n xs = splitBy (((length xs) + n - 1) `div` n) xs
+splitBy :: Int -> [a] -> [[a]]
+splitBy _ [] = []
+splitBy m xs = xs1:(splitBy m xs2)
     where
-    splitBy :: Int -> [a] -> [[a]]
-    splitBy _ [] = []
-    splitBy m x's = xs1:(splitBy m xs2)
-        where
-        (xs1, xs2) = splitAt m x's
+    (xs1, xs2) = splitAt m xs
 
 data VcounterWith vaux
     = C Int Int
     | Imported Int vaux
     deriving (Eq, Show)
 
-atMostBinomial :: Int -> [(Bool, VarWith a)] -> CNFwith a
-atMostBinomial k bvs = map (map \(bl,v) -> (not bl, v)) $
-    combinations bvs $ k + 1
+importVars :: CNF (VcounterWith vaux) -> CNF (VcounterWith vaux)
+importVars = map $ \literals ->
+    flip map literals \(b, v) ->
+        case v of
 
-commander :: NumberConstraint Vcounter
-commander g (k, n) =
-    let hss = divideInto g [1..n]
-        c1M = flip concatMap [1..g] \i -> 
-                atMostBinomial k $
-                    (map (\h -> (True, X h)) $ hss !! (i-1)) ++
-                        [ (False, VarAux $ C i j) | j <- [1..k] ]
-        c1L = flip concatMap [1..g] \i -> 
-                atMostBinomial k $ (map (\h -> (False, X h)) $ hss !! (i-1)) ++
-                    [ (True, VarAux $ C i j) | j <- [1..k] ]
-        c2 = [ [(True, VarAux $ C i j), (True, VarAux $ C i (j+1))]
+
+commander :: NumberConstraint vaux -> Int -> NumberConstraint (VcounterWith vaux)
+commander atMost s literals k =
+    let hss = splitBy s [1..n]
+        g = length hss
+        n = length literals
+        c i j = (True, Aux $ C i j)
+        c1 = flip concatMap [1..g] \i -> 
+                let lits = [ literals !! (h-1) | h <- hss !! (i-1) ]
+                        ++ [ c i j | j <- [1..k] ]
+                in  atMost lits k ++ atLeastBy atMost lits k
+        c2 = [ [c i j, c i (j+1)]
                 | i <- [1..g]
                 , j <- [1 .. k-1]
              ]
-        c3 = atMostBinomial k $
-                [ (True, VarAux $ C i j) | i <- [1..g], j <- [1..k] ]
-    in  foldr1 (++) [c1M, c1L, c2, c3]
+        c3 = atMost [ c i j | i <- [1..g], j <- [1..k] ] k
+    in  c1 ++ c2 ++ c3
 
 {-
 appendCnfWhenAtMostCommander3 :: String -> Variable -> Int -> [Variable] -> GenCnfConstraint ()
