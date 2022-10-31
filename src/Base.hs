@@ -9,6 +9,7 @@ import qualified Prelude (not)
 import Control.Monad
 
 import Data.Maybe
+import Data.Either
 import Data.List (nub, intercalate)
 
 combinations :: [a] -> Int -> [[a]]
@@ -34,6 +35,10 @@ data Var vaux
     = X Int
     | Aux vaux
     deriving (Eq, Show)
+instance Functor Var where
+  fmap f = \case
+    X i -> X i
+    Aux v -> Aux $ f v
 
 type Literal vaux = (Bool, Var vaux)
 
@@ -44,6 +49,8 @@ not :: Literal vaux -> Literal vaux
 not (b, v) = (Prelude.not b, v)
 
 type CNF vaux = [[Literal vaux]]
+cnfMap :: (a -> b) -> CNF a -> CNF b
+cnfMap = fmap . fmap . fmap . fmap
 
 auxsOf :: Eq vaux => CNF vaux -> [vaux]
 auxsOf cnf = nub $ flip concatMap cnf \bvs ->
@@ -60,10 +67,9 @@ printCNF bvss = do
           Aux va -> show va
           _ -> show v
 
--- type NumberConstraint vaux = [Literal vaux] -> Int -> CNF vaux
-type NumberConstraint a b = (Var a -> Var b) -> [Literal b] -> Int -> CNF b
+type NumberConstraint a b = [Literal a] -> Int -> CNF (Either a b)
 
-atLeastBy :: NumberConstraint vaux -> NumberConstraint vaux
+atLeastBy :: NumberConstraint a b -> NumberConstraint a b
 atLeastBy atMost literals k = atMost (map not literals) (length literals - k + 1)
 
 type KN = (Int, Int)

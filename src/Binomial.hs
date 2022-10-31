@@ -4,7 +4,5 @@ import Prelude hiding (not)
 
 import Base
 
-type Vbinomial = ()
-
-binomial :: NumberConstraint Vbinomial
+binomial :: NumberConstraint a () 
 binomial literals k = combinations (map not literals) $ k + 1
