@@ -1,7 +1,9 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE BlockArguments #-}
 
-module Commander(commander) where
+module Commander (commander) where
+
+import Prelude hiding (not)
 
 import Base
 
@@ -29,50 +31,23 @@ commander atMost s literals k =
             Aux (Left (Left v)) -> Aux $ Left v
             Aux (Left (Right v)) -> Aux $ Right $ Right v
             Aux (Right v) -> Aux $ Right $ Left (str, v)
-        -- c1 :: CNF (Either a (Either (String, b) Vcommander))
-        c1 =  flip concatMap [1..g] \i -> 
-                let -- lits :: [Literal (Either a Vcommander)]
-                    lits
-                      =  [ lift $ literals !! (h-1) | h <- hss !! (i-1) ]
-                      ++ [ c i j | j <- [1..k] ]
-                    -- am :: CNF (Either (Either a Vcommander) b)
-                    am = atMost lits k
-                    -- al :: CNF (Either (Either a Vcommander) b)
-                    al = atLeastBy atMost lits k
-                in  arrange13 ("c1-AM" ++ show i) am
-                      ++ arrange13 ("c1-AL" ++ show i) al
         arrange2 :: CNF (Either a Vcommander) -> CNF (Either a (Either (String, b) Vcommander))
         arrange2 = map \lits ->
           flip map lits $ fmap \case 
             X i -> X i
             Aux (Left v) -> Aux $ Left v
             Aux (Right v) -> Aux $ Right $ Right v
+        c1 =  flip concatMap [1..g] \i -> 
+                let lits
+                      =  [ lift $ literals !! (h-1) | h <- hss !! (i-1) ]
+                      ++ [ not $ c i j | j <- [1..k] ]
+                in  arrange13 ("c1-AM" ++ show i) (atMost lits k)
+                      ++ arrange13 ("c1-AL" ++ show i) (atLeastBy atMost lits k)
         c2 :: CNF (Either a (Either (String, b) Vcommander))
         c2 =  arrange2
-                [ [c i j, c i (j+1)]
+                [ [not $ c i j, c i (j+1)]
                 | i <- [1..g]
                 , j <- [1 .. k-1]
                 ]
-        -- c3 :: CNF (Either a (Either (String, b) Vcommander))
         c3 = arrange13 "c3" $ atMost [ c i j | i <- [1..g], j <- [1..k] ] k
     in  c1 ++ c2 ++ c3 
-
-{-
-appendCnfWhenAtMostCommander3 :: String -> Variable -> Int -> [Variable] -> GenCnfConstraint ()
-appendCnfWhenAtMostCommander3 strId v n vs = do
-  let strId' = strId ++ ":WhenAtMostCommander3:NumberConstraint" ++ show n
-  let vss = divideInto 3 vs
-      ns = [0 .. n]
-  withNewVarsDivided strId (VarCountCommander strId <$> [0..2]) ns $ do
-    forM_ [0..2] \x -> do
-      let vs = vss !! x
-      appendCnf $ cnf (strId' ++ ":Max:Group" ++ show x) $
-        bvssWhen v $ bvssAtMost n vs
-    forM_ ((,) <$> [0..2] <*> tail ns) \(x,y) -> do
-      let vs = vss !! x
-      appendCnf $ cnf (strId ++ ":Group" ++ show x ++ ":LT" ++ show y) $
-        bvssUnless (VarCountCommander strId x y) $ bvssAtMost (y-1) vs
-    let vs = uncurry (VarCountCommander strId) <$> ((,) <$> [0..2] <*> tail ns)
-    appendCnf $ cnf (strId ++ ":CountCommanders") $
-      bvssWhen v $ bvssAtMost n vs
--}

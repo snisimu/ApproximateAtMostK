@@ -13,13 +13,15 @@ import Base
 import Binomial
 import Binary
 import Counter
--- import Commander
+import Commander
 
 report :: KN -> IO ()
 report (k, n) = do
-  putStrLn "Binomial"; reportOf $ binomial (literalXs n) k
-  putStrLn "Binary"; reportOf $ binary (literalXs n) k
-  putStrLn "Counter"; reportOf $ counter (literalXs n) k
+  -- putStrLn "binomial"; reportOf $ binomial (literalXs n) k
+  putStrLn "binary"; reportOf $ binary (literalXs n) k
+  putStrLn "counter"; reportOf $ counter (literalXs n) k
+  let s = min 10 $ n `div` 3
+  putStrLn "commander(+counter)"; reportOf $ commander counter s (literalXs n) k
   where
     reportOf cnf = do
       putStrLn $ " aux vars: " ++ show (length $ auxsOf cnf)
@@ -48,4 +50,4 @@ generateDIMACStoCheck atMost (k, n) = do
 
 main :: IO ()
 main = do
-  printCNF $ binary (literalXs 3) 1
+  printCNF $ commander binomial 2 (literalXs 4) 2
