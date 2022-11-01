@@ -15,41 +15,46 @@ data Vcommander
     = C Int Int
     deriving (Eq, Show)
 
-commander :: NumberConstraint (Either a Vcommander) b -> Int -> NumberConstraint (Either a Vcommander) (Int, Int, b)
+commander :: NumberConstraint (Either a Vcommander) b -> Int -> NumberConstraint a (Either (String, b) Vcommander)
 commander atMost s literals k =
     let hss = splitBy s [1..n]
         g = length hss
         n = length literals
         c :: Int -> Int -> Literal (Either a Vcommander)
         c i j = (True, Aux $ Right $ C i j)
-        -- liftLocal :: Int -> Int -> CNF (Either a b) -> CNF (Either a (Int,Int,b))
-        liftLocal numID0 numID1 cnf = flip map cnf \lits ->
+        arrange13 :: String -> CNF (Either (Either a Vcommander) b) -> CNF (Either a (Either (String, b) Vcommander))
+        arrange13 str = map \lits ->
           flip map lits $ fmap \case
-            Aux (Right v) -> Aux $ Right (numID0, numID1, v)
-            Aux (Left v) -> Aux $ Left v
             X i -> X i
-        replaceRight cnf = flip map cnf \lits ->
-          flip map lits $ fmap \case
-            Aux (Right v) -> Aux $ Left $ Right v
-            Aux (Left v) -> Aux $ Left $ Left v
-            X i -> X i
-        -- c1 :: CNF (Either (Either a Vcommander) (Int, Int, b))
+            Aux (Left (Left v)) -> Aux $ Left v
+            Aux (Left (Right v)) -> Aux $ Right $ Right v
+            Aux (Right v) -> Aux $ Right $ Left (str, v)
+        -- c1 :: CNF (Either a (Either (String, b) Vcommander))
         c1 =  flip concatMap [1..g] \i -> 
-                let lits :: [Literal (Either a Vcommander)]
-                    lits = -- [ lift $ literals !! (h-1) | h <- hss !! (i-1) ]
-                        let 
-                        in  lift
-                        ++ [ c i j | j <- [1..k] ]
-                in  liftLocal 1 i (atMost lits k)
-                      ++ liftLocal 2 i (atLeastBy atMost lits k)
-        c2 :: CNF (Either (Either a Vcommander) (Int, Int, b))
-        c2 =  replaceRight
+                let -- lits :: [Literal (Either a Vcommander)]
+                    lits
+                      =  [ lift $ literals !! (h-1) | h <- hss !! (i-1) ]
+                      ++ [ c i j | j <- [1..k] ]
+                    -- am :: CNF (Either (Either a Vcommander) b)
+                    am = atMost lits k
+                    -- al :: CNF (Either (Either a Vcommander) b)
+                    al = atLeastBy atMost lits k
+                in  arrange13 ("c1-AM" ++ show i) am
+                      ++ arrange13 ("c1-AL" ++ show i) al
+        arrange2 :: CNF (Either a Vcommander) -> CNF (Either a (Either (String, b) Vcommander))
+        arrange2 = map \lits ->
+          flip map lits $ fmap \case 
+            X i -> X i
+            Aux (Left v) -> Aux $ Left v
+            Aux (Right v) -> Aux $ Right $ Right v
+        c2 :: CNF (Either a (Either (String, b) Vcommander))
+        c2 =  arrange2
                 [ [c i j, c i (j+1)]
                 | i <- [1..g]
                 , j <- [1 .. k-1]
                 ]
-        -- c3 :: CNF (Either (Either a Vcommander) (Int, Int, b))
-        c3 = liftLocal 3 0 $ atMost [ c i j | i <- [1..g], j <- [1..k] ] k
+        -- c3 :: CNF (Either a (Either (String, b) Vcommander))
+        c3 = arrange13 "c3" $ atMost [ c i j | i <- [1..g], j <- [1..k] ] k
     in  c1 ++ c2 ++ c3 
 
 {-

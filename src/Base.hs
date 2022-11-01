@@ -36,6 +36,8 @@ data Var a
    | Aux a
    deriving (Eq, Show)
 
+-- instance Functor Var where
+
 type Literal a = (Bool, Var a)
 
 lift :: Literal a -> Literal (Either a b)
