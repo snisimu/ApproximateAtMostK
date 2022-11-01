@@ -12,6 +12,8 @@ import Data.Maybe
 import Data.Either
 import Data.List (nub, intercalate)
 
+-- lib [begin]
+
 combinations :: [a] -> Int -> [[a]]
 combinations xs n | n > 0 = 
     go n (length (take n xs) == n) (drop n xs) xs
@@ -30,6 +32,14 @@ allFTssOf n = filter (\ss -> length ss == n) allFTss
   makeFTss m bss = if m == 0
     then bss
     else makeFTss (m - 1) $ bss ++ [ bs ++ [False] | bs <- bss ] ++ [ bs ++ [True] | bs <- bss ]
+
+splitBy :: Int -> [a] -> [[a]]
+splitBy _ [] = []
+splitBy m xs = xs1:(splitBy m xs2)
+    where
+    (xs1, xs2) = splitAt m xs
+
+-- lib [end]
 
 data Var a
    = X Int
@@ -54,13 +64,6 @@ not :: Literal a -> Literal a
 not (bl, v) = (Prelude.not bl, v)
 
 type CNF a = [[Literal a]]
-
-mapRight :: (a -> b) -> CNF (Either c a) -> CNF (Either c b)
-mapRight f cnf = flip map cnf \literals ->
-  flip map literals \(bl, v) -> case v of
-    X i -> (bl, X i)
-    Aux (Right v') -> (bl, Aux (Right $ f v'))
-    Aux (Left v') -> (bl, Aux (Left v'))
 
 auxsOf :: Eq a => CNF a -> [a]
 auxsOf cnf = nub $ flip concatMap cnf \literals ->

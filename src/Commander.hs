@@ -7,12 +7,6 @@ import Prelude hiding (not)
 
 import Base
 
-splitBy :: Int -> [a] -> [[a]]
-splitBy _ [] = []
-splitBy m xs = xs1:(splitBy m xs2)
-    where
-    (xs1, xs2) = splitAt m xs
-
 data Vcommander
     = C Int Int
     deriving (Eq, Show)
