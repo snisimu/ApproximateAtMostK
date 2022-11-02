@@ -57,8 +57,8 @@ lift = fmap \case
 lifts :: [Literal a] -> [Literal (Either a b)]
 lifts = map lift
 
-literalVs :: Int -> [Literal ()]
-literalVs n = [ (True, X i) | i <- [1..n] ]
+literalXs :: Int -> [Literal ()]
+literalXs n = [ (True, X i) | i <- [1..n] ]
 
 not :: Literal a -> Literal a
 not (bl, v) = (Prelude.not bl, v)

@@ -6,6 +6,7 @@ module Main (main, report, generateDIMACStoCheck) where
 import System.Exit
 
 import Control.Monad
+import Control.Applicative
 
 import Data.List (elemIndex, intercalate)
 
@@ -52,3 +53,13 @@ generateDIMACStoCheck atMost (k, n) = do
 main :: IO ()
 main = do
   printCNF $ commander binomial 2 (literalXs 4) 2
+
+tr1 :: KN -> [Int]
+tr1 (k, n) = 
+  let f :: [Int] -> [Int] -> [[Int]]
+      f a b = (++) <$> map return a <*> map return b
+      pss :: [[Int]]
+      pss = foldr1 f $ replicate (k+1) [1..]
+      ps's :: [[Int]]
+      ps's = filter (\ps -> foldr1 (*) ps >= n) pss
+  in  head ps's

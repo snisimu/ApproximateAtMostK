@@ -49,5 +49,6 @@ product prodArg xs k = case paKN prodArg == (k, length literals) of True ->
                 l = [ [not $ x i, a d $ xv i] | d <- [1 .. k+1], i <- [1..n] ]
                 arrange ::
                 arrange
-                r = [  |  ]
+                r = product [  |  ]
+
             
