@@ -5,6 +5,6 @@ import Prelude hiding (not)
 import Base
 
 binomial :: NumberConstraint a ()
-binomial literals k =
-    let literal's = lifts literals
-    in  combinations (map not literal's) $ k + 1
+binomial x's k =
+    let xs = lifts x's
+    in  combinations (map not xs) $ k + 1

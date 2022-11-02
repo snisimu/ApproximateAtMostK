@@ -11,10 +11,9 @@ data Vcounter = R Int Int
     deriving (Eq, Show)
 
 counter :: NumberConstraint a Vcounter
-counter literals k = 
-    let literal's = lifts literals
-        n = length literal's
-        x i = literal's !! (i-1)
+counter xs k = 
+    let n = length xs
+        x i = lifts xs !! (i-1)
         r i j = (True, Aux $ Right $ R i j)
     in  [ [not $ x i, r i 1] | i <- [1 .. n-1] ] -- (1)
         ++
