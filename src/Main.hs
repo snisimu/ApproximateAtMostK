@@ -14,6 +14,7 @@ import Binomial
 import Binary
 import Counter
 import Commander
+-- import Product
 
 report :: KN -> IO ()
 report (k, n) = do
