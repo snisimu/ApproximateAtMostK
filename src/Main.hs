@@ -20,7 +20,7 @@ import Product
 
 report :: KN -> IO ()
 report (k, n) = do
-  -- putStrLn "binomial"; reportOf $ binomial (literalXs n) k
+  putStrLn "binomial"; reportOf $ binomial (literalXs n) k
   putStrLn "binary"; reportOf $ binary (literalXs n) k
   putStrLn "counter"; reportOf $ counter (literalXs n) k
   let s = min 10 $ n `div` 3

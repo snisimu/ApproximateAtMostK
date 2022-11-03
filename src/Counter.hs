@@ -15,7 +15,7 @@ counter xs k =
     let n = length xs
         x i = lifts xs !! (i-1)
         r i j = (True, Aux $ Right $ R i j)
-    in  [ [not $ x i, r i 1] | i <- [1 .. n-1] ] -- (1)
+    in  [ [not $ x i, r i 1] | i <- [1..n-1] ] -- (1)
         ++
         [ [not $ r 1 j] | j <- [2..k] ] -- (2)
         ++
@@ -25,7 +25,7 @@ counter xs k =
         ]
         ++
         [ [not $ x i, not $ r (i-1) (j-1), r i j] -- (4)
-        | i <- [2 .. n-1]
+        | i <- [2..n-1]
         , j <- [2..k]
         ]
         ++

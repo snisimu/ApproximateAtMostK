@@ -42,7 +42,7 @@ commander atMost s xs k =
         c2 =  arrange2
                 [ [not $ c i j, c i (j+1)]
                 | i <- [1..g]
-                , j <- [1 .. k-1]
+                , j <- [1..k-1]
                 ]
         c3 = arrange13 "c3" $ atMost [ c i j | i <- [1..g], j <- [1..k] ] k
     in  c1 ++ c2 ++ c3 
