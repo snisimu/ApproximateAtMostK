@@ -85,10 +85,10 @@ printCNF cnf = do
           Aux (Right v') -> show v'
           _ -> show v
 
-type NumberConstraint a b
-  = [Literal a] -> Int -> CNF (Either a b)
+type NumberConstraint a b c
+  = [Literal a] -> Int -> CNF (Either a (Either b c))
 
-atLeastBy :: NumberConstraint a b -> NumberConstraint a b
+atLeastBy :: NumberConstraint a b c -> NumberConstraint a b c
 atLeastBy atMost literals k = atMost (map not literals) (length literals - k + 1)
 
 type KN = (Int, Int)
