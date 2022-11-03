@@ -5,33 +5,55 @@ module Commander (commander) where
 
 import Prelude hiding (not)
 
+import Data.Maybe
+
 import Base
 
 data Vcommander
     = C Int Int
     deriving (Eq, Show)
 
-commander :: NumberConstraint (Either a Vcommander) b -> Int -> NumberConstraint a (Either (String, b) Vcommander)
-commander atMost s xs k =
+{-
+commander
+    :: Maybe (NumberConstraint a b)
+    -> Int
+    -> NumberConstraint a (Either (String, b) Vcommander)
+-}
+commander mbAtMost s xs k = if length xs == k + 1 then [map not $ lifts xs] else
     let hss = splitBy s [1..n]
         g = length hss
         n = length xs
         c :: Int -> Int -> Literal (Either a Vcommander)
         c i j = (True, Aux $ Right $ C i j)
         arrange13
-          :: String
-          -> CNF (Either (Either a Vcommander) b)
-          -> CNF (Either a (Either (String, b) Vcommander))
-        arrange13 str = fmapCNF \case
+            :: String
+            -> CNF (Either (Either a Vcommander) b)
+            -> CNF (Either a (Either (String, b) Vcommander))
+        arrange13 strId = fmapCNF \case
             Left (Left v) -> Left v
             Left (Right v) -> Right $ Right v
-            Right v -> Right $ Left (str, v)
+            Right v -> Right $ Left (strId, v)
         arrange2
-          :: CNF (Either a Vcommander)
-          -> CNF (Either a (Either (String, b) Vcommander))
+            :: CNF (Either a Vcommander)
+            -> CNF (Either a (Either (String, b) Vcommander))
         arrange2 = fmapCNF \case 
             Left v -> Left v
             Right v -> Right $ Right v
+        {-
+        arrangeRecur
+            :: CNF (Either a (Either (String, b) c))
+            -> CNF (Either a (Either (String, b) Vcommander))
+        -}
+        arrangeRecur = fmapCNF \case
+            Left v -> Left v
+            Right (Left v) -> Right $ Left v
+            Right (Right v) -> Right $ Left ("recur", v)
+        -- tr1 :: NumberConstraint a (Either (String, b) Vcommander)
+        tr1 = commander Nothing s
+        -- tr2 :: NumberConstraint a (Either (String, Vcommander) Vcommander)
+        tr2 = arrangeRecur . commander Nothing s
+        -- atMost :: NumberConstraint a b
+        atMost = fromMaybe tr2 mbAtMost
         c1 =  flip concatMap [1..g] \i -> 
                 let lits
                       =  [ lift $ xs !! (h-1) | h <- hss !! (i-1) ]
