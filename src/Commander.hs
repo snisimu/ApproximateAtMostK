@@ -18,19 +18,20 @@ commander atMost s xs k =
         n = length xs
         c :: Int -> Int -> Literal (Either a Vcommander)
         c i j = (True, Aux $ Right $ C i j)
-        arrange13 :: String -> CNF (Either (Either a Vcommander) b) -> CNF (Either a (Either (String, b) Vcommander))
-        arrange13 str = map \lits ->
-          flip map lits $ fmap \case
-            X i -> X i
-            Aux (Left (Left v)) -> Aux $ Left v
-            Aux (Left (Right v)) -> Aux $ Right $ Right v
-            Aux (Right v) -> Aux $ Right $ Left (str, v)
-        arrange2 :: CNF (Either a Vcommander) -> CNF (Either a (Either (String, b) Vcommander))
-        arrange2 = map \lits ->
-          flip map lits $ fmap \case 
-            X i -> X i
-            Aux (Left v) -> Aux $ Left v
-            Aux (Right v) -> Aux $ Right $ Right v
+        arrange13
+          :: String
+          -> CNF (Either (Either a Vcommander) b)
+          -> CNF (Either a (Either (String, b) Vcommander))
+        arrange13 str = fmapCNF \case
+            Left (Left v) -> Left v
+            Left (Right v) -> Right $ Right v
+            Right v -> Right $ Left (str, v)
+        arrange2
+          :: CNF (Either a Vcommander)
+          -> CNF (Either a (Either (String, b) Vcommander))
+        arrange2 = fmapCNF \case 
+            Left v -> Left v
+            Right v -> Right $ Right v
         c1 =  flip concatMap [1..g] \i -> 
                 let lits
                       =  [ lift $ xs !! (h-1) | h <- hss !! (i-1) ]

@@ -3,10 +3,11 @@
 
 module Main (main, report, generateDIMACStoCheck) where
 
+import Prelude hiding (not, product)
+
 import System.Exit
 
 import Control.Monad
-import Control.Applicative
 
 import Data.List (elemIndex, intercalate)
 
@@ -15,7 +16,7 @@ import Binomial
 import Binary
 import Counter
 import Commander
--- import Product
+import Product
 
 report :: KN -> IO ()
 report (k, n) = do
@@ -24,6 +25,7 @@ report (k, n) = do
   putStrLn "counter"; reportOf $ counter (literalXs n) k
   let s = min 10 $ n `div` 3
   putStrLn "commander(+counter)"; reportOf $ commander counter s (literalXs n) k
+  putStrLn "product"; reportOf $ product (literalXs n) k
   where
     reportOf cnf = do
       putStrLn $ " aux vars: " ++ show (length $ auxsOf cnf)
@@ -53,13 +55,3 @@ generateDIMACStoCheck atMost (k, n) = do
 main :: IO ()
 main = do
   printCNF $ commander binomial 2 (literalXs 4) 2
-
-tr1 :: KN -> [Int]
-tr1 (k, n) = 
-  let f :: [Int] -> [Int] -> [[Int]]
-      f a b = (++) <$> map return a <*> map return b
-      pss :: [[Int]]
-      pss = foldr1 f $ replicate (k+1) [1..]
-      ps's :: [[Int]]
-      ps's = filter (\ps -> foldr1 (*) ps >= n) pss
-  in  head ps's

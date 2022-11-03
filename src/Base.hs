@@ -45,8 +45,10 @@ data Var a
    = X Int
    | Aux a
    deriving (Eq, Show)
-
--- instance Functor Var where
+instance Functor Var where
+  fmap f = \case
+    X i -> X i
+    Aux v -> Aux $ f v
 
 type Literal a = (Bool, Var a)
 
@@ -64,6 +66,9 @@ not :: Literal a -> Literal a
 not (bl, v) = (Prelude.not bl, v)
 
 type CNF a = [[Literal a]]
+
+fmapCNF :: (a -> b) -> CNF a -> CNF b
+fmapCNF = map . map . fmap . fmap
 
 auxsOf :: Eq a => CNF a -> [a]
 auxsOf cnf = nub $ flip concatMap cnf \literals ->
