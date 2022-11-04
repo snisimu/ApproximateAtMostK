@@ -41,54 +41,51 @@ splitBy m xs = xs1:(splitBy m xs2)
 
 -- lib [end]
 
-data Var a
-   = X Int
-   | Aux a
+data Var
+  = X Int
+  | B Int Int -- binary
+  | T Int Int -- binary
+  | R Int Int -- counter
+  | C [String] Int Int -- commander
+  | A [String] Int [Int] -- product
    deriving (Eq, Show)
-instance Functor Var where
-  fmap f = \case
-    X i -> X i
-    Aux v -> Aux $ f v
 
-type Literal a = (Bool, Var a)
+isAux :: Var -> Bool
+isAux =  \case
+  X _ -> False
+  _ -> True
 
-lift :: Literal a -> Literal (Either a b)
-lift = fmap \case
-  X i -> X i
-  Aux v -> Aux $ Left v
-lifts :: [Literal a] -> [Literal (Either a b)]
-lifts = map lift
+type Literal = (Bool, Var)
 
-literalXs :: Int -> [Literal ()]
+literalXs :: Int -> [Literal]
 literalXs n = [ (True, X i) | i <- [1..n] ]
 
-not :: Literal a -> Literal a
+not :: Literal -> Literal
 not (bl, v) = (Prelude.not bl, v)
 
-type CNF a = [[Literal a]]
+type CNF = [[Literal]]
 
-fmapCNF :: (a -> b) -> CNF a -> CNF b
-fmapCNF = map . map . fmap . fmap
+auxsOf :: CNF -> [Var]
+auxsOf = nub . map snd . concatMap (filter $ isAux . snd)
 
-auxsOf :: Eq a => CNF a -> [a]
-auxsOf cnf = nub $ flip concatMap cnf \literals ->
-  catMaybes $ flip map literals \case
-    (_, Aux v) -> Just v
-    _ -> Nothing
-
-printCNF :: (Show a, Show b) => CNF (Either a b) -> IO ()
-printCNF cnf = do
-  forM_ cnf \literals -> do
+printCNF :: CNF -> IO ()
+printCNF = do
+  mapM_ \literals -> do
     putStrLn $ intercalate " or " $ flip map literals \(bl, v) ->
       (if bl then "" else "~ ") ++
         case v of
-          Aux (Right v') -> show v'
+          C sIDs i j -> "C " ++ showSIDs sIDs ++ " " ++ show i ++ " " ++ show j
+          A sIDs i js -> "A " ++ showSIDs sIDs ++ " " ++ show i ++ " " ++ show js
           _ -> show v
+  where
+  showSIDs sIDs = if null sIDs
+    then ""
+    else "(" ++ (intercalate ">" $ reverse sIDs) ++ ")"
 
-type NumberConstraint a b c
-  = [Literal a] -> Int -> CNF (Either a (Either b c))
+type NumberConstraint
+  = [Literal] -> Int -> CNF
 
-atLeastBy :: NumberConstraint a b c -> NumberConstraint a b c
+atLeastBy :: NumberConstraint -> NumberConstraint
 atLeastBy atMost literals k = atMost (map not literals) (length literals - k + 1)
 
 type KN = (Int, Int)

@@ -13,11 +13,6 @@ import Data.List hiding (product)
 
 import Base
 
-data Vproduct
-    = A Int [Int]
-    deriving (Eq, Show)
-
-
 {-
 xvOn :: KN -> Int -> [Int]
 xvOn (k, n) i = gen (map (\p -> [1..p]) ps) !! (i-1)

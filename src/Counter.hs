@@ -7,14 +7,11 @@ import Prelude hiding (not)
 
 import Base
 
-data Vcounter = R Int Int
-    deriving (Eq, Show)
-
-counter :: NumberConstraint a Vcounter ()
+counter :: NumberConstraint
 counter xs k = 
     let n = length xs
-        x i = lifts xs !! (i-1)
-        r i j = (True, Aux $ Right $ Left $ R i j)
+        x i = xs !! (i-1)
+        r i j = (True, R i j)
     in  [ [not $ x i, r i 1] | i <- [1..n-1] ] -- (1)
         ++
         [ [not $ r 1 j] | j <- [2..k] ] -- (2)

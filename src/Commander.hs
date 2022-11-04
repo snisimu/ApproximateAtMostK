@@ -9,18 +9,15 @@ import Data.Maybe
 
 import Base
 
-data Vcommander
-    = C Int Int
-    deriving (Eq, Show)
-
 commander
     :: Maybe (NumberConstraint a b c)
     -> Int
     -> NumberConstraint a Vcommander (Either (String, b) (String, c))
-commander mbAtMost s xs k = if length xs == k + 1 then [map not $ lifts xs] else
+commander mbAtMost xs k = if length xs == k + 1 then [map not $ lifts xs] else
     let hss = splitBy s [1..n]
         g = length hss
         n = length xs
+        s = min 10 $ n `div` 3
         c :: Int -> Int -> Literal (Either a (Either Vcommander b))
         c i j = (True, Aux $ Right $ Left $ C i j)
         arrange13
