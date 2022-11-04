@@ -43,8 +43,7 @@ splitBy m xs = xs1:(splitBy m xs2)
 
 data Var
   = X Int
-  | B Int Int -- binary
-  | T Int Int -- binary
+  | B Int Int | T Int Int -- binary
   | R Int Int -- counter
   | C [String] Int Int -- commander
   | A [String] Int [Int] -- product
