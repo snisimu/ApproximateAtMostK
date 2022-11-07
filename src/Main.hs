@@ -23,7 +23,7 @@ report (k, n) = do
   putStrLn "binomial"; reportOf $ binomial (literalXs n) k
   putStrLn "binary"; reportOf $ binary (literalXs n) k
   putStrLn "counter"; reportOf $ counter (literalXs n) k
-  -- putStrLn "commander(+counter)"; reportOf $ commander counter s (literalXs n) k
+  putStrLn "commander"; reportOf $ commander (literalXs n) k
   -- putStrLn "product"; reportOf $ product (literalXs n) k
   where
     reportOf cnf = do
@@ -51,8 +51,9 @@ generateDIMACStoCheck atMost (k, n) = do
   -- ghci> generateDIMACStoCheck Counter.atMost (5,10)
   -- PowerShell> wsl -- ./minisat ShouldBeSAT.cnf
 
+check :: NumberConstraint -> KN -> IO ()
+check atMost (k, n) = printCNF $ atMost (literalXs n) k
+-- > check commander (5,10)
+
 main :: IO ()
 main = return ()
-
--- > printCNF $ commander (literalXs 3) 1
--- > printCNF $ commander (literalXs 12) 3

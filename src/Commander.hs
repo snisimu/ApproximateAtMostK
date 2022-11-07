@@ -41,3 +41,28 @@ commander x's k' = command [] (Just $ mFor x's) x's k'
                         ]
                     c3 = command ("c3" : sIDs) (Just $ m - 1) [ c i j | i <- [1..g], j <- [1..k] ] k
                 in  c1 ++ c2 ++ c3
+
+commanderIO x's k' = commandIO [] (Just $ mFor x's) x's k'
+    where
+    commandIO sIDs mbM xs k = do
+        let m = fromMaybe (mFor xs) mbM
+        if m <= 1
+        then putStrLn $ "binomial" ++ show (length xs, k)
+        else do
+            let hss = divideInto m [1..n]
+                g = length hss
+                n = length xs
+                c i j = (True, C sIDs i j)
+            putStrLn $ showSIDs sIDs ++ show (n,k)
+            forM_ [1..g] \i -> do
+                let lits
+                        =  [ xs !! (h-1) | h <- hss !! (i-1) ]
+                        ++ [ not $ c i j | j <- [1..k] ]
+                commandIO ("c1AM" : sIDs) Nothing lits k
+                commandIO ("c1AL" : sIDs) Nothing lits k
+            let c2 =
+                    [ [not $ c i j, c i (j+1)]
+                    | i <- [1..g]
+                    , j <- [1..k-1]
+                    ]
+            commandIO ("c3" : sIDs) (Just $ m - 1) [ c i j | i <- [1..g], j <- [1..k] ] k
