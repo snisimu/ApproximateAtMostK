@@ -33,6 +33,8 @@ allFTssOf n = filter (\ss -> length ss == n) allFTss
     then bss
     else makeFTss (m - 1) $ bss ++ [ bs ++ [False] | bs <- bss ] ++ [ bs ++ [True] | bs <- bss ]
 
+divideInto :: Int -> [a] -> [[a]]
+divideInto n xs = splitBy (((length xs) + n - 1) `div` n) xs
 splitBy :: Int -> [a] -> [[a]]
 splitBy _ [] = []
 splitBy m xs = xs1:(splitBy m xs2)
@@ -41,12 +43,14 @@ splitBy m xs = xs1:(splitBy m xs2)
 
 -- lib [end]
 
+type ScopeID = String
+
 data Var
   = X Int
   | B Int Int | T Int Int -- binary
   | R Int Int -- counter
-  | C [String] Int Int -- commander
-  | A [String] Int [Int] -- product
+  | C [ScopeID] Int Int -- commander
+  | A [ScopeID] Int [Int] -- product
    deriving (Eq, Show)
 
 isAux :: Var -> Bool
@@ -76,10 +80,9 @@ printCNF = do
           C sIDs i j -> "C " ++ showSIDs sIDs ++ " " ++ show i ++ " " ++ show j
           A sIDs i js -> "A " ++ showSIDs sIDs ++ " " ++ show i ++ " " ++ show js
           _ -> show v
-  where
-  showSIDs sIDs = if null sIDs
-    then ""
-    else "(" ++ (intercalate ">" $ reverse sIDs) ++ ")"
+showSIDs sIDs = if null sIDs
+  then ""
+  else "(" ++ (intercalate ">" $ reverse sIDs) ++ ")"
 
 type NumberConstraint
   = [Literal] -> Int -> CNF

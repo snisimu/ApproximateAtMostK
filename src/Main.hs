@@ -15,7 +15,7 @@ import Base
 import Binomial
 import Binary
 import Counter
--- import Commander
+import Commander
 -- import Product
 
 report :: KN -> IO ()
@@ -52,5 +52,7 @@ generateDIMACStoCheck atMost (k, n) = do
   -- PowerShell> wsl -- ./minisat ShouldBeSAT.cnf
 
 main :: IO ()
-main = do
-  printCNF $ counter (literalXs 3) 1
+main = return ()
+
+-- > printCNF $ commander (literalXs 3) 1
+-- > printCNF $ commander (literalXs 12) 3
