@@ -41,13 +41,12 @@ xvOn (k, _) = \case
             a = d + 2
         in  replicate j 1 ++ [a] ++ replicate (k-j) 1
 
-product :: Eq a => NumberConstraint a (String, Vproduct)
-product = prod ""
+product :: NumberConstraint
+product = prod []
     where
-    prod :: Eq a => String -> [Literal a] -> Int -> CNF (Either a (String, Vproduct))
-    prod strId xs k = if length xs <= k then [] else
-        if length xs == k + 1
-        then [map not $ lifts xs]
+    prod :: [ScopeID] -> NumberConstraint
+    prod sIDs xs k = if length xs <= k+1
+        then binomial xs k
         else
             let n = length xs
                 xv = xvOn (k, n)
@@ -55,18 +54,9 @@ product = prod ""
                 a d xvi =
                     let (xva, xvb) = splitAt d $ xvi
                         xv'd = init xva ++ xvb
-                    in  (True, Aux $ Right (strId, A d xv'd))
-                arrange
-                    :: String
-                    -> CNF (Either (Either a (String, Vproduct)) (String, Vproduct))
-                    -> CNF (Either a (String, Vproduct))
-                arrange strId' = fmapCNF $ \case
-                    Left (Left v) -> Left v
-                    Left (Right (strId'', v)) -> Right (strId'', v)
-                    Right (strId'', v) -> Right (strId'' ++ ":" ++ strId', v)
+                    in  (True, A sIDs d xv'd))
             in  [ [not $ x i, a d $ xv i] | d <- [1 .. k+1], i <- [1..n] ]
                 ++ concat
-                    [ arrange (show d) $
-                        prod (strId ++ "-" ++ show d) (nub [ a d $ xv i | i <- [1..n] ]) k
+                    [ prod (show d : sIDs) (nub [ a d $ xv i | i <- [1..n] ]) k
                     | d <- [1 .. k+1]
                     ]
