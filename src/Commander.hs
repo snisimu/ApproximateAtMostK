@@ -28,9 +28,9 @@ commander = command [] Nothing
         in  if m <= 1
             then binomial xs k
             else
-                let hss = divideInto m [1..n]
+                let n = length xs
+                    hss = divideInto m [1..n]
                     g = length hss
-                    n = length xs
                     c i j = (True, C sIDs i j)
                     mbMnext = Just $ m-1
                     c1 = flip concatMap [1..g] \i -> 

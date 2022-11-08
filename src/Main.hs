@@ -16,7 +16,7 @@ import Binomial
 import Binary
 import Counter
 import Commander
--- import Product
+import Product
 
 report :: KN -> IO ()
 report (k, n) = do
@@ -24,7 +24,7 @@ report (k, n) = do
   putStrLn "binary"; reportOf $ binary (literalXs n) k
   putStrLn "counter"; reportOf $ counter (literalXs n) k
   putStrLn "commander"; reportOf $ commander (literalXs n) k
-  -- putStrLn "product"; reportOf $ product (literalXs n) k
+  putStrLn "product"; reportOf $ product (literalXs n) k
   where
     reportOf cnf = do
       putStrLn $ " aux vars: " ++ show (length $ auxsOf cnf)
