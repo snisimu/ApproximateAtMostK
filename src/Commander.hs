@@ -12,17 +12,17 @@ import Data.Maybe
 import Base
 import Binomial
 
-s :: Int
-s = 3
+sFor :: KN -> Int
+sFor (k, n) = k + n `div` 3
 
 commander :: NumberConstraint
-commander x's k' = command [] Nothing x's k'
+commander = command [] Nothing
     where
     command :: [ScopeID] -> Maybe Int -> NumberConstraint
     command sIDs mbM xs k =
         let m :: Int
             m =
-                let (a, b) = length xs `divMod` s
+                let (a, b) = length xs `divMod` sFor (k, length xs)
                     m' = a + if 0 < b then 1 else 0
                 in  maybe m' (min m') mbM
         in  if m <= 1
