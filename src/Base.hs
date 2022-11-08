@@ -51,6 +51,7 @@ data Var
   | R Int Int -- counter
   | C [ScopeID] Int Int -- commander
   | A [ScopeID] Int [Int] -- product
+  | P [Int] Int -- approximate
    deriving (Eq, Show)
 
 isAux :: Var -> Bool

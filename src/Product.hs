@@ -21,25 +21,6 @@ xvOn (k, _) = \case
         let (d, j) = (i-2) `divMod` (k+1)
             a = d + 2
         in  replicate j 1 ++ [a] ++ replicate (k-j) 1
-{-
-xvOn :: KN -> Int -> [Int]
-xvOn (k, n) i = gen (map (\p -> [1..p]) ps) !! (i-1)
-  where
-    gen is's =
-      let  is : iss = reverse is's
-      in   foldr add (map return is) iss
-    add is iss = flip concatMap is \i -> map ((:) i) iss
-    ps =
-      let psFor p's = if foldr1 (*) p's >= n
-            then p's
-            else psFor $ incr p's
-      in  psFor $ replicate (k+1) 1
-    incr p's = if length (nub p's) == 1
-      then head p's + 1 : tail p's
-      else
-        let (former, latter) = break (/= head p's) p's
-        in  former ++ (head latter + 1 : tail latter)
--}
 
 product :: NumberConstraint
 product = prod []
