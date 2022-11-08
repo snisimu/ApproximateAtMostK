@@ -1,7 +1,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE BlockArguments #-}
 
-module Approximate (approximate) where
+module Approximate where
 
 import Prelude hiding (not)
 
@@ -9,7 +9,7 @@ import System.Exit
 
 import Control.Monad
 
--- import Data.List
+import Data.List
 
 import Base
 import Binomial
@@ -21,23 +21,33 @@ approximate xs k =
         p is j = (True, P is j)
     in  []
 
+allIss :: Int -> Int -> [[Int]]
+allIss m l = concat $ makeIsss (l-1) $ return $ map return [1..m]
+  where
+  makeIsss :: Int -> [[[Int]]] -> [[[Int]]]
+  makeIsss l isss = if l == 0
+    then isss
+    else makeIsss (l-1) $ isss ++ [[ is ++ [i] | is <- last isss, i <- [1..m] ]]
+
 approx :: (Int, Int, Int) -> CNF
 approx (a, m, l) =
     let n = a * m^l
-        
-    in  []
-{-
-countAllBss n = if n == 0 then [[]] else [] : makeBss (n - 1) [[False],[True]]
-  where
-  makeBss n bss = if n == 0
-    then bss
-    else makeBss (n - 1) $ bss ++ [ bs ++ [False] | bs <- bss ] ++ [ bs ++ [True] | bs <- bss ]
+        p is j = (True, P is j)
+        iss = allIss m l
+        order = flip concatMap iss \is ->
+          flip map [2..a] \j ->
+            [ not $ p is j, p is $ j-1 ]
+        atMost = flip concatMap iss \is ->
+          let ps = p <$> filter ((==) is . init) iss <*> [1..a]
+          in  flip concatMap [1..a] \j ->
+                map ((:) $ p is j) $ binomial ps $ m*(j-1)
+    in  order ++ atMost
 
+{-
 countObjBss n =
   let bssAll = countAllBss n
       l = maximum $ map length bssAll
   in  filter ((==) l . length) bssAll
-
 vars'cnfsCount strId n ord =
   let vf = VarCountOf10 strId
       cnfOneHot bss = cnf ("CountOf10Body:OneHot:" ++ show bss) (bvssOne (map (vf False bss) [0..10]))

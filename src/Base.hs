@@ -69,6 +69,9 @@ not (bl, v) = (Prelude.not bl, v)
 
 type CNF = [[Literal]]
 
+xsOf :: CNF -> [Var]
+xsOf = nub . map snd . concatMap (filter $ Prelude.not . isAux . snd)
+
 auxsOf :: CNF -> [Var]
 auxsOf = nub . map snd . concatMap (filter $ isAux . snd)
 

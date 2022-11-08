@@ -1,7 +1,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE BlockArguments #-}
 
-module Main (main, report, generateDIMACStoCheck) where
+module Main where
 
 import Prelude hiding (not, product)
 
@@ -17,6 +17,7 @@ import Binary
 import Counter
 import Commander
 import Product
+import Approximate
 
 report :: KN -> IO ()
 report (k, n) = do
@@ -31,11 +32,14 @@ report (k, n) = do
       putStrLn $ " clauses : " ++ show (length cnf)
       putStrLn $ " literals: " ++ show (sum $ map length cnf)
 
-generateDIMACStoCheck :: NumberConstraint -> KN -> IO ()
-generateDIMACStoCheck atMost (k, n) = do
-  let cnf = atMost (literalXs n) k
+vNumssToStr vNumss = unlines $ flip map vNumss \vNums ->
+  intercalate " " $ map show $ vNums ++ [0]
+
+genDIMACS :: CNF -> IO String
+genDIMACS cnf = do
+  let n = length $ xsOf cnf
       auxs = auxsOf cnf
-  vNumAtMostss <- forM cnf \literals -> do
+  vNumssToStr <$> forM cnf \literals -> do
     forM literals \(bl, var) -> do
       vNum <- case var of
         X i -> return i
@@ -43,11 +47,16 @@ generateDIMACStoCheck atMost (k, n) = do
           Nothing -> die $ "cannot determine a number for aux var: " ++ show v
           Just index -> return $ n + index + 1
       return $ (if bl then 1 else -1) * vNum
+
+generateDIMACS :: CNF -> IO ()
+generateDIMACS cnf = writeFile "the.cnf" =<< genDIMACS cnf
+
+generateDIMACStoCheck :: NumberConstraint -> KN -> IO ()
+generateDIMACStoCheck atMost (k, n) = do
+  strAtMost <- genDIMACS $ atMost (literalXs n) k
   let vNumFixss bl = map return [1..(k + (if bl then 0 else 1))]
-      vNumssToStr vNumss = unlines $ flip map vNumss \vNums ->
-        intercalate " " $ map show $ vNums ++ [0]
-  writeFile "ShouldBeSAT.cnf" $ vNumssToStr (vNumAtMostss ++ vNumFixss True)
-  writeFile "ShouldBeUNSAT.cnf" $ vNumssToStr (vNumAtMostss ++ vNumFixss False)
+  writeFile "ShouldBeSAT.cnf" $ strAtMost ++ vNumssToStr (vNumFixss True)
+  writeFile "ShouldBeUNSAT.cnf" $ strAtMost ++ vNumssToStr (vNumFixss False)
   -- ghci> generateDIMACStoCheck Counter.atMost (5,10)
   -- PowerShell> wsl -- ./minisat ShouldBeSAT.cnf
 
