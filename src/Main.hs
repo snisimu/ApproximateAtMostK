@@ -68,3 +68,4 @@ check atMost (k, n) = printCNF $ atMost (literalXs n) k
 
 main :: IO ()
 main = return ()
+
