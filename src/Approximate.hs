@@ -28,7 +28,7 @@ allIsss m l = makeIsss (l-1) $ return $ map return [1..m]
   makeIsss l isss = if l == 0
     then isss
     else makeIsss (l-1) $ isss ++ [[ is ++ [i] | is <- last isss, i <- [1..m] ]]
-allIss = concat . allIsss
+allIss m l = concat $ allIsss m l
 
 approx :: (Int, Int, Int) -> (CNF, [[[Int]]])
 approx (h, w, d) =
@@ -51,18 +51,18 @@ approxWithX :: (Int, Int, Int) -> CNF
 approxWithX (a, m, l) =
   let (cnfP, isLeafss) = approx (a, m, l)
       xss = splitBy a $ literalXs $ (length isLeafs) * a
-      cnfX = flip map (zip isLeafs xss) \(isLeaf, xs) -> 
+      cnfX = flip concatMap (zip isLeafs xss) \(is, xs) -> 
         flip concatMap [1..a] \j ->
           map ((:) $ p is j) $ binomial xs $ m*(j-1)
   in  cnfP ++ cnfX
 
-isPossible :: (Int, Int, Int) -> [Int] -> IO Bool
+isPossible :: (Int, Int, Int) -> [Int] -> Int -> IO Bool
 isPossible (a, m, l) js k = do
   unless (k < a*m) $ die "k: too large"
   let n = a * m^l
-  unless (filter (> n) js) $ die "js: out of range"
+  unless (null $ filter (> n) js) $ die "js: out of range"
   let isss = allIsss m l
-      bss = splitBy a bs $ foldr makeTrueAt (replicate n False) js
+      bss = splitBy a $ foldr makeTrueAt (replicate n False) js
         where
         makeTrueAt h bs =
           let (hd, tl) = splitAt h bs
@@ -77,7 +77,7 @@ isPossible (a, m, l) js k = do
           hs ->
             let (hHD, hTL) = splitAt m hs
                 (y, z) = sum hHD `divMod` m
-                r = y ++ if z == 0 then 0 else 1
+                r = y + if z == 0 then 0 else 1
             in  integr (gs ++ [r]) hTL
       z = integrate $ map (length . filter id) bss
   return $ z < k
