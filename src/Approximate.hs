@@ -43,6 +43,10 @@ approx (a, m, l) =
                 map ((:) $ p is j) $ binomial ps $ m*(j-1)
     in  order ++ atMost
 
+-- > generateDIMACSwithTrue (approx (2,2,3) ++ binomial [ (True, P [i] j) | i <- [1..2], j <- [1..2] ] 2) [1,2,3]
+-- NG: [1,2,3],[1,2,4],[2,3,4]
+-- OK: [1,2],[1,2,5,6],[1,2,7,8]
+
 {-
 countObjBss n =
   let bssAll = countAllBss n

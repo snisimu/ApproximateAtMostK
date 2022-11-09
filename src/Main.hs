@@ -32,14 +32,12 @@ report (k, n) = do
       putStrLn $ " clauses : " ++ show (length cnf)
       putStrLn $ " literals: " ++ show (sum $ map length cnf)
 
-vNumssToStr vNumss = unlines $ flip map vNumss \vNums ->
-  intercalate " " $ map show $ vNums ++ [0]
-
-genDIMACS :: CNF -> IO String
-genDIMACS cnf = do
+strDIMACSwithTrue :: CNF -> [Int] -> IO String
+strDIMACSwithTrue cnf ts = do
   let n = length $ xsOf cnf
       auxs = auxsOf cnf
-  vNumssToStr <$> forM cnf \literals -> do
+  when (n == 0 && ts /= []) $ die "has no Xs"
+  vNumAtMostss <- forM cnf \literals -> do
     forM literals \(bl, var) -> do
       vNum <- case var of
         X i -> return i
@@ -47,18 +45,22 @@ genDIMACS cnf = do
           Nothing -> die $ "cannot determine a number for aux var: " ++ show v
           Just index -> return $ n + index + 1
       return $ (if bl then 1 else -1) * vNum
+  let vNumTruess = map return ts
+  return $ vNumssToStr $ vNumAtMostss ++ vNumTruess
+  where
+    vNumssToStr vNumss = unlines $ flip map vNumss \vNums ->
+      intercalate " " $ map show $ vNums ++ [0]
 
-generateDIMACS :: CNF -> IO ()
-generateDIMACS cnf = writeFile "the.cnf" =<< genDIMACS cnf
+generateDIMACSwithTrue :: CNF -> [Int] -> IO ()
+generateDIMACSwithTrue cnf ts = writeFile "the.cnf" =<< strDIMACSwithTrue cnf ts
+  -- > wsl -- ./minisat the.cnf
 
 generateDIMACStoCheck :: NumberConstraint -> KN -> IO ()
 generateDIMACStoCheck atMost (k, n) = do
-  strAtMost <- genDIMACS $ atMost (literalXs n) k
-  let vNumFixss bl = map return [1..(k + (if bl then 0 else 1))]
-  writeFile "ShouldBeSAT.cnf" $ strAtMost ++ vNumssToStr (vNumFixss True)
-  writeFile "ShouldBeUNSAT.cnf" $ strAtMost ++ vNumssToStr (vNumFixss False)
-  -- ghci> generateDIMACStoCheck Counter.atMost (5,10)
-  -- PowerShell> wsl -- ./minisat ShouldBeSAT.cnf
+  let strDIMACS bl = strDIMACSwithTrue (atMost (literalXs n) k) [1 .. k + (if bl then 0 else 1)]
+  writeFile "ShouldBeSAT.cnf" =<< strDIMACS True
+  writeFile "ShouldBeUNSAT.cnf" =<< strDIMACS False
+  -- > wsl -- ./minisat ShouldBeSAT.cnf
 
 check :: NumberConstraint -> KN -> IO ()
 check atMost (k, n) = printCNF $ atMost (literalXs n) k
