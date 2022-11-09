@@ -21,27 +21,68 @@ approximate xs k =
         p is j = (True, P is j)
     in  []
 
-allIss :: Int -> Int -> [[Int]]
-allIss m l = concat $ makeIsss (l-1) $ return $ map return [1..m]
+allIsss :: Int -> Int -> [[[Int]]]
+allIsss m l = makeIsss (l-1) $ return $ map return [1..m]
   where
   makeIsss :: Int -> [[[Int]]] -> [[[Int]]]
   makeIsss l isss = if l == 0
     then isss
     else makeIsss (l-1) $ isss ++ [[ is ++ [i] | is <- last isss, i <- [1..m] ]]
+allIss = concat . allIsss
 
-approx :: (Int, Int, Int) -> CNF
+approx :: (Int, Int, Int) -> (CNF, [[Int]])
 approx (a, m, l) =
-    let n = a * m^l
-        p is j = (True, P is j)
-        iss = allIss m l
-        order = flip concatMap iss \is ->
-          flip map [2..a] \j ->
-            [ not $ p is j, p is $ j-1 ]
-        atMost = flip concatMap iss \is ->
-          let ps = p <$> filter ((==) is . init) iss <*> [1..a]
-          in  flip concatMap [1..a] \j ->
-                map ((:) $ p is j) $ binomial ps $ m*(j-1)
-    in  order ++ atMost
+  let n = a * m^l
+    p is j = (True, P is j)
+    iss = allIss m l
+    order = flip concatMap iss \is ->
+      flip map [2..a] \j ->
+        [ not $ p is j, p is $ j-1 ]
+    atMost = flip concatMap iss \is ->
+      let ps = p <$> filter ((==) is . init) iss <*> [1..a]
+      in  flip concatMap [1..a] \j ->
+            map ((:) $ p is j) $ binomial ps $ m*(j-1)
+    isLeafs =
+      let n = maximum $ map length iss
+      in  filter ((==) n . length) iss
+  in  (order ++ atMost, isLeafs)
+
+approxWithX :: (Int, Int, Int) -> CNF
+approxWithX (a, m, l) =
+  let (cnfP, isLeafs) = approx (a, m, l)
+      xss = splitBy a $ literalXs $ (length isLeafs) * a
+      cnfX = flip map (zip isLeafs xss) \(isLeaf, xs) -> 
+        flip concatMap [1..a] \j ->
+          map ((:) $ p is j) $ binomial xs $ m*(j-1)
+  in  cnfP ++ cnfX
+
+isPossible :: (Int, Int, Int) -> [Int] -> IO Bool
+isPossible (a, m, l) js k = do
+  unless (k < a*m) $ die "k: too large"
+  let n = a * m^l
+  unless (filter (> n) js) $ die "js: out of range"
+  let isss = allIsss m l
+      bss = splitBy a bs $ foldr makeTrueAt (replicate n False) js
+        where
+        makeTrueAt h bs =
+          let (hd, tl) = splitAt h bs
+          in  init hd ++ [True] ++ tl
+      integrate :: [Int] -> Int
+      integrate hs = case integr [] hs of
+        [z] -> z
+        h's -> integrate h's
+        where
+        integr gs = \case
+          [] -> gs
+          hs ->
+            let (hHD, hTL) = splitAt m hs
+                (y, z) = sum hHD `divMod` m
+                r = y ++ if z == 0 then 0 else 1
+            in  integr (gs ++ [r]) hTL
+      z = integrate $ map (length . filter id) bss
+  return $ z < k
+
+-- > generateDIMACSwithTrue (approxWithX (2,2,3) ++ binomial [ (True, P [i] j) | i <- [1..2], j <- [1..2] ] 2) [1,2,3]
 
 -- > generateDIMACSwithTrue (approx (2,2,3) ++ binomial [ (True, P [i] j) | i <- [1..2], j <- [1..2] ] 2) [1,2,3]
 -- NG: [1,2,3],[1,2,4],[2,3,4]
