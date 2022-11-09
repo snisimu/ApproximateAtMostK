@@ -30,26 +30,26 @@ allIsss m l = makeIsss (l-1) $ return $ map return [1..m]
     else makeIsss (l-1) $ isss ++ [[ is ++ [i] | is <- last isss, i <- [1..m] ]]
 allIss = concat . allIsss
 
-approx :: (Int, Int, Int) -> (CNF, [[Int]])
-approx (a, m, l) =
-  let n = a * m^l
+approx :: (Int, Int, Int) -> (CNF, [[[Int]]])
+approx (h, w, d) =
+  let n = h * w^d
     p is j = (True, P is j)
-    iss = allIss m l
+    iss = allIss w d
     order = flip concatMap iss \is ->
-      flip map [2..a] \j ->
+      flip map [2..h] \j ->
         [ not $ p is j, p is $ j-1 ]
     atMost = flip concatMap iss \is ->
-      let ps = p <$> filter ((==) is . init) iss <*> [1..a]
-      in  flip concatMap [1..a] \j ->
-            map ((:) $ p is j) $ binomial ps $ m*(j-1)
-    isLeafs =
+      let ps = p <$> filter ((==) is . init) iss <*> [1..h]
+      in  flip concatMap [1..h] \j ->
+            map ((:) $ p is j) $ binomial ps $ w*(j-1)
+    isLeafss =
       let n = maximum $ map length iss
-      in  filter ((==) n . length) iss
-  in  (order ++ atMost, isLeafs)
+      in  chunksOf w $ filter ((==) n . length) iss
+  in  (order ++ atMost, isLeafss)
 
 approxWithX :: (Int, Int, Int) -> CNF
 approxWithX (a, m, l) =
-  let (cnfP, isLeafs) = approx (a, m, l)
+  let (cnfP, isLeafss) = approx (a, m, l)
       xss = splitBy a $ literalXs $ (length isLeafs) * a
       cnfX = flip map (zip isLeafs xss) \(isLeaf, xs) -> 
         flip concatMap [1..a] \j ->
