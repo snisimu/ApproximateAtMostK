@@ -9,6 +9,7 @@ import System.Exit
 
 import Control.Monad
 
+import Data.Maybe
 import Data.List
 
 import Base
@@ -56,13 +57,12 @@ approxWithX (h, w, d) =
         flip concatMap [1..h] \j ->
           map ((:) $ p is j) $ binomial xs $ w*(j-1)
   in  cnfP ++ cnfX
-
--- > generateDIMACSwithTrue (approxWithX (2,2,1) ++ binomial [ (True, P [i] j) | i <- [1..2], j <- [1..2] ] 2) [1,2,3,4]
+  -- > generateDIMACSwithTrue (approxWithX (2,2,1) ++ binomial [ (True, P [i] j) | i <- [1..2], j <- [1..2] ] 2) [1,2,3,4]
 
 isPossible :: (Int, Int, Int) -> [Int] -> Int -> IO Bool
 isPossible (h, w, d) js k = do
   unless (k < h*w) $ die "k: too large"
-  let n = h * w^d
+  let n = h * w^(d+1)
   unless (null $ filter (> n) js) $ die "js: out of range"
   let isss = allIsss w d
       bss = splitBy h $ foldr makeTrueAt (replicate n False) js
@@ -85,33 +85,16 @@ isPossible (h, w, d) js k = do
       z = integrate $ map (length . filter id) bss
   return $ z < k
 
-{-
-countObjBss n =
-  let bssAll = countAllBss n
-      l = maximum $ map length bssAll
-  in  filter ((==) l . length) bssAll
-vars'cnfsCount strId n ord =
-  let vf = VarCountOf10 strId
-      cnfOneHot bss = cnf ("CountOf10Body:OneHot:" ++ show bss) (bvssOne (map (vf False bss) [0..10]))
-      cnfCnt m bs p = if m == 0
-        then []
-        else flip concatMap [0..10] \q ->
-          let r = p - (q - p)
-              commentHead = "CountOf10Body:" ++ show bs ++ show p ++ ":"
-          in  if 0 <= r && r <= 10
-              then cnf (commentHead ++ show q ++ "-" ++ show r) (bvssWhen (vf False bs p) $ bvssWhen (vf False (bs ++ [False]) q) $ bvssAtLeast 1 [vf False (bs ++ [True]) r])
-                ++ cnfCnt (m - 1) (bs ++ [False]) q
-                ++ cnfCnt (m - 1) (bs ++ [True]) r
-              else cnf (commentHead ++ show q ++ ":N/A") $ bvssWhen (vf False bs p) $ bvssNo [vf False (bs ++ [False]) q] ++ bvssNo [vf False (bs ++ [True]) q]
-      bvssOrd = case ord of
-        LT -> bvssAtMost
-        EQ -> bvssEq
-        GT -> bvssAtLeast
-      cnfObjs = flip concatMap ((,) <$> countObjBss n <*> [0..10]) \(bs, k) ->
-        cnf ("CountOf10Body:" ++ show bs ++ show k) $ bvssWhen (vf False bs k) $ bvssOrd k $ map (vf True bs) [0..9]
-      cnfs = concatMap cnfOneHot (countAllBss n) ++ concatMap (cnfCnt n []) [0..10] ++ cnfObjs
-      vars = (vf False <$> countAllBss n <*> [0..10])
-        ++ (vf True <$> countObjBss n <*> [0..9])
-  in  (vars, cnfs)
-  -- > mapM_ (putStrLn . showCnfLineHuman) $ cnfCount "tr" 1
--}
+reportPossible :: (Int, Int, Int) -> Int -> IO ()
+reportPossible (h, w, d) k = do
+  let n = h * w^(d+1)
+      ftss = filter ((>=) (k^(d+1)) . length . filter id) $ allFTssOf n
+      jss = flip map ftss \fts ->
+        catMaybes $ flip map (zip [1..] fts) \(j, bl) ->
+          if bl then Just j else Nothing
+  js'rs <- forM jss \js -> do
+    r <- isPossible (h, w, d) js k
+    return (js, r)
+  let js'rPossibles = filter snd js'rs
+  putStrLn $ show (length js'rPossibles) ++ "/" ++ show (length js'rs)
+  print js'rPossibles; print js'rs -- [debug]
