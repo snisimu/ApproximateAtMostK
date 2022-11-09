@@ -32,3 +32,6 @@ executable AtMostK
                       , Binomial
                       , Binary
                       , Counter
+                      , Commander
+                      , Product
+                      , Approximate

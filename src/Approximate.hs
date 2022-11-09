@@ -85,21 +85,25 @@ isPossible (h, w, d) k js = do
   -- print z -- [debug]
   return $ z <= k
 
-reportPossible :: (Int, Int, Int) -> Int -> IO ()
-reportPossible (h, w, d) k' = do
+reportApprox :: Bool -> (Int, Int, Int) -> Int -> IO ()
+reportApprox blPossibilityRate (h, w, d) k' = do
   let k = k' * w^d
       n = h * w^(d+1)
   putStrLn $ "(k=" ++ show k ++ ",n=" ++ show n ++ ")"
   reportOf $ approx (h, w, d) k'
-  let ftss = filter ((>=) k . length . filter id) $ allFTssOf n
-      jss = flip map ftss \fts ->
-        catMaybes $ flip map (zip [1..] fts) \(j, bl) ->
-          if bl then Just j else Nothing
-  js'rs <- forM jss \js -> do
-    r <- isPossible (h, w, d) k' js
-    return (js, r)
-  let js'rPossibles = filter snd js'rs
-      l = length js'rs
-      lPossible = length js'rPossibles
-  putStrLn $ show lPossible ++ "/" ++ show l ++ showPercentage lPossible l
-  -- print js'rPossibles; print js'rs -- [debug]
+  when blPossibilityRate $ do
+    let ftss = filter ((>=) k . length . filter id) $ allFTssOf n
+        jss = flip map ftss \fts ->
+          catMaybes $ flip map (zip [1..] fts) \(j, bl) ->
+            if bl then Just j else Nothing
+    js'rs <- forM jss \js -> do
+      r <- isPossible (h, w, d) k' js
+      return (js, r)
+    let js'rPossibles = filter snd js'rs
+        l = length js'rs
+        lPossible = length js'rPossibles
+    putStrLn $ show lPossible ++ "/" ++ show l ++ showPercentage lPossible l
+    -- print js'rPossibles; print js'rs -- [debug]
+  -- > reportPossible (5,2,1) 5
+  -- > reportOf $ counter (literalXs 20) 10
+  
