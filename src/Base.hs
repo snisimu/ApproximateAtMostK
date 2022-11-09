@@ -41,6 +41,12 @@ splitBy m xs = xs1:(splitBy m xs2)
     where
     (xs1, xs2) = splitAt m xs
 
+showPercentage :: Int -> Int -> String
+showPercentage m n =
+  let m' = fromInteger (toInteger m) :: Float
+      n' = fromInteger (toInteger n) :: Float
+  in  "(" ++ show (fromInteger (toInteger $ floor $ m' / n' * 1000) / 10) ++ "%)"
+
 -- lib [end]
 
 type ScopeID = String
@@ -95,3 +101,9 @@ atLeastBy :: NumberConstraint -> NumberConstraint
 atLeastBy atMost literals k = atMost (map not literals) (length literals - k + 1)
 
 type KN = (Int, Int)
+
+reportOf :: CNF -> IO ()
+reportOf cnf = do
+  putStrLn $ "aux vars: " ++ show (length $ auxsOf cnf)
+  putStrLn $ "clauses : " ++ show (length cnf)
+  putStrLn $ "literals: " ++ show (sum $ map length cnf)

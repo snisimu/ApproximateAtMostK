@@ -26,11 +26,6 @@ report (k, n) = do
   putStrLn "counter"; reportOf $ counter (literalXs n) k
   putStrLn "commander"; reportOf $ commander (literalXs n) k
   putStrLn "product"; reportOf $ product (literalXs n) k
-  where
-    reportOf cnf = do
-      putStrLn $ " aux vars: " ++ show (length $ auxsOf cnf)
-      putStrLn $ " clauses : " ++ show (length cnf)
-      putStrLn $ " literals: " ++ show (sum $ map length cnf)
 
 strDIMACSwithTrue :: CNF -> [Int] -> IO String
 strDIMACSwithTrue cnf ts = do
