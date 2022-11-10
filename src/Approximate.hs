@@ -1,6 +1,5 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE BlockArguments #-}
-{-# LANGUAGE DeriveFoldable #-}
 
 module Approximate where
 
@@ -23,59 +22,47 @@ type Width = Int
 type Height = Int
 type WH = (Width, Height)
 
-data Tree a
-  = Node a [Tree a]
-  deriving (Eq, Show, Foldable)
-instance Functor Tree where
-  fmap f (Node a as) = Node (f a) $ fmap (fmap f) as
--- [Node 2 [Node 2 [], Node 2 [], Node 2 []], Node 2 [Node 3 [], Node 3 []]]
-
-multipleCheck :: [Tree Height] -> IO ()
-multipleCheck = mapM_ multCheck
-  where
-  multCheck (Node h trHs) = do
-    let hSum = sum $ map (\(Node h' _) -> h') trHs
-    unless (hSum `mod` h == 0) $ die $ show $ Node h trHs
-    mapM_ multCheck trHs
-
-heightToHIss :: [Tree Height] -> [Tree (Height, [Int])]
-heightToHIss = hToIss []
-  where
-  hToIss :: [Int] -> [Tree Height] -> [Tree (Height, [Int])]
-  hToIss is trHs = flip map (zip [1..] trHs) \(i, Node h trH's) ->
-    let i's = is ++ [i]
-    in  Node (h, i's) $ hToIss i's trH's
-
-is'xsOf :: [Tree Height] -> [([Int], [Var])]
-is'xsOf = makeIs'xs [] . heightToHIss
-  where
-  makeIs'xs :: [([Int], [Var])] -> [Tree (Height, [Int])] -> [([Int], [Var])]
-  makeIs'xs is'xs = \case
-    [] -> is'xs
-    Node (h, is) [] : trI'ss -> 
-      let m = maximum $ (:) 0 $ flip map (concat $ map snd is'xs) \case
-            X i -> i
-            _ -> 0
-          xs = map X [m+1..m+h]
-      in  makeIs'xs (is'xs ++ [(is, xs)]) trI'ss
-    Node _ trI'ss : trI''ss -> makeIs'xs (makeIs'xs is'xs trI'ss) trI''ss
-
-approxP :: NumberConstraint -> VarScope -> [Tree Height] -> (CNF, [([Int], [Var])])
-approxP atMost vScope trHs =
-  let p is j = (True, vScope $ P is j)
-      h'iss = concatMap concat $ map (fmap return) $ heightToHIss trHs
-      cnfOrder = flip concatMap h'iss \(h, is) ->
-        flip map [2..h] \j ->
-          [ not $ p is j, p is $ j-1 ]
-      cnfAtMost = flip concatMap h'iss \(h, is) ->
-        let h'is's = filter ((==) is . init . snd) h'iss
-            ps = [ p is j | (h', i's) <- h'is's, j <- [1..h'] ]
-            n = length ps
-        in  flip concatMap [1..h] \j ->
-              map ((:) $ p is j) $ atMost (vScope . Scope "approxP") ps $ (n*(j-1)) `div` h
-  in  (cnfOrder ++ cnfAtMost, is'xsOf trHs)
+data WHtree
+  = Nil
+  | WHtree WH [WHtree]
+  deriving (Eq, Show)
 
 {-
+allWHsss :: WHtree -> [[[WH]]]
+allWHsss = makeWHsss []
+  where
+  makeWHsss :: [[[WH]]] -> WHtree -> [[[WH]]]
+  makeWHsss whsss = \case
+    Nil -> whsss
+    WHTree wh whTrees -> 
+      let
+      in  whsss ++ 
+-}
+
+allIss :: Int -> Int -> [[Int]]
+allIss w d = concat $ makeIsss (d-1) $ return $ map return [1..w]
+  where
+  makeIsss :: Int -> [[[Int]]] -> [[[Int]]]
+  makeIsss d' isss = if d' == 0
+    then isss
+    else makeIsss (d'-1) $ isss ++ [[ is ++ [i] | is <- last isss, i <- [1..w] ]]
+
+approxP :: NumberConstraint -> VarScope -> (Int, Int, Int) -> (CNF, [[Int]])
+approxP atMost vScope (h, w, d) =
+  let p is j = (True, vScope $ P is j)
+      iss = allIss w d
+      cnfOrder = flip concatMap iss \is ->
+        flip map [2..h] \j ->
+          [ not $ p is j, p is $ j-1 ]
+      cnfAtMost = flip concatMap iss \is ->
+        let ps = p <$> filter ((==) is . init) iss <*> [1..h]
+        in  flip concatMap [1..h] \j ->
+              map ((:) $ p is j) $ atMost (vScope . Scope "appr") ps $ w*(j-1)
+      isLeafs =
+        let m = maximum $ map length iss
+        in  filter ((==) m . length) iss
+  in  (cnfOrder ++ cnfAtMost, isLeafs)
+
 approx :: NumberConstraint -> VarScope -> (Int, Int, Int) -> Int -> CNF
 approx atMost vScope (h, w, d) k =
   let vScopeNext sID = vScope . Scope ("approx:" ++ sID)
@@ -141,5 +128,4 @@ reportApprox atMost blPossibilityRate (h, w, d) k' = do
     -- print js'rPossibles; print js'rs -- [debug]
   -- > reportPossible (5,2,1) 5
   -- > reportOf $ counter (literalXs 20) 10
--}
-
+  
