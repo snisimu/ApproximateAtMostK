@@ -142,3 +142,4 @@ reportApprox atMost blPossibilityRate (h, w, d) k' = do
   -- > reportPossible (5,2,1) 5
   -- > reportOf $ counter (literalXs 20) 10
 -}
+
