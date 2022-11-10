@@ -55,8 +55,8 @@ data Var
   = X Int
   | B Int Int | T Int Int -- binary
   | R Int Int -- counter
-  | C [ScopeID] Int Int -- commander
-  | A [ScopeID] Int [Int] -- product
+  | C Int Int -- commander
+  | A Int [Int] -- product
   | P [Int] Int -- approximate
   | Scope ScopeID Var
    deriving (Eq, Show)
@@ -88,8 +88,7 @@ printCNF = do
     putStrLn $ intercalate " or " $ flip map literals \(bl, v) ->
       (if bl then "" else "~ ") ++
         case v of
-          C sIDs i j -> "C " ++ showSIDs sIDs ++ " " ++ show i ++ " " ++ show j
-          A sIDs i js -> "A " ++ showSIDs sIDs ++ " " ++ show i ++ " " ++ show js
+          Scope sID v -> "(" ++ show sID ++ ")" ++ show v
           _ -> show v
 showSIDs sIDs = if null sIDs
   then ""
@@ -100,7 +99,8 @@ type NumberConstraint
 type VarScope = Var -> Var
 
 atLeastBy :: NumberConstraint -> NumberConstraint
-atLeastBy atMost literals k = atMost (map not literals) (length literals - k + 1)
+atLeastBy atMost vScope literals k
+  = atMost vScope (map not literals) (length literals - k + 1)
 
 type KN = (Int, Int)
 

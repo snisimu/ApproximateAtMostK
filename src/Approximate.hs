@@ -27,6 +27,7 @@ data WHtree
   | WHtree WH [WHtree]
   deriving (Eq, Show)
 
+{-
 allWHsss :: WHtree -> [[[WH]]]
 allWHsss = makeWHsss []
   where
@@ -36,6 +37,7 @@ allWHsss = makeWHsss []
     WHTree wh whTrees -> 
       let
       in  whsss ++ 
+-}
 
 allIss :: Int -> Int -> [[Int]]
 allIss w d = concat $ makeIsss (d-1) $ return $ map return [1..w]
@@ -45,33 +47,34 @@ allIss w d = concat $ makeIsss (d-1) $ return $ map return [1..w]
     then isss
     else makeIsss (d'-1) $ isss ++ [[ is ++ [i] | is <- last isss, i <- [1..w] ]]
 
+{-
 approxP :: NumConstraint -> VarScope -> WHtree -> (CNF, [(Width, Height)])
 approxP atMost vScope whTree =
   let p is j = (True, vScope $ P is j)
+-}
 
-
-approxP :: NumConstraint -> VarScope -> (Int, Int, Int) -> (CNF, [[Int]])
+approxP :: NumberConstraint -> VarScope -> (Int, Int, Int) -> (CNF, [[Int]])
 approxP atMost vScope (h, w, d) =
   let p is j = (True, vScope $ P is j)
       iss = allIss w d
-      order = flip concatMap iss \is ->
+      cnfOrder = flip concatMap iss \is ->
         flip map [2..h] \j ->
           [ not $ p is j, p is $ j-1 ]
-      atMost = flip concatMap iss \is ->
+      cnfAtMost = flip concatMap iss \is ->
         let ps = p <$> filter ((==) is . init) iss <*> [1..h]
         in  flip concatMap [1..h] \j ->
-              map ((:) $ p is j) $ atMost (vScope $ Scope "appr") ps $ w*(j-1)
+              map ((:) $ p is j) $ atMost (vScope . Scope "appr") ps $ w*(j-1)
       isLeafs =
         let m = maximum $ map length iss
         in  filter ((==) m . length) iss
-  in  (order ++ atMost, isLeafs)
+  in  (cnfOrder ++ cnfAtMost, isLeafs)
 
-approx :: NumConstraint -> VarScope -> (Int, Int, Int) -> Int -> CNF
+approx :: NumberConstraint -> VarScope -> (Int, Int, Int) -> Int -> CNF
 approx atMost vScope (h, w, d) k =
   let vScopeNext sID = vScope . Scope ("approx:" ++ sID)
       p is j = (True, vScope $ P is j)
       cnfTop = atMost (vScopeNext "top") [ (True, P [i] j) | i <- [1..w], j <- [1..h] ] k
-      (cnfP, isLeafs) = approxP (vScopeNext "P") (h, w, d)
+      (cnfP, isLeafs) = approxP atMost (vScopeNext "P") (h, w, d)
       xss = splitBy (h*w) $ literalXs $ (length isLeafs) * h*w
       cnfX = flip concatMap (zip isLeafs xss) \(is, xs) -> 
         flip concatMap [1..h] \j ->
@@ -110,12 +113,12 @@ isPossible (h, w, d) k js = do
   -- print z -- [debug]
   return $ z <= k
 
-reportApprox :: Bool -> (Int, Int, Int) -> Int -> IO ()
-reportApprox blPossibilityRate (h, w, d) k' = do
+reportApprox :: NumberConstraint -> Bool -> (Int, Int, Int) -> Int -> IO ()
+reportApprox atMost blPossibilityRate (h, w, d) k' = do
   let k = k' * w^d
       n = h * w^(d+1)
   putStrLn $ "(k=" ++ show k ++ ",n=" ++ show n ++ ")"
-  reportOf $ approx id (h, w, d) k'
+  reportOf $ approx atMost id (h, w, d) k'
   when blPossibilityRate $ do
     let ftss = filter ((>=) k . length . filter id) $ allFTssOf n
         jss = flip map ftss \fts ->
