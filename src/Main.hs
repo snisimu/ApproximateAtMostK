@@ -24,8 +24,8 @@ report (k, n) = do
   putStrLn "binomial"; reportOf $ binomial id (literalXs n) k
   putStrLn "binary"; reportOf $ binary id (literalXs n) k
   putStrLn "counter"; reportOf $ counter id (literalXs n) k
-  putStrLn "commander"; reportOf $ commander id (literalXs n) k
-  putStrLn "product"; reportOf $ product id (literalXs n) k
+  putStrLn "commander(+binomial)"; reportOf $ commander binomial id (literalXs n) k
+  putStrLn "product(+binomial)"; reportOf $ product binomail id (literalXs n) k
 
 strDIMACSwithTrue :: CNF -> [Int] -> IO String
 strDIMACSwithTrue cnf ts = do

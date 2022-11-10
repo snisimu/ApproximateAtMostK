@@ -22,9 +22,9 @@ xvOn (k, _) = \case
             a = d + 2
         in  replicate j 1 ++ [a] ++ replicate (k-j) 1
 
-product :: NumberConstraint
-product = vScope xs k = if length xs <= k+1
-    then binomial xs k
+product :: NumberConstraint -> NumberConstraint
+product atMost = vScope xs k = if length xs <= k+1
+    then atMost (vScope $ Scope $ "prod:final") xs k
     else
         let n = length xs
             xv = xvOn (k, n)

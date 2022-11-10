@@ -26,8 +26,8 @@ allIss w d = concat $ makeIsss (d-1) $ return $ map return [1..w]
     then isss
     else makeIsss (d'-1) $ isss ++ [[ is ++ [i] | is <- last isss, i <- [1..w] ]]
 
-appr :: VarScope -> (Int, Int, Int) -> (CNF, [[Int]])
-appr vScope (h, w, d) =
+appr :: NumConstraint -> VarScope -> (Int, Int, Int) -> (CNF, [[Int]])
+appr atMost vScope (h, w, d) =
   let p is j = (True, vScope $ P is j)
       iss = allIss w d
       order = flip concatMap iss \is ->
@@ -36,21 +36,22 @@ appr vScope (h, w, d) =
       atMost = flip concatMap iss \is ->
         let ps = p <$> filter ((==) is . init) iss <*> [1..h]
         in  flip concatMap [1..h] \j ->
-              map ((:) $ p is j) $ binomial ps $ w*(j-1)
+              map ((:) $ p is j) $ atMost (vScope $ Scope "appr") ps $ w*(j-1)
       isLeafs =
         let m = maximum $ map length iss
         in  filter ((==) m . length) iss
   in  (order ++ atMost, isLeafs)
 
-approx :: VarScope -> (Int, Int, Int) -> Int -> CNF
-approx vScope (h, w, d) k =
-  let p is j = (True, vScope $ P is j)
-      cnfTop = binomial [ (True, P [i] j) | i <- [1..w], j <- [1..h] ] k
-      (cnfP, isLeafs) = appr vScope (h, w, d)
+approx :: NumConstraint -> VarScope -> (Int, Int, Int) -> Int -> CNF
+approx atMost vScope (h, w, d) k =
+  let vScopeNext sID = vScope . Scope ("approx:" ++ sID)
+      p is j = (True, vScope $ P is j)
+      cnfTop = atMost (vScopeNext "top") [ (True, P [i] j) | i <- [1..w], j <- [1..h] ] k
+      (cnfP, isLeafs) = appr (vScopeNext "P") (h, w, d)
       xss = splitBy (h*w) $ literalXs $ (length isLeafs) * h*w
       cnfX = flip concatMap (zip isLeafs xss) \(is, xs) -> 
         flip concatMap [1..h] \j ->
-          map ((:) $ p is j) $ binomial xs $ w*(j-1)
+          map ((:) $ p is j) $ atMost (vScopeNext "X") xs $ w*(j-1)
   in  cnfTop ++ cnfP ++ cnfX
   -- > generateDIMACSwithTrue (approx id (2,2,1) 2) [1,2,3,4]
 
