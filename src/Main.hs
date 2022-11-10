@@ -21,11 +21,11 @@ import Approximate
 
 report :: KN -> IO ()
 report (k, n) = do
-  putStrLn "binomial"; reportOf $ binomial (literalXs n) k
-  putStrLn "binary"; reportOf $ binary (literalXs n) k
-  putStrLn "counter"; reportOf $ counter (literalXs n) k
-  putStrLn "commander"; reportOf $ commander (literalXs n) k
-  putStrLn "product"; reportOf $ product (literalXs n) k
+  putStrLn "binomial"; reportOf $ binomial id (literalXs n) k
+  putStrLn "binary"; reportOf $ binary id (literalXs n) k
+  putStrLn "counter"; reportOf $ counter id (literalXs n) k
+  putStrLn "commander"; reportOf $ commander id (literalXs n) k
+  putStrLn "product"; reportOf $ product id (literalXs n) k
 
 strDIMACSwithTrue :: CNF -> [Int] -> IO String
 strDIMACSwithTrue cnf ts = do
@@ -52,13 +52,13 @@ generateDIMACSwithTrue cnf ts = writeFile "the.cnf" =<< strDIMACSwithTrue cnf ts
 
 generateDIMACStoCheck :: NumberConstraint -> KN -> IO ()
 generateDIMACStoCheck atMost (k, n) = do
-  let strDIMACS bl = strDIMACSwithTrue (atMost (literalXs n) k) [1 .. k + (if bl then 0 else 1)]
+  let strDIMACS bl = strDIMACSwithTrue (atMost id (literalXs n) k) [1 .. k + (if bl then 0 else 1)]
   writeFile "ShouldBeSAT.cnf" =<< strDIMACS True
   writeFile "ShouldBeUNSAT.cnf" =<< strDIMACS False
   -- > wsl -- ./minisat ShouldBeSAT.cnf
 
 check :: NumberConstraint -> KN -> IO ()
-check atMost (k, n) = printCNF $ atMost (literalXs n) k
+check atMost (k, n) = printCNF $ atMost id (literalXs n) k
 -- > check commander (5,10)
 
 main :: IO ()

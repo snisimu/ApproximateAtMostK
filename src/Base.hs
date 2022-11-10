@@ -58,6 +58,7 @@ data Var
   | C [ScopeID] Int Int -- commander
   | A [ScopeID] Int [Int] -- product
   | P [Int] Int -- approximate
+  | Scope ScopeID Var
    deriving (Eq, Show)
 
 isAux :: Var -> Bool
@@ -95,7 +96,8 @@ showSIDs sIDs = if null sIDs
   else "(" ++ (intercalate ">" $ reverse sIDs) ++ ")"
 
 type NumberConstraint
-  = [Literal] -> Int -> CNF
+  = VarScope -> [Literal] -> Int -> CNF
+type VarScope = Var -> Var
 
 atLeastBy :: NumberConstraint -> NumberConstraint
 atLeastBy atMost literals k = atMost (map not literals) (length literals - k + 1)

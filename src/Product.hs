@@ -23,21 +23,18 @@ xvOn (k, _) = \case
         in  replicate j 1 ++ [a] ++ replicate (k-j) 1
 
 product :: NumberConstraint
-product = prod []
-    where
-    prod :: [ScopeID] -> NumberConstraint
-    prod sIDs xs k = if length xs <= k+1
-        then binomial xs k
-        else
-            let n = length xs
-                xv = xvOn (k, n)
-                x i = xs !! (i-1)
-                a d xvi =
-                    let (xva, xvb) = splitAt d $ xvi
-                        xv'd = init xva ++ xvb
-                    in  (True, A sIDs d xv'd)
-            in  [ [not $ x i, a d $ xv i] | d <- [1 .. k+1], i <- [1..n] ]
-                ++ concat
-                    [ prod (show d : sIDs) (nub [ a d $ xv i | i <- [1..n] ]) k
-                    | d <- [1 .. k+1]
-                    ]
+product = vScope xs k = if length xs <= k+1
+    then binomial xs k
+    else
+        let n = length xs
+            xv = xvOn (k, n)
+            x i = xs !! (i-1)
+            a d xvi =
+                let (xva, xvb) = splitAt d $ xvi
+                    xv'd = init xva ++ xvb
+                in  (True, vScope $ A sIDs d xv'd)
+        in  [ [not $ x i, a d $ xv i] | d <- [1 .. k+1], i <- [1..n] ]
+            ++ concat
+                [ product (vScope $ Scope $ "prod" ++ show d) (nub [ a d $ xv i | i <- [1..n] ]) k
+                | d <- [1 .. k+1]
+                ]

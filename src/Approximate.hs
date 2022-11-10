@@ -16,7 +16,7 @@ import Base
 import Binomial
 
 approximate :: NumberConstraint
-approximate = \_ _ -> []
+approximate = \_ _ _ -> []
 
 allIss :: Int -> Int -> [[Int]]
 allIss w d = concat $ makeIsss (d-1) $ return $ map return [1..w]
@@ -26,9 +26,9 @@ allIss w d = concat $ makeIsss (d-1) $ return $ map return [1..w]
     then isss
     else makeIsss (d'-1) $ isss ++ [[ is ++ [i] | is <- last isss, i <- [1..w] ]]
 
-appr :: (Int, Int, Int) -> (CNF, [[Int]])
-appr (h, w, d) =
-  let p is j = (True, P is j)
+appr :: VarScope -> (Int, Int, Int) -> (CNF, [[Int]])
+appr vScope (h, w, d) =
+  let p is j = (True, vScope $ P is j)
       iss = allIss w d
       order = flip concatMap iss \is ->
         flip map [2..h] \j ->
@@ -42,17 +42,17 @@ appr (h, w, d) =
         in  filter ((==) m . length) iss
   in  (order ++ atMost, isLeafs)
 
-approx :: (Int, Int, Int) -> Int -> CNF
-approx (h, w, d) k =
-  let p is j = (True, P is j)
+approx :: VarScope -> (Int, Int, Int) -> Int -> CNF
+approx vScope (h, w, d) k =
+  let p is j = (True, vScope $ P is j)
       cnfTop = binomial [ (True, P [i] j) | i <- [1..w], j <- [1..h] ] k
-      (cnfP, isLeafs) = appr (h, w, d)
+      (cnfP, isLeafs) = appr vScope (h, w, d)
       xss = splitBy (h*w) $ literalXs $ (length isLeafs) * h*w
       cnfX = flip concatMap (zip isLeafs xss) \(is, xs) -> 
         flip concatMap [1..h] \j ->
           map ((:) $ p is j) $ binomial xs $ w*(j-1)
   in  cnfTop ++ cnfP ++ cnfX
-  -- > generateDIMACSwithTrue (approx (2,2,1) 2) [1,2,3,4]
+  -- > generateDIMACSwithTrue (approx id (2,2,1) 2) [1,2,3,4]
 
 isPossible :: (Int, Int, Int) -> Int -> [Int] -> IO Bool
 isPossible (h, w, d) k js = do
@@ -90,7 +90,7 @@ reportApprox blPossibilityRate (h, w, d) k' = do
   let k = k' * w^d
       n = h * w^(d+1)
   putStrLn $ "(k=" ++ show k ++ ",n=" ++ show n ++ ")"
-  reportOf $ approx (h, w, d) k'
+  reportOf $ approx id (h, w, d) k'
   when blPossibilityRate $ do
     let ftss = filter ((>=) k . length . filter id) $ allFTssOf n
         jss = flip map ftss \fts ->

@@ -8,15 +8,15 @@ import Prelude hiding (not)
 import Base
 
 binary :: NumberConstraint
-binary xs k = 
+binary vScope xs k = 
     let n = length xs
         x i = xs !! (i-1)
-        t g i = (True, T g i)
+        t g i = (True, vScope $ T g i)
         theMax i = max 1 $ k - n + i
         theMin i = min i k
         log2n = head $ filter (\i -> n <= 2^i) [1..] -- floor (logBase 2 n) + if ..
         s i = allFTssOf log2n !! (i - 1)
-        phi i g j = (s i !! (j - 1), B g j)
+        phi i g j = (s i !! (j - 1), vScope $ B g j)
     in  [ not (x i) : [ t g i | g <- [theMax i .. theMin i] ]
         | i <- [1..n]
         ]

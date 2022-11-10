@@ -8,10 +8,10 @@ import Prelude hiding (not)
 import Base
 
 counter :: NumberConstraint
-counter xs k = 
+counter vScope xs k = 
     let n = length xs
         x i = xs !! (i-1)
-        r i j = (True, R i j)
+        r i j = (True, vScope $ R i j)
     in  [ [not $ x i, r i 1] | i <- [1..n-1] ] -- (1)
         ++
         [ [not $ r 1 j] | j <- [2..k] ] -- (2)
