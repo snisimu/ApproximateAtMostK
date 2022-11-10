@@ -18,6 +18,25 @@ import Binomial
 approximate :: NumberConstraint
 approximate = \_ _ _ -> []
 
+type Width = Int
+type Height = Int
+type WH = (Width, Height)
+
+data WHtree
+  = Nil
+  | WHtree WH [WHtree]
+  deriving (Eq, Show)
+
+allWHsss :: WHtree -> [[[WH]]]
+allWHsss = makeWHsss []
+  where
+  makeWHsss :: [[[WH]]] -> WHtree -> [[[WH]]]
+  makeWHsss whsss = \case
+    Nil -> whsss
+    WHTree wh whTrees -> 
+      let
+      in  whsss ++ 
+
 allIss :: Int -> Int -> [[Int]]
 allIss w d = concat $ makeIsss (d-1) $ return $ map return [1..w]
   where
@@ -26,8 +45,13 @@ allIss w d = concat $ makeIsss (d-1) $ return $ map return [1..w]
     then isss
     else makeIsss (d'-1) $ isss ++ [[ is ++ [i] | is <- last isss, i <- [1..w] ]]
 
-appr :: NumConstraint -> VarScope -> (Int, Int, Int) -> (CNF, [[Int]])
-appr atMost vScope (h, w, d) =
+approxP :: NumConstraint -> VarScope -> WHtree -> (CNF, [(Width, Height)])
+approxP atMost vScope whTree =
+  let p is j = (True, vScope $ P is j)
+
+
+approxP :: NumConstraint -> VarScope -> (Int, Int, Int) -> (CNF, [[Int]])
+approxP atMost vScope (h, w, d) =
   let p is j = (True, vScope $ P is j)
       iss = allIss w d
       order = flip concatMap iss \is ->
@@ -47,7 +71,7 @@ approx atMost vScope (h, w, d) k =
   let vScopeNext sID = vScope . Scope ("approx:" ++ sID)
       p is j = (True, vScope $ P is j)
       cnfTop = atMost (vScopeNext "top") [ (True, P [i] j) | i <- [1..w], j <- [1..h] ] k
-      (cnfP, isLeafs) = appr (vScopeNext "P") (h, w, d)
+      (cnfP, isLeafs) = approxP (vScopeNext "P") (h, w, d)
       xss = splitBy (h*w) $ literalXs $ (length isLeafs) * h*w
       cnfX = flip concatMap (zip isLeafs xss) \(is, xs) -> 
         flip concatMap [1..h] \j ->
