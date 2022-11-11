@@ -18,35 +18,27 @@ import Binomial
 approximate :: NumberConstraint
 approximate = \_ _ _ -> []
 
-type Width = Int
 type Height = Int
-type WH = (Width, Height)
+type Width = Int
+type HW = (Height, Width)
 
-data WHtree
-  = Nil
-  | WHtree WH [WHtree]
-  deriving (Eq, Show)
+multipleCheck :: [HW] -> IO ()
+multipleCheck = multCheck <$> fst . head <*> tail
+  where
+  multCheck :: Height -> [HW] -> IO ()
+  multCheck h' = \case
+    [] -> return ()
+    (h, w) : hws -> do
+      unless ((h*w) `mod` h' == 0) $ die $ show (h*w) ++ " mod " ++ show h' ++ " /= 0"
+      multCheck h hws    
+
+is'hsFor :: [HW] -> [([Int], Height)]
+is'hsFor = tail . concat . foldl makeH'Isss [[([], 0)]]
+  where
+  makeH'Isss ishss (h, w) =
+    ishss ++ [[ (is ++ [i], h) | (is, _) <- last ishss, i <- [1..w] ]]
 
 {-
-allWHsss :: WHtree -> [[[WH]]]
-allWHsss = makeWHsss []
-  where
-  makeWHsss :: [[[WH]]] -> WHtree -> [[[WH]]]
-  makeWHsss whsss = \case
-    Nil -> whsss
-    WHTree wh whTrees -> 
-      let
-      in  whsss ++ 
--}
-
-allIss :: Int -> Int -> [[Int]]
-allIss w d = concat $ makeIsss (d-1) $ return $ map return [1..w]
-  where
-  makeIsss :: Int -> [[[Int]]] -> [[[Int]]]
-  makeIsss d' isss = if d' == 0
-    then isss
-    else makeIsss (d'-1) $ isss ++ [[ is ++ [i] | is <- last isss, i <- [1..w] ]]
-
 approxP :: NumberConstraint -> VarScope -> (Int, Int, Int) -> (CNF, [[Int]])
 approxP atMost vScope (h, w, d) =
   let p is j = (True, vScope $ P is j)
@@ -128,4 +120,4 @@ reportApprox atMost blPossibilityRate (h, w, d) k' = do
     -- print js'rPossibles; print js'rs -- [debug]
   -- > reportPossible (5,2,1) 5
   -- > reportOf $ counter (literalXs 20) 10
-  
+-}
