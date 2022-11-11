@@ -88,7 +88,7 @@ printCNF = do
     putStrLn $ intercalate " or " $ flip map literals \(bl, v) ->
       (if bl then "" else "~ ") ++
         case v of
-          Scope sID v -> "(" ++ show sID ++ ")" ++ show v
+          Scope sID v -> "(" ++ sID ++ ")" ++ show v
           _ -> show v
 showSIDs sIDs = if null sIDs
   then ""

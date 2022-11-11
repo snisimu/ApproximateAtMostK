@@ -32,42 +32,47 @@ multipleCheck = multCheck <$> fst . head <*> tail
       unless ((h*w) `mod` h' == 0) $ die $ show (h*w) ++ " mod " ++ show h' ++ " /= 0"
       multCheck h hws    
 
-is'hsFor :: [HW] -> [([Int], Height)]
-is'hsFor = tail . concat . foldl makeH'Isss [[([], 0)]]
+labeling :: [HW] -> [([Int], Height)]
+labeling = tail . concat . foldl makeH'Isss [[([], 0)]]
   where
   makeH'Isss ishss (h, w) =
     ishss ++ [[ (is ++ [i], h) | (is, _) <- last ishss, i <- [1..w] ]]
 
-{-
-approxP :: NumberConstraint -> VarScope -> (Int, Int, Int) -> (CNF, [[Int]])
-approxP atMost vScope (h, w, d) =
+approxP :: NumberConstraint -> VarScope -> [HW] -> (CNF, [[Int]])
+approxP atMost vScope hws =
   let p is j = (True, vScope $ P is j)
-      iss = allIss w d
-      cnfOrder = flip concatMap iss \is ->
+      is'hs = labeling hws
+      cnfOrder = flip concatMap is'hs \(is, h) ->
         flip map [2..h] \j ->
           [ not $ p is j, p is $ j-1 ]
-      cnfAtMost = flip concatMap iss \is ->
-        let ps = p <$> filter ((==) is . init) iss <*> [1..h]
+      cnfAtMost = flip concatMap is'hs \(is, h) ->
+        let theIs'hs = filter ((==) is . init . fst) is'hs
+            ps = map (uncurry p) theIs'hs
+            w = length theIs'hs
         in  flip concatMap [1..h] \j ->
-              map ((:) $ p is j) $ atMost (vScope . Scope "appr") ps $ w*(j-1)
+              map ((:) $ p is j) $ atMost (vScope . Scope "approxP") ps $ w*(j-1)
       isLeafs =
-        let m = maximum $ map length iss
-        in  filter ((==) m . length) iss
+        let iss = map fst is'hs
+        in  filter ((==) (length hws) . length) iss
   in  (cnfOrder ++ cnfAtMost, isLeafs)
 
-approx :: NumberConstraint -> VarScope -> (Int, Int, Int) -> Int -> CNF
-approx atMost vScope (h, w, d) k =
+approx :: NumberConstraint -> VarScope -> [HW] -> Int -> CNF
+approx atMost vScope hws k =
   let vScopeNext sID = vScope . Scope ("approx:" ++ sID)
       p is j = (True, vScope $ P is j)
+      (h, w) = head hws
       cnfTop = atMost (vScopeNext "top") [ (True, P [i] j) | i <- [1..w], j <- [1..h] ] k
-      (cnfP, isLeafs) = approxP atMost (vScopeNext "P") (h, w, d)
-      xss = splitBy (h*w) $ literalXs $ (length isLeafs) * h*w
+      (cnfP, isLeafs) = approxP atMost vScope{- (vScopeNext "P") -} hws
+      (h', w') = last hws
+      m = product $ map snd $ init hws
+      xss = splitBy h' $ literalXs $ h'*w'*m
       cnfX = flip concatMap (zip isLeafs xss) \(is, xs) -> 
-        flip concatMap [1..h] \j ->
-          map ((:) $ p is j) $ atMost (vScopeNext "X") xs $ w*(j-1)
+        flip concatMap [1..h'] \j ->
+          map ((:) $ p is j) $ atMost (vScopeNext "X") xs $ j-1
   in  cnfTop ++ cnfP ++ cnfX
-  -- > generateDIMACSwithTrue (approx id (2,2,1) 2) [1,2,3,4]
+  -- > generateDIMACSwithTrue (approx counter id [(2,2),(2,2)] 2) [1,2,3,4]
 
+{-
 isPossible :: (Int, Int, Int) -> Int -> [Int] -> IO Bool
 isPossible (h, w, d) k js = do
   unless (k < h*w) $ die "k: too large"
