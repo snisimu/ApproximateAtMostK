@@ -6,8 +6,10 @@ module Counter (counter) where
 import Prelude hiding (not)
 
 import Base
+import Binomial
 
 counter :: NumberConstraint
+counter vScope xs 0 = binomial vScope xs 0
 counter vScope xs k = 
     let n = length xs
         x i = xs !! (i-1)

@@ -50,7 +50,7 @@ approxP atMost vScope hws =
             ps = map (uncurry p) theIs'hs
             w = length theIs'hs
         in  flip concatMap [1..h] \j ->
-              map ((:) $ p is j) $ atMost (vScope . Scope "approxP") ps $ w*(j-1)
+              map ((:) $ p is j) $ atMost (vScope . Scope ("approxP:" ++ show is ++ show j)) ps $ w*(j-1)
       isLeafs =
         let iss = map fst is'hs
         in  filter ((==) (length hws) . length) iss
@@ -68,9 +68,10 @@ approx atMost vScope hws k =
       xss = splitBy h' $ literalXs $ h'*w'*m
       cnfX = flip concatMap (zip isLeafs xss) \(is, xs) -> 
         flip concatMap [1..h'] \j ->
-          map ((:) $ p is j) $ atMost (vScopeNext "X") xs $ j-1
+          map ((:) $ p is j) $ atMost (vScopeNext $ "X:" ++ show is ++ show j) xs $ j-1
   in  cnfTop ++ cnfP ++ cnfX
   -- > generateDIMACSwithTrue (approx counter id [(2,2),(2,2)] 2) [1,2,3,4]
+  -- > generateDIMACSwithTrue (approx counter id [(2,2)] 2) [1,2,3]
 
 {-
 isPossible :: (Int, Int, Int) -> Int -> [Int] -> IO Bool

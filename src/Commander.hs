@@ -19,6 +19,7 @@ commanderWith :: NumberConstraint -> NumberConstraint
 commanderWith atMost = command Nothing
     where
     command :: Maybe Int -> NumberConstraint
+    command mbM vScope xs 0 = binomial vScope xs 0
     command mbM vScope xs k =
         let m :: Int
             m =
