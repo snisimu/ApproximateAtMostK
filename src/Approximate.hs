@@ -113,19 +113,79 @@ reportApproxWith atMost hws k' = do
   putStrLn $ "(k=" ++ show k ++ ",n=" ++ show n ++ ")"
   reportOf $ approx atMost id hws k'
 
-possibilityRate :: NumberConstraint ->  [HW] -> Int -> IO ()
-possibilityRate atMost hws k' = do
+possibilityRate :: [HW] -> Int -> IO ()
+possibilityRate hws k' = do
   let (k, n) = knOf hws k'
-      ftss = filter ((>=) k . length . filter id) $ allFTssOf n
-      jss = flip map ftss \fts ->
-        catMaybes $ flip map (zip [1..] fts) \(j, bl) ->
-          if bl then Just j else Nothing
-  js'rs <- forM jss \js -> do
-    r <- isPossible hws k' js
-    return (js, r)
-  let js'rPossibles = filter snd js'rs
-      l = length js'rs
-      lPossible = length js'rPossibles
-  putStrLn $ show lPossible ++ "/" ++ show l ++ showPercentage lPossible l
-  -- print js'rPossibles; print js'rs -- [debug]
+      jsKs = combinations [1..n] k
+      -- jsLtKs = [] : concatMap (combinations [1..n]) [1..k-1]
+      check jss = forM jss \js -> do
+        bl <- isPossible hws k' js
+        return (js, bl)
+  jsK'bls <- check jsKs
+  -- jsLtK'bls <- check jsLtKs
+  let jsK'Trues = filter snd jsK'bls
+      -- jsLtK'Trues = filter snd jsLtK'bls
+      lK = length jsK'bls
+      lKTrue = length jsK'Trues
+  putStrLn $ show lKTrue ++ "/" ++ show lK ++ showPercentage lKTrue lK
+  -- print js'rPoss; print js'rs -- [debug]
   -- > reportOf $ counter (literalXs 20) 10
+
+overall22 :: Int -> Int -> Int
+overall22 lv k =
+  let f = overall22 (lv-1)
+  in  case k of
+        0 -> 1
+        1 -> if lv == 0 then 4 else
+              f 2 * f 0
+              + f 1 * f 1
+              + f 0 * f 2
+        2 -> if lv == 0 then 6 else
+              f 4 * f 0
+              + f 3 * f 1
+              + f 2 * f 2
+              + f 1 * f 3
+              + f 0 * f 4
+        3 -> if lv == 0 then 4 else
+              f 3 * f 0
+              + f 2 * f 1
+              + f 1 * f 2
+              + f 0 * f 3
+        4 -> 1
+
+possible22 :: Int -> Int
+possible22 lv = 
+  let f = p22 $ lv-1
+  in  if lv == 0 then 6 else
+        f 2 * f 0
+        + f 1 * f 1
+        + f 0 * f 2
+  where
+    p22 lv k =
+      let f = p22 (lv-1)
+      in  case k of
+            0 -> 1
+            1 -> if lv == 0 then 6 else
+                  f 2 * f 0
+                  + f 1 * f 1
+                  + f 0 * f 2
+            2 -> 1
+
+possible22' :: Int -> [[Bool]]
+possible22' lv = 
+  let f = p22 $ lv-1
+  in  if lv == 0 then fts 2 4 else
+        ((++) <$> f 2 <*> f 0)
+        ++ ((++) <$> f 1 <*> f 1)
+        ++ ((++) <$> f 0 <*> f 2)
+  where
+    fts k n = filter ((==) k . length . filter id) $ allFTssOf n
+    p22 lv k =
+      let f = p22 (lv-1)
+      in  case k of
+            0 -> [replicate 4 False]
+            1 -> if lv == 0 then fts 1 2 else
+                  ((++) <$> f 2 <*> f 0)
+                  ++ ((++) <$> f 1 <*> f 1)
+                  ++ ((++) <$> f 0 <*> f 2)
+            2 -> [replicate 4 True]
