@@ -26,11 +26,11 @@ multipleCheck :: [HW] -> IO ()
 multipleCheck = multCheck <$> fst . head <*> tail
   where
   multCheck :: Height -> [HW] -> IO ()
-  multCheck h' = \case
+  multCheck h = \case
     [] -> return ()
-    (h, w) : hws -> do
-      unless ((h*w) `mod` h' == 0) $ die $ show (h*w) ++ " mod " ++ show h' ++ " /= 0"
-      multCheck h hws    
+    (h', w') : hws -> do
+      unless ((h'*w') `mod` h == 0) $ die $ show (h'*w') ++ " mod " ++ show h ++ " /= 0"
+      multCheck h' hws
 
 labeling :: [HW] -> [([Int], Height)]
 labeling = tail . concat . foldl makeH'Isss [[([], 0)]]
@@ -48,9 +48,10 @@ approxP atMost vScope hws =
       cnfAtMost = flip concatMap is'hs \(is, h) ->
         let theIs'hs = filter ((==) is . init . fst) is'hs
             ps = concatMap (\(is, h) -> p is <$> [1..h]) theIs'hs
-            w = length theIs'hs
+            h' = if null theIs'hs then 0 else snd $ head theIs'hs
+            w' = length theIs'hs
         in  flip concatMap [1..h] \j ->
-              map ((:) $ p is j) $ atMost (vScope . Scope ("approxP:" ++ show is ++ show j)) ps $ w*(j-1)
+              map ((:) $ p is j) $ atMost (vScope . Scope ("approxP:" ++ show is ++ show j)) ps $ (h'*w'*(j-1)) `div` h
       isLeafs =
         let iss = map fst is'hs
         in  filter ((==) (length hws) . length) iss
@@ -71,8 +72,7 @@ approx atMost vScope hws k =
           map ((:) $ p is j) $ atMost (vScopeNext $ "X:" ++ show is ++ show j) xs $ j-1
   in  cnfTop ++ cnfP ++ cnfX
   -- > generateDIMACSwithTrue (approx counter id [(2,2),(2,2)] 2) [1,2,3,4]
-  -- > generateDIMACSwithTrue (approx counter id [(2,2)] 2) [1,2,3]
-
+  
 {-
 isPossible :: (Int, Int, Int) -> Int -> [Int] -> IO Bool
 isPossible (h, w, d) k js = do
