@@ -51,7 +51,9 @@ approxP atMost vScope hws =
             h' = if null theIs'hs then 0 else snd $ head theIs'hs
             w' = length theIs'hs
         in  flip concatMap [1..h] \j ->
-              map ((:) $ p is j) $ atMost (vScope . Scope ("approxP:" ++ show is ++ show j)) ps $ (h'*w'*(j-1)) `div` h
+              let theScope = vScope . Scope ("approxP:" ++ show is ++ show j)
+              in  map ((:) $ p is j) $ 
+                    atMost theScope ps $ (h'*w'*(j-1)) `div` h
       isLeafs =
         let iss = map fst is'hs
         in  filter ((==) (length hws) . length) iss
@@ -73,57 +75,57 @@ approx atMost vScope hws k =
   in  cnfTop ++ cnfP ++ cnfX
   -- > generateDIMACSwithTrue (approx counter id [(2,2),(2,2)] 2) [1,2,3,4]
   
-{-
-isPossible :: (Int, Int, Int) -> Int -> [Int] -> IO Bool
-isPossible (h, w, d) k js = do
-  unless (k < h*w) $ die "k: too large"
-  let n = h * w^(d+1)
+isPossible :: [HW] -> Int -> [Int] -> IO Bool
+isPossible hws k js = do
+  let (h', w') = head hws
+  unless (k < h'*w') $ die "k: too large"
+  let (h, w) = last hws
+      m = product $ map snd $ init hws
+      n = h * w * m
   unless (null $ filter (> n) js) $ die "js: out of range"
   let bss = splitBy h $ foldr makeTrueAt (replicate n False) js
         where
         makeTrueAt m bs =
           let (hd, tl) = splitAt m bs
           in  init hd ++ [True] ++ tl
-      integrate :: [Int] -> IO Int
-      integrate ls = do
-        -- print ls -- [debug]
-        let l's = integr [] ls
-        if length l's <= w
-          then do
-            -- print l's -- [debug]
-            return $ sum l's
-          else integrate l's
-        where
-        integr gs = \case
-          [] -> gs
-          hs ->
-            let (hHD, hTL) = splitAt w hs
-                (y, z) = sum hHD `divMod` w
-                r = y + if z == 0 then 0 else 1
-            in  integr (gs ++ [r]) hTL
-  z <- integrate $ map (length . filter id) bss
+      integrate :: [Int] -> [HW] -> IO [Int]
+      integrate ls = \case
+        hw : [] -> return ls
+        (h', w') : (h, w) : hws -> do
+          let l'ss = divideInto w' ls
+              lsNext = flip map l'ss \l's -> 
+                let (a, b) = (sum l's * h) `divMod` (h' * w')
+                in  a + if b == 0 then 0 else 1
+          integrate lsNext $ (h, w) : hws
+  z <- sum <$> integrate (map (length . filter id) bss) (reverse hws)
   -- print z -- [debug]
   return $ z <= k
 
-reportApprox :: NumberConstraint -> Bool -> (Int, Int, Int) -> Int -> IO ()
-reportApprox atMost blPossibilityRate (h, w, d) k' = do
-  let k = k' * w^d
-      n = h * w^(d+1)
+knOf :: [HW] -> Int -> KN
+knOf hws k' = 
+  let (h, w) = last hws
+      m = product $ map snd $ init hws
+  in  (k' * m, h * w * m)
+
+reportApproxWith :: NumberConstraint -> [HW] -> Int -> IO ()
+reportApproxWith atMost hws k' = do
+  let (k, n) = knOf hws k'
   putStrLn $ "(k=" ++ show k ++ ",n=" ++ show n ++ ")"
-  reportOf $ approx atMost id (h, w, d) k'
-  when blPossibilityRate $ do
-    let ftss = filter ((>=) k . length . filter id) $ allFTssOf n
-        jss = flip map ftss \fts ->
-          catMaybes $ flip map (zip [1..] fts) \(j, bl) ->
-            if bl then Just j else Nothing
-    js'rs <- forM jss \js -> do
-      r <- isPossible (h, w, d) k' js
-      return (js, r)
-    let js'rPossibles = filter snd js'rs
-        l = length js'rs
-        lPossible = length js'rPossibles
-    putStrLn $ show lPossible ++ "/" ++ show l ++ showPercentage lPossible l
-    -- print js'rPossibles; print js'rs -- [debug]
-  -- > reportPossible (5,2,1) 5
+  reportOf $ approx atMost id hws k'
+
+possibilityRate :: NumberConstraint ->  [HW] -> Int -> IO ()
+possibilityRate atMost hws k' = do
+  let (k, n) = knOf hws k'
+      ftss = filter ((>=) k . length . filter id) $ allFTssOf n
+      jss = flip map ftss \fts ->
+        catMaybes $ flip map (zip [1..] fts) \(j, bl) ->
+          if bl then Just j else Nothing
+  js'rs <- forM jss \js -> do
+    r <- isPossible hws k' js
+    return (js, r)
+  let js'rPossibles = filter snd js'rs
+      l = length js'rs
+      lPossible = length js'rPossibles
+  putStrLn $ show lPossible ++ "/" ++ show l ++ showPercentage lPossible l
+  -- print js'rPossibles; print js'rs -- [debug]
   -- > reportOf $ counter (literalXs 20) 10
--}
