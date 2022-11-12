@@ -47,7 +47,7 @@ approxP atMost vScope hws =
           [ not $ p is j, p is $ j-1 ]
       cnfAtMost = flip concatMap is'hs \(is, h) ->
         let theIs'hs = filter ((==) is . init . fst) is'hs
-            ps = map (uncurry p) theIs'hs
+            ps = concatMap (\(is, h) -> p is <$> [1..h]) theIs'hs
             w = length theIs'hs
         in  flip concatMap [1..h] \j ->
               map ((:) $ p is j) $ atMost (vScope . Scope ("approxP:" ++ show is ++ show j)) ps $ w*(j-1)
