@@ -20,6 +20,26 @@
   (major1) == 4 && (major2) <  15 || \
   (major1) == 4 && (major2) == 15 && (minor) <= 1)
 #endif /* MIN_VERSION_base */
+/* package directory-1.3.6.2 */
+#ifndef VERSION_directory
+#define VERSION_directory "1.3.6.2"
+#endif /* VERSION_directory */
+#ifndef MIN_VERSION_directory
+#define MIN_VERSION_directory(major1,major2,minor) (\
+  (major1) <  1 || \
+  (major1) == 1 && (major2) <  3 || \
+  (major1) == 1 && (major2) == 3 && (minor) <= 6)
+#endif /* MIN_VERSION_directory */
+/* package filepath-1.4.2.1 */
+#ifndef VERSION_filepath
+#define VERSION_filepath "1.4.2.1"
+#endif /* VERSION_filepath */
+#ifndef MIN_VERSION_filepath
+#define MIN_VERSION_filepath(major1,major2,minor) (\
+  (major1) <  1 || \
+  (major1) == 1 && (major2) <  4 || \
+  (major1) == 1 && (major2) == 4 && (minor) <= 2)
+#endif /* MIN_VERSION_filepath */
 
 /* tool gcc-10.2.0 */
 #ifndef TOOL_VERSION_gcc
@@ -103,7 +123,7 @@
 #endif /* MIN_TOOL_VERSION_strip */
 
 #ifndef CURRENT_COMPONENT_ID
-#define CURRENT_COMPONENT_ID "AtMostK-0.1.0.0-J1opn9WGkuRGYQf7IHruqM-AtMostK"
+#define CURRENT_COMPONENT_ID "AtMostK-0.1.0.0-F2iz63qfdvtAepk54H5dti-AtMostK"
 #endif /* CURRENT_COMPONENT_ID */
 #ifndef CURRENT_PACKAGE_VERSION
 #define CURRENT_PACKAGE_VERSION "0.1.0.0"

@@ -1,6 +1,8 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE BlockArguments #-}
 
+-- stack ghci --ghc-options -w
+
 module Main where
 
 import Prelude hiding (not, product)
@@ -17,7 +19,8 @@ import Binary
 import Counter
 import Commander
 import Product
-import Approximate
+import Approximate.Encoding
+import Approximate.Evaluation
 
 report :: KN -> IO ()
 report (k, n) = do
@@ -63,4 +66,3 @@ check atMost (k, n) = printCNF $ atMost id (literalXs n) k
 
 main :: IO ()
 main = return ()
-
