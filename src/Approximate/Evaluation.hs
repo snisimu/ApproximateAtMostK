@@ -4,6 +4,7 @@
 module Approximate.Evaluation where
 
 import Prelude hiding (not)
+import qualified Prelude (not)
 
 import System.Exit
 import System.Directory
@@ -63,37 +64,15 @@ reportApproxWith atMost hws k' = do
 possibilityRate :: [HW] -> Int -> IO ()
 possibilityRate hws k' = do
   let (k, n) = knOf hws k'
-      jsKs = combinations [1..n] k
-      -- jsLtKs = [] : concatMap (combinations [1..n]) [1..k-1]
+      jss = [] : concatMap (combinations [1..n]) [1..k]
       check jss = forM jss \js -> do
         bl <- isPossible hws k' js
         return (js, bl)
-  jsK'bls <- check jsKs
-  -- jsLtK'bls <- check jsLtKs
-  let jsK'Trues = filter snd jsK'bls
-      -- jsLtK'Trues = filter snd jsLtK'bls
-      lK = length jsK'bls
-      lKTrue = length jsK'Trues
-  putStrLn $ show lKTrue ++ "/" ++ show lK ++ showPercentage lKTrue lK
-  -- print js'rPoss; print js'rs -- [debug]
-  -- > reportOf $ counter (literalXs 20) 10
-
-{-
-byIsPossible :: [HW] -> Int -> IO [[Bool]]
-byIsPossible hws k' = do
-  let (k, n) = knOf hws k'
-      jsKs = combinations [1..n] k
-      check jss = forM jss \js -> do
-        bl <- isPossible hws k' js
-        return (js, bl)
-  jsK'bls <- check jsKs
-  let jsK'Trues = filter snd jsK'bls
-      jss = map fst jsK'Trues
-      makeTrueAt m bs =
-        let (hd, tl) = splitAt m bs
-        in  init hd ++ [True] ++ tl
-  return $ map (foldr makeTrueAt (replicate n False)) jss
--}
+  js'bls <- check jss
+  let js'Trues = filter snd js'bls
+      l = length js'bls
+      lTrue = length js'Trues
+  putStrLn $ show lTrue ++ "/" ++ show l ++ showPercentage lTrue l
 
 -- for (2, 2)
 
@@ -119,12 +98,12 @@ possible22bssJust d = pble22 d 1 2
 fileFor :: (Int, Int) -> FilePath
 fileFor (k, n) = "work" </> show k ++ "-" ++ show n <.> "txt"
 
-lengthOf :: (Int, Int) -> IO ()
+lengthOf :: (Int, Int) -> IO Int
 lengthOf (k, n) = do
   let fileIn = fileFor (k, n)
   bl <- doesFileExist fileIn
   unless bl $ die "not exist"
-  print =<< return . length . lines =<< readFile fileIn
+  return . length . lines =<< readFile fileIn
 
 -- procedure
 
@@ -152,20 +131,26 @@ resumeDrop file = do
             resumeDrop file
 
 resumeNub :: String -> IO ()
-resumeNub file = do
-    let filePath = "work" </> file
-    ls <- lines <$> readFile filePath
-    let n = length ls
-    case findIndex ((/=) "Just " . take 5) ls of
-        Nothing -> return ()
-        Just j -> do
-            putStrLn $ show (j+1) ++ "/" ++ show n
-            let (lMbs, l : l's) = splitAt j ls
-                mbIsss = (read :: String -> [Maybe [[Int]]]) $
-                    "[" ++ intercalate "," lMbs ++ "]"
-                isPrevious = 
-                iss = (read :: String -> [[Int]]) l
-                mbIss = Just $ catMaybes $ flip map iss \is ->
-                    if elem is isPrevious then Nothing else Just is
-            writeFile filePath $ unlines $ map show mbIsss ++ [show mbIss] ++ l's
-            resumeNub file
+resumeNub = rsNub Nothing
+    where
+    rsNub :: Maybe [[Int]] -> String -> IO ()
+    rsNub mbIss file = do
+        let filePath = "work" </> file
+        ls <- lines <$> readFile filePath
+        let n = length ls
+        case findIndex ((==) "[[" . take 2) ls of
+            Nothing -> return ()
+            Just j -> do
+                putStrLn $ show (j+1) ++ "/" ++ show n
+                let (lPreviouss, l : l's) = splitAt j ls
+                    isPreviouss = fromMaybe (map (read :: String -> [Int]) lPreviouss) mbIss
+                    iss = (read :: String -> [[Int]]) l
+                    is's = filter (Prelude.not . flip elem isPreviouss) iss
+                    strIs's = if null is's then [] else [show is's]
+                writeFile filePath $ unlines $ map show isPreviouss ++ strIs's ++ l's
+                rsNub (Just $ isPreviouss ++ is's) file
+
+total :: KN -> IO ()
+total (k, n) = do
+    ls <- forM [0..k] \i -> lengthOf (i, n)
+    print $ sum ls
