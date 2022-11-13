@@ -92,7 +92,8 @@ isPossible hws k js = do
       integrate ls = \case
         hw : [] -> return ls
         (h', w') : (h, w) : hws -> do
-          let l'ss = divideInto w' ls
+          let m = product $ map snd $ (h, w) : hws
+              l'ss = divideInto m ls
               lsNext = flip map l'ss \l's -> 
                 let (a, b) = (sum l's * h) `divMod` (h' * w')
                 in  a + if b == 0 then 0 else 1
@@ -131,61 +132,62 @@ possibilityRate hws k' = do
   -- print js'rPoss; print js'rs -- [debug]
   -- > reportOf $ counter (literalXs 20) 10
 
-overall22 :: Int -> Int -> Int
-overall22 lv k =
-  let f = overall22 (lv-1)
-  in  case k of
-        0 -> 1
-        1 -> if lv == 0 then 4 else
-              f 2 * f 0
-              + f 1 * f 1
-              + f 0 * f 2
-        2 -> if lv == 0 then 6 else
-              f 4 * f 0
-              + f 3 * f 1
-              + f 2 * f 2
-              + f 1 * f 3
-              + f 0 * f 4
-        3 -> if lv == 0 then 4 else
-              f 3 * f 0
-              + f 2 * f 1
-              + f 1 * f 2
-              + f 0 * f 3
-        4 -> 1
+{-
+byIsPossible :: [HW] -> Int -> IO [[Bool]]
+byIsPossible hws k' = do
+  let (k, n) = knOf hws k'
+      jsKs = combinations [1..n] k
+      check jss = forM jss \js -> do
+        bl <- isPossible hws k' js
+        return (js, bl)
+  jsK'bls <- check jsKs
+  let jsK'Trues = filter snd jsK'bls
+      jss = map fst jsK'Trues
+      makeTrueAt m bs =
+        let (hd, tl) = splitAt m bs
+        in  init hd ++ [True] ++ tl
+  return $ map (foldr makeTrueAt (replicate n False)) jss
+-}
 
-possible22 :: Int -> Int
-possible22 lv = 
-  let f = p22 $ lv-1
-  in  if lv == 0 then 6 else
-        f 2 * f 0
-        + f 1 * f 1
-        + f 0 * f 2
-  where
-    p22 lv k =
-      let f = p22 (lv-1)
-      in  case k of
-            0 -> 1
-            1 -> if lv == 0 then 6 else
-                  f 2 * f 0
-                  + f 1 * f 1
-                  + f 0 * f 2
-            2 -> 1
 
-possible22' :: Int -> [[Bool]]
-possible22' lv = 
-  let f = p22 $ lv-1
-  in  if lv == 0 then fts 2 4 else
-        ((++) <$> f 2 <*> f 0)
-        ++ ((++) <$> f 1 <*> f 1)
-        ++ ((++) <$> f 0 <*> f 2)
+
+possible22bl :: Int -> [[Bool]]
+possible22bl d = nub $ pble22 d 1 2
   where
-    fts k n = filter ((==) k . length . filter id) $ allFTssOf n
-    p22 lv k =
-      let f = p22 (lv-1)
-      in  case k of
-            0 -> [replicate 4 False]
-            1 -> if lv == 0 then fts 1 2 else
-                  ((++) <$> f 2 <*> f 0)
-                  ++ ((++) <$> f 1 <*> f 1)
-                  ++ ((++) <$> f 0 <*> f 2)
-            2 -> [replicate 4 True]
+  (+++) a b = (++) <$> a <*> b
+  pble22 d d' = \case
+    0 -> pb22 0 +++ pb22 0
+    1 -> pb22 1 +++ pb22 0
+          ++ pb22 0 +++ pb22 1
+    2 -> pb22 2 +++ pb22 0
+          ++ pb22 1 +++ pb22 1
+          ++ pb22 1 +++ pb22 0 --
+          ++ pb22 0 +++ pb22 1 --
+          ++ pb22 0 +++ pb22 2
+    3 -> pb22 2 +++ pb22 1
+          ++ pb22 1 +++ pb22 1 --
+          ++ pb22 1 +++ pb22 0 --
+          ++ pb22 0 +++ pb22 1 --
+          ++ pb22 0 +++ pb22 2 --
+          ++ pb22 1 +++ pb22 2
+    4 -> pb22 2 +++ pb22 2
+          ++ pb22 2 +++ pb22 1 --
+          ++ pb22 2 +++ pb22 0 --
+          ++ pb22 1 +++ pb22 0 --
+          ++ pb22 0 +++ pb22 1 --
+          ++ pb22 0 +++ pb22 2 --
+          ++ pb22 1 +++ pb22 2 --
+   where
+    pb22 k = if d == d'
+      then concatMap (flip ftss 2) [0..k]
+      else pble22 d (d'+1) (k*2)
+ftss k n = filter ((==) k . length . filter id) $ allFTssOf n
+
+combinationNum r n = (product [1..n]) `div` (product [1..r] * product [1..n-r])
+combinationLTnum r n = sum $ map (flip combinationNum n) [0..r]
+
+possibilityRate22 d = do
+  let n = length $ possible22bl d
+      a = 4 * 2^(d-1)
+      m = combinationLTnum (a `div` 2) a
+  putStrLn $ show n ++ "/" ++ show m ++ showPercentage n m

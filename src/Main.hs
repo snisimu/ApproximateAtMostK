@@ -9,7 +9,7 @@ import System.Exit
 
 import Control.Monad
 
-import Data.List (elemIndex, intercalate)
+import Data.List
 
 import Base
 import Binomial
