@@ -95,6 +95,8 @@ byIsPossible hws k' = do
   return $ map (foldr makeTrueAt (replicate n False)) jss
 -}
 
+-- for (2, 2)
+
 possible22bssJust :: Int -> [[Bool]]
 possible22bssJust d = pble22 d 1 2
   where
@@ -114,46 +116,56 @@ possible22bssJust d = pble22 d 1 2
       then ftss k 2
       else pble22 d (d'+1) (k*2)
 
--- writeFile "work/4-8.hs" $ unlines $ map (show . findIndices id) $ possible22bssJust 2
-
 fileFor :: (Int, Int) -> FilePath
-fileFor (k, n) = "work" </> show k ++ "-" ++ show n <.> "hs"
+fileFor (k, n) = "work" </> show k ++ "-" ++ show n <.> "txt"
 
 lengthOf :: (Int, Int) -> IO ()
 lengthOf (k, n) = do
   let fileIn = fileFor (k, n)
   bl <- doesFileExist fileIn
   unless bl $ die "not exist"
-  bss <- (read :: String -> [[Bool]]) <$> readFile fileIn
-  print $ length bss
+  print =<< return . length . lines =<< readFile fileIn
 
-{-
-writeNext :: (Int, Int) -> IO ()
-writeNext (k, n) = do
-  let fileIn = fileFor (k, n)
-  bl <- doesFileExist fileIn
-  unless bl $ die $ "not exist: " ++ fileIn
-  str <- readFile fileIn
-  let isInits = (read :: String -> [[Int]]) $
-        concat $ "[" ++ intercalate "," (lines str) ++ "]"
-  let nInit = length isInits
-      dropOne :: [[Int]] -> (Int, [Int]) -> IO [[Int]]
-      dropOne iss (j, is) = do
-        putStrLn $ show (k, n) ++ " -> " ++ show (k-1, n) ++ ": "
-          ++ show j ++ "/" ++ show nInit
-        let droppeds = flip map [0 .. length is] \h ->
-              let (bHs, _ : bTs) = splitAt h bs
-              in  bHs ++ bTs
-            toAdds = catMaybes $ flip map droppeds \drs ->
-              if elem drs bss then Nothing else Just drs
-        return $ bss ++ toAdds
-  bs's <- foldM dropOne [] (zip [1..] isInits)
-  writeFile (fileFor (k-1, n)) $ show bs's
+-- procedure
 
-startCalc :: Int -> IO ()
-startCalc d = do
-  let n = 4 * 2^(d-1)
-      k = n `div` 2
-  writeFile (fileFor (k, n)) $ show $ possible22bssJust d
-  forM_ (reverse [1..k]) \k' -> writeNext (k', n)
--}
+makeInit d = do
+    let n = 4 * 2^(d-1)
+        k = n `div` 2
+    writeFile (fileFor (k, n)) $ unlines $
+        map (show . findIndices id) $ possible22bssJust d
+
+resumeDrop :: String -> IO ()
+resumeDrop file = do
+    let filePath = "work" </> file
+    ls <- lines <$> readFile filePath
+    let n = length ls
+    case findIndex ((/=) "[[" . take 2) ls of
+        Nothing -> return ()
+        Just l -> do
+            putStrLn $ show (l+1) ++ "/" ++ show n
+            let is = (read :: String -> [Int]) $ ls !! l
+                iss = flip map [0 .. length is - 1] \h ->
+                    let (i1s, _ : i2s) = splitAt h is
+                    in  i1s ++ i2s
+                (l1s, _ : l2s) = splitAt l ls
+            writeFile filePath $ unlines $ l1s ++ [show iss] ++ l2s
+            resumeDrop file
+
+resumeNub :: String -> IO ()
+resumeNub file = do
+    let filePath = "work" </> file
+    ls <- lines <$> readFile filePath
+    let n = length ls
+    case findIndex ((/=) "Just " . take 5) ls of
+        Nothing -> return ()
+        Just j -> do
+            putStrLn $ show (j+1) ++ "/" ++ show n
+            let (lMbs, l : l's) = splitAt j ls
+                mbIsss = (read :: String -> [Maybe [[Int]]]) $
+                    "[" ++ intercalate "," lMbs ++ "]"
+                isPrevious = 
+                iss = (read :: String -> [[Int]]) l
+                mbIss = Just $ catMaybes $ flip map iss \is ->
+                    if elem is isPrevious then Nothing else Just is
+            writeFile filePath $ unlines $ map show mbIsss ++ [show mbIss] ++ l's
+            resumeNub file
