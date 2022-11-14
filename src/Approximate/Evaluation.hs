@@ -9,6 +9,7 @@ import qualified Prelude (not)
 import System.Exit
 import System.Directory
 import System.FilePath
+import System.Random
 
 import Control.Monad
 
@@ -74,7 +75,7 @@ possibilityRate hws k' = do
       lTrue = length js'Trues
   putStrLn $ show lTrue ++ "/" ++ show l ++ showPercentage lTrue l
 
--- for (2, 2)
+-- for [(2,2)..]
 
 possible22bssJust :: Int -> [[Bool]]
 possible22bssJust d = pble22 d 1 2
@@ -95,12 +96,12 @@ possible22bssJust d = pble22 d 1 2
       then ftss k 2
       else pble22 d (d'+1) (k*2)
 
-fileFor :: (Int, Int) -> FilePath
-fileFor (k, n) = "work" </> show k ++ "-" ++ show n <.> "txt"
+fileFor :: (Int, Int) -> Maybe String -> FilePath
+fileFor (k, n) mbStr = "work" </> show k ++ "-" ++ show n ++ fromMaybe "" mbStr <.> "txt"
 
 lengthOf :: (Int, Int) -> IO Int
 lengthOf (k, n) = do
-  let fileIn = fileFor (k, n)
+  let fileIn = fileFor (k, n) Nothing
   bl <- doesFileExist fileIn
   unless bl $ die "not exist"
   return . length . lines =<< readFile fileIn
@@ -108,49 +109,60 @@ lengthOf (k, n) = do
 -- procedure
 
 makeInit d = do
-    let n = 4 * 2^(d-1)
-        k = n `div` 2
-    writeFile (fileFor (k, n)) $ unlines $
-        map (show . findIndices id) $ possible22bssJust d
+  let n = 4 * 2^(d-1)
+      k = n `div` 2
+  writeFile (fileFor (k, n) Nothing) $ unlines $
+    map (show . findIndices id) $ possible22bssJust d
 
-resumeDrop :: String -> IO ()
-resumeDrop file = do
-    let filePath = "work" </> file
-    ls <- lines <$> readFile filePath
-    let n = length ls
-    case findIndex ((/=) "[[" . take 2) ls of
-        Nothing -> return ()
-        Just l -> do
-            putStrLn $ show (l+1) ++ "/" ++ show n
-            let is = (read :: String -> [Int]) $ ls !! l
-                iss = flip map [0 .. length is - 1] \h ->
-                    let (i1s, _ : i2s) = splitAt h is
-                    in  i1s ++ i2s
-                (l1s, _ : l2s) = splitAt l ls
-            writeFile filePath $ unlines $ l1s ++ [show iss] ++ l2s
-            resumeDrop file
+resumeDrop :: KN -> IO ()
+resumeDrop (k, n) = do
+  let fileFrom = fileFor (k, n) Nothing
+      k' = k-1
+      fileTo = fileFor (k', n) $ Just "dropping"
+  lFroms <- lines <$> readFile fileFrom
+  let nFrom = length lFroms
+  nTo <- do
+    bl <- doesFileExist fileTo
+    if bl
+      then (length . lines) <$> readFile fileTo
+      else return 0
+  when (nTo < nFrom) $ do
+      putStrLn $ show (nTo+1) ++ "/" ++ show nFrom
+      let is = (read :: String -> [Int]) $ lFroms !! nTo
+          iss = flip map [0 .. length is - 1] \h ->
+              let (i1s, _ : i2s) = splitAt h is
+              in  i1s ++ i2s
+          str = intercalate ";" $ map show iss
+      appendFile fileTo $ str ++ "\n"
+      resumeDrop (k, n)
 
-resumeNub :: String -> IO ()
+{-
+resumeNub :: KN -> IO ()
 resumeNub = rsNub Nothing
-    where
-    rsNub :: Maybe [[Int]] -> String -> IO ()
-    rsNub mbIss file = do
-        let filePath = "work" </> file
-        ls <- lines <$> readFile filePath
-        let n = length ls
-        case findIndex ((==) "[[" . take 2) ls of
-            Nothing -> return ()
-            Just j -> do
-                putStrLn $ show (j+1) ++ "/" ++ show n
-                let (lPreviouss, l : l's) = splitAt j ls
-                    isPreviouss = fromMaybe (map (read :: String -> [Int]) lPreviouss) mbIss
-                    iss = (read :: String -> [[Int]]) l
-                    is's = filter (Prelude.not . flip elem isPreviouss) iss
-                    strIs's = if null is's then [] else [show is's]
-                writeFile filePath $ unlines $ map show isPreviouss ++ strIs's ++ l's
-                rsNub (Just $ isPreviouss ++ is's) file
+  where
+  rsNub :: Maybe [[Int]] -> KN -> IO ()
+  rsNub mbIss kn = do
+    let file = fileFor kn
+    ls <- lines <$> readFile file
+    let n = length ls
+    case findIndex ((==) "[[" . take 2) ls of
+      Nothing -> return ()
+      Just j -> do
+        putStrLn $ show (j+1) ++ "/" ++ show n
+        let (lPreviouss, l : l's) = splitAt j ls
+            isPreviouss = fromMaybe (map (read :: String -> [Int]) lPreviouss) mbIss
+            iss = (read :: String -> [[Int]]) l
+            is's = filter (Prelude.not . flip elem isPreviouss) iss
+            strIs's = if null is's then [] else [show is's]
+        writeFile file $ unlines $ map show isPreviouss ++ strIs's ++ l's
+        rsNub (Just $ isPreviouss ++ is's) kn
+-}
 
 total :: KN -> IO ()
 total (k, n) = do
-    ls <- forM [0..k] \i -> lengthOf (i, n)
-    print $ sum ls
+  ls <- forM [0..k] \i -> lengthOf (i, n)
+  print $ sum ls
+
+-- in random
+
+random0toLT n = newStdGen >>= \gen -> return $ fst (random gen) `mod` n

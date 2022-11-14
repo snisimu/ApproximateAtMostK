@@ -12,7 +12,7 @@ import Data.Maybe
 import Data.Either
 import Data.List (nub, intercalate)
 
--- lib [begin]
+-- from MyLib
 
 combinations :: [a] -> Int -> [[a]]
 combinations xs n | n > 0 = 
@@ -47,7 +47,7 @@ showPercentage m n =
       n' = fromInteger (toInteger n) :: Float
   in  "(" ++ show (fromInteger (toInteger $ floor $ m' / n' * 1000) / 10) ++ "%)"
 
--- lib [end]
+-- 
 
 type ScopeID = String
 

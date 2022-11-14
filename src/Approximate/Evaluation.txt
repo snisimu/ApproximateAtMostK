@@ -1,0 +1,10 @@
+- 4/8: 169?/
+
+- 8/16: 17411/39203(44.4%)
+
+ghci> reportApproxWith counter (replicate 3 (2,2)) 2
+(k=8,n=16)
+aux vars: 78
+clauses : 161
+literals: 423
+
