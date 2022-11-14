@@ -30,12 +30,12 @@ version :: Version
 version = Version [0,1,0,0] []
 bindir, libdir, dynlibdir, datadir, libexecdir, sysconfdir :: FilePath
 
-bindir     = "C:\\Users\\snisi\\Repos\\App\\AtMostK\\.stack-work\\install\\28cbec53\\bin"
-libdir     = "C:\\Users\\snisi\\Repos\\App\\AtMostK\\.stack-work\\install\\28cbec53\\lib\\x86_64-windows-ghc-9.0.2\\AtMostK-0.1.0.0-IJtX3cDeyYTLdFihc8ngGL-AtMostK"
-dynlibdir  = "C:\\Users\\snisi\\Repos\\App\\AtMostK\\.stack-work\\install\\28cbec53\\lib\\x86_64-windows-ghc-9.0.2"
-datadir    = "C:\\Users\\snisi\\Repos\\App\\AtMostK\\.stack-work\\install\\28cbec53\\share\\x86_64-windows-ghc-9.0.2\\AtMostK-0.1.0.0"
-libexecdir = "C:\\Users\\snisi\\Repos\\App\\AtMostK\\.stack-work\\install\\28cbec53\\libexec\\x86_64-windows-ghc-9.0.2\\AtMostK-0.1.0.0"
-sysconfdir = "C:\\Users\\snisi\\Repos\\App\\AtMostK\\.stack-work\\install\\28cbec53\\etc"
+bindir     = "D:\\Repos\\App\\AtMostK\\.stack-work\\install\\28cbec53\\bin"
+libdir     = "D:\\Repos\\App\\AtMostK\\.stack-work\\install\\28cbec53\\lib\\x86_64-windows-ghc-9.0.2\\AtMostK-0.1.0.0-IJtX3cDeyYTLdFihc8ngGL-AtMostK"
+dynlibdir  = "D:\\Repos\\App\\AtMostK\\.stack-work\\install\\28cbec53\\lib\\x86_64-windows-ghc-9.0.2"
+datadir    = "D:\\Repos\\App\\AtMostK\\.stack-work\\install\\28cbec53\\share\\x86_64-windows-ghc-9.0.2\\AtMostK-0.1.0.0"
+libexecdir = "D:\\Repos\\App\\AtMostK\\.stack-work\\install\\28cbec53\\libexec\\x86_64-windows-ghc-9.0.2\\AtMostK-0.1.0.0"
+sysconfdir = "D:\\Repos\\App\\AtMostK\\.stack-work\\install\\28cbec53\\etc"
 
 getBinDir, getLibDir, getDynLibDir, getDataDir, getLibexecDir, getSysconfDir :: IO FilePath
 getBinDir = catchIO (getEnv "AtMostK_bindir") (\_ -> return bindir)

@@ -52,15 +52,18 @@ isPossible hws k js = do
 
 knOf :: [HW] -> Int -> KN
 knOf hws k' = 
-  let (h, w) = last hws
+  let (h, w) = head hws
+      (h', w') = last hws
       m = product $ map snd $ init hws
-  in  (k' * m, h * w * m)
+      n = h' * w' * m
+  in  ((k'*n) `div` (h*w), n)
 
 reportApproxWith :: NumberConstraint -> [HW] -> Int -> IO ()
 reportApproxWith atMost hws k' = do
   let (k, n) = knOf hws k'
   putStrLn $ "(k=" ++ show k ++ ",n=" ++ show n ++ ")"
-  reportOf $ approx atMost id hws k'
+  -- reportOf $ approxWith atMost id hws k'
+  putStrLn $ "literals: " ++ (show $ sum $ map length $ approxWith atMost id hws k')
 
 possibilityRate :: [HW] -> Int -> IO ()
 possibilityRate hws k' = do
@@ -158,15 +161,9 @@ fileRCfor hws k' = "work" </> "randomCheck" ++ show hws ++ show k' <.> "txt"
 randomCheck :: Int -> [HW] -> Int -> IO ()
 randomCheck m hws k' = sequence_ $ replicate m $ do
   let (k, n) = knOf hws k'
-      zeroOnesOn x = do
-          j <- random0toLT $ 2 ^ n
-          return $ reverse $ map (\h -> (j `div` 2^(h-1)) `mod` 2) [1..x]
       findLtK = do
-        let (a, b) = n `divMod` 30
-        jas <- sequence $ replicate a $ zeroOnesOn 30
-        jb <- zeroOnesOn b
-        let zeroOnes = concat jas ++ jb :: [Int]
-            is = findIndices ((==) 1) zeroOnes
+        zeroOnes <- sequence $ replicate n $ random0toLT 2 :: IO [Int]
+        let is = findIndices ((==) 1) zeroOnes
         if length is <= k
           then return is
           else findLtK

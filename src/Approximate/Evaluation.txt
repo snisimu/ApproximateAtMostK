@@ -28,7 +28,7 @@ aux vars: 1638
 clauses : 2901
 literals: 6240
 
-- 8/16: 17411/39203(44.4%)
+- 8/16: 17411/39203(44.4%)((44.4%))
 
 ghci> reportApproxWith counter (replicate 3 (2,2)) 2
 (k=8,n=16)
@@ -56,4 +56,68 @@ literals: 3095
 product(+counter)
 aux vars: ?
 
-- 16/32: /2448023843(.%)
+- 16/32: /2448023843(.%)((12,2%))
+
+ghci> reportApproxWith counter (replicate 4 (2,2)) 2
+(k=16,n=32)
+aux vars: 166
+clauses : 345
+literals: 919
+
+ghci> reportLiterals (16,32)              
+binary: 3024
+counter: 2449
+
+- 2-2-3
+
+ghci> reportApproxWith counter [(2,2),(2,3)] 2
+(k=6,n=12)
+literals: 331
+ghci> possibilityRate [(2,2),(2,3)] 2
+1808/2510(72.0%)
+
+ghci> reportApproxWith counter [(2,3),(2,2)] 3
+(k=6,n=12)
+literals: 292
+ghci> possibilityRate [(2,3),(2,2)] 3
+1646/2510(65.5%)
+
+ghci> reportLiterals (6,12) 
+binary: 390
+counter: 319
+
+- 2-3-3
+
+ghci> reportApproxWith counter [(2,2),(3,3)] 2
+(k=9,n=18)
+literals: 805
+ghci> possibilityRate [(2,2),(3,3)] 2
+66048/155382(42.5%)
+
+ghci> reportApproxWith counter [(2,3),(2,3)] 3
+(k=9,n=18)
+literals: 526
+ghci> possibilityRate [(2,3),(2,3)] 3
+79566/155382(51.2%)
+
+ghci> reportLiterals (9,18)
+binary: 1008
+counter: 748
+
+- 2-2-5
+
+ghci> reportApproxWith counter [(2,2),(2,5)] 2
+(k=10,n=20)
+literals: 811
+ghci> randomRate [(2,2),(2,5)] 2
+6592/9907(66.5%)
+
+ghci> reportApproxWith counter [(2,5),(2,2)] 5
+(k=10,n=20)
+literals: 586
+ghci> randomRate [(2,5),(2,2)] 5
+4501/9928(45.3%)
+
+ghci> reportLiterals (10,20)
+binary: 1230
+counter: 931

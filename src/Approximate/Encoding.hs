@@ -29,8 +29,8 @@ labeling = tail . concat . foldl makeH'Isss [[([], 0)]]
   makeH'Isss ishss (h, w) =
     ishss ++ [[ (is ++ [i], h) | (is, _) <- last ishss, i <- [1..w] ]]
 
-approxP :: NumberConstraint -> VarScope -> [HW] -> (CNF, [[Int]])
-approxP atMost vScope hws =
+approxPwith :: NumberConstraint -> VarScope -> [HW] -> (CNF, [[Int]])
+approxPwith atMost vScope hws =
   let p is j = (True, vScope $ P is j)
       is'hs = labeling hws
       cnfOrder = flip concatMap is'hs \(is, h) ->
@@ -42,7 +42,7 @@ approxP atMost vScope hws =
             h' = if null theIs'hs then 0 else snd $ head theIs'hs
             w' = length theIs'hs
         in  flip concatMap [1..h] \j ->
-              let theScope = vScope . Scope ("approxP:" ++ show is ++ show j)
+              let theScope = vScope . Scope ("approxPwith:" ++ show is ++ show j)
               in  map ((:) $ p is j) $ 
                     atMost theScope ps $ (h'*w'*(j-1)) `div` h
       isLeafs =
@@ -50,13 +50,13 @@ approxP atMost vScope hws =
         in  filter ((==) (length hws) . length) iss
   in  (cnfOrder ++ cnfAtMost, isLeafs)
 
-approx :: NumberConstraint -> VarScope -> [HW] -> Int -> CNF
-approx atMost vScope hws k =
-  let vScopeNext sID = vScope . Scope ("approx:" ++ sID)
+approxWith :: NumberConstraint -> VarScope -> [HW] -> Int -> CNF
+approxWith atMost vScope hws k =
+  let vScopeNext sID = vScope . Scope ("approxWith:" ++ sID)
       p is j = (True, vScope $ P is j)
       (h, w) = head hws
       cnfTop = atMost (vScopeNext "top") [ (True, P [i] j) | i <- [1..w], j <- [1..h] ] k
-      (cnfP, isLeafs) = approxP atMost vScope{- (vScopeNext "P") -} hws
+      (cnfP, isLeafs) = approxPwith atMost vScope{- (vScopeNext "P") -} hws
       (h', w') = last hws
       m = product $ map snd $ init hws
       xss = splitBy h' $ literalXs $ h'*w'*m
@@ -64,4 +64,4 @@ approx atMost vScope hws k =
         flip concatMap [1..h'] \j ->
           map ((:) $ p is j) $ atMost (vScopeNext $ "X:" ++ show is ++ show j) xs $ j-1
   in  cnfTop ++ cnfP ++ cnfX
-  -- > generateDIMACSwithTrue (approx counter id [(2,2),(2,2)] 2) [1,2,3,4]
+  -- > generateDIMACSwithTrue (approxWith counter id [(2,2),(2,2)] 2) [1,2,3,4]
