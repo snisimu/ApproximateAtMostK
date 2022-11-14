@@ -30,12 +30,12 @@ isPossible hws k js = do
   let (h, w) = last hws
       m = product $ map snd $ init hws
       n = h * w * m
-  unless (null $ filter (> n) js) $ die "js: out of range"
+  unless (null $ filter (>= n) js) $ die "js: out of range"
   let bss = splitBy h $ foldr makeTrueAt (replicate n False) js
         where
         makeTrueAt m bs =
-          let (hd, tl) = splitAt m bs
-          in  init hd ++ [True] ++ tl
+          let (b1s, _ : b2s) = splitAt m bs
+          in  b1s ++ [True] ++ b2s
       integrate :: [Int] -> [HW] -> IO [Int]
       integrate ls = \case
         hw : [] -> return ls
@@ -115,29 +115,26 @@ makeInit d = do
     map (show . findIndices id) $ possible22bssJust d
 
 dropOne :: KN -> IO ()
-dropOne (k, n) = do
-  let fileFrom = fileFor (k, n) Nothing
-      k' = k-1
-      fileTo = fileFor (k', n) $ Just "dropping"
-  lFroms <- lines <$> readFile fileFrom
-  let nFrom = length lFroms
-  nTo <- do
-    bl <- doesFileExist fileTo
-    if bl
-      then (length . lines) <$> readFile fileTo
-      else return 0
-  when (nTo < nFrom) $ do
-      putStrLn $ show (nTo+1) ++ "/" ++ show nFrom
-      let is = (read :: String -> [Int]) $ lFroms !! nTo
+dropOne kn = do
+  nFrom <- (length . lines) <$> readFile (fileFor kn Nothing)
+  drOne 1 nFrom kn
+  where
+    drOne j nFrom (k, n) = when (j < nFrom) $ do
+      putStrLn $ show j ++ "/" ++ show nFrom
+      let fileFrom = fileFor (k, n) Nothing
+          k' = k-1
+          fileTo = fileFor (k', n) $ Just "drop"
+      l <- (flip (!!) (j-1) . lines) <$> readFile fileFrom
+      let is = (read :: String -> [Int]) l
           iss = flip map [0 .. length is - 1] \h ->
               let (i1s, _ : i2s) = splitAt h is
               in  i1s ++ i2s
       appendFile fileTo $ show iss ++ "\n"
-      dropOne (k, n)
+      drOne (j+1) nFrom (k, n)
 
 concatenation :: KN -> IO ()
 concatenation kn = do
-  let fileFrom = fileFor kn $ Just "dropping"
+  let fileFrom = fileFor kn $ Just "drop"
       fileTo = fileFor kn $ Just "concat"
   ls <- lines <$> readFile fileFrom
   let nFrom = length ls
@@ -147,7 +144,7 @@ concatenation kn = do
         iss = (read :: String -> [[Int]]) l
     forM_ iss \is -> appendFile fileTo $ show is ++ "\n"
 
--- linux> sort -u K-Nconcat.txt > K-N.txt
+-- Linux> sort -u K-Nconcat.txt > K-N.txt
 
 total :: KN -> IO ()
 total (k, n) = do
@@ -157,3 +154,18 @@ total (k, n) = do
 -- in random
 
 random0toLT n = newStdGen >>= \gen -> return $ fst (random gen) `mod` n
+
+randomTr d = do
+  let hws = replicate d (2, 2)
+      k' = 2
+      (k, n) = knOf hws k'
+      findLtK = do
+        j <- random0toLT $ 2 ^ (4 * 2^(d-1))
+        let is = findIndices id $ allFTssOf n !! j
+        if length is <= k
+          then return is
+          else findLtK
+  is <- findLtK
+  putStr $ show is ++ ": "
+  bl <- isPossible hws k' is
+  putStrLn $ show bl
