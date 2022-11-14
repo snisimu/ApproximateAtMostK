@@ -114,8 +114,8 @@ makeInit d = do
   writeFile (fileFor (k, n) Nothing) $ unlines $
     map (show . findIndices id) $ possible22bssJust d
 
-resumeDrop :: KN -> IO ()
-resumeDrop (k, n) = do
+dropOne :: KN -> IO ()
+dropOne (k, n) = do
   let fileFrom = fileFor (k, n) Nothing
       k' = k-1
       fileTo = fileFor (k', n) $ Just "dropping"
@@ -132,31 +132,22 @@ resumeDrop (k, n) = do
           iss = flip map [0 .. length is - 1] \h ->
               let (i1s, _ : i2s) = splitAt h is
               in  i1s ++ i2s
-          str = intercalate ";" $ map show iss
-      appendFile fileTo $ str ++ "\n"
-      resumeDrop (k, n)
+      appendFile fileTo $ show iss ++ "\n"
+      dropOne (k, n)
 
-{-
-resumeNub :: KN -> IO ()
-resumeNub = rsNub Nothing
-  where
-  rsNub :: Maybe [[Int]] -> KN -> IO ()
-  rsNub mbIss kn = do
-    let file = fileFor kn
-    ls <- lines <$> readFile file
-    let n = length ls
-    case findIndex ((==) "[[" . take 2) ls of
-      Nothing -> return ()
-      Just j -> do
-        putStrLn $ show (j+1) ++ "/" ++ show n
-        let (lPreviouss, l : l's) = splitAt j ls
-            isPreviouss = fromMaybe (map (read :: String -> [Int]) lPreviouss) mbIss
-            iss = (read :: String -> [[Int]]) l
-            is's = filter (Prelude.not . flip elem isPreviouss) iss
-            strIs's = if null is's then [] else [show is's]
-        writeFile file $ unlines $ map show isPreviouss ++ strIs's ++ l's
-        rsNub (Just $ isPreviouss ++ is's) kn
--}
+concatenation :: KN -> IO ()
+concatenation kn = do
+  let fileFrom = fileFor kn $ Just "dropping"
+      fileTo = fileFor kn $ Just "concat"
+  ls <- lines <$> readFile fileFrom
+  let nFrom = length ls
+  forM_ [1..nFrom] \j -> do
+    putStrLn $ show j ++ "/" ++ show nFrom
+    let l = ls !! (j-1)
+        iss = (read :: String -> [[Int]]) l
+    forM_ iss \is -> appendFile fileTo $ show is ++ "\n"
+
+-- linux> sort -u K-Nconcat.txt > K-N.txt
 
 total :: KN -> IO ()
 total (k, n) = do
