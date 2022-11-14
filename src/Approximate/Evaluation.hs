@@ -30,7 +30,7 @@ isPossible hws k js = do
   let (h, w) = last hws
       m = product $ map snd $ init hws
       n = h * w * m
-  unless (null $ filter (>= n) js) $ die "js: out of range"
+  unless (null $ filter (>= n) js) $ die $ "js: out of range: " ++ show js
   let bss = splitBy h $ foldr makeTrueAt (replicate n False) js
         where
         makeTrueAt m bs =
@@ -65,7 +65,7 @@ reportApproxWith atMost hws k' = do
 possibilityRate :: [HW] -> Int -> IO ()
 possibilityRate hws k' = do
   let (k, n) = knOf hws k'
-      jss = [] : concatMap (combinations [1..n]) [1..k]
+      jss = [] : concatMap (combinations [0..n-1]) [1..k]
       check jss = forM jss \js -> do
         bl <- isPossible hws k' js
         return (js, bl)
@@ -96,12 +96,12 @@ possible22bssJust d = pble22 d 1 2
       then ftss k 2
       else pble22 d (d'+1) (k*2)
 
-fileFor :: (Int, Int) -> Maybe String -> FilePath
-fileFor (k, n) mbStr = "work" </> show k ++ "-" ++ show n ++ fromMaybe "" mbStr <.> "txt"
+fileKNfor :: (Int, Int) -> Maybe String -> FilePath
+fileKNfor (k, n) mbStr = "work" </> show k ++ "-" ++ show n ++ fromMaybe "" mbStr <.> "txt"
 
 lengthOf :: (Int, Int) -> IO Int
 lengthOf (k, n) = do
-  let fileIn = fileFor (k, n) Nothing
+  let fileIn = fileKNfor (k, n) Nothing
   bl <- doesFileExist fileIn
   unless bl $ die "not exist"
   return . length . lines =<< readFile fileIn
@@ -111,19 +111,19 @@ lengthOf (k, n) = do
 makeInit d = do
   let n = 4 * 2^(d-1)
       k = n `div` 2
-  writeFile (fileFor (k, n) Nothing) $ unlines $
+  writeFile (fileKNfor (k, n) Nothing) $ unlines $
     map (show . findIndices id) $ possible22bssJust d
 
 dropOne :: KN -> IO ()
 dropOne kn = do
-  nFrom <- (length . lines) <$> readFile (fileFor kn Nothing)
+  nFrom <- (length . lines) <$> readFile (fileKNfor kn Nothing)
   drOne 1 nFrom kn
   where
     drOne j nFrom (k, n) = when (j < nFrom) $ do
       putStrLn $ show j ++ "/" ++ show nFrom
-      let fileFrom = fileFor (k, n) Nothing
+      let fileFrom = fileKNfor (k, n) Nothing
           k' = k-1
-          fileTo = fileFor (k', n) $ Just "drop"
+          fileTo = fileKNfor (k', n) $ Just "drop"
       l <- (flip (!!) (j-1) . lines) <$> readFile fileFrom
       let is = (read :: String -> [Int]) l
           iss = flip map [0 .. length is - 1] \h ->
@@ -134,8 +134,8 @@ dropOne kn = do
 
 concatenation :: KN -> IO ()
 concatenation kn = do
-  let fileFrom = fileFor kn $ Just "drop"
-      fileTo = fileFor kn $ Just "concat"
+  let fileFrom = fileKNfor kn $ Just "drop"
+      fileTo = fileKNfor kn $ Just "concat"
   ls <- lines <$> readFile fileFrom
   let nFrom = length ls
   forM_ [1..nFrom] \j -> do
@@ -153,20 +153,34 @@ total (k, n) = do
 
 -- in random
 
+fileRCfor hws k' = "work" </> "randomCheck" ++ show hws ++ show k' <.> "txt"
+
 randomCheck :: Int -> [HW] -> Int -> IO ()
 randomCheck m hws k' = sequence_ $ replicate m $ do
   let (k, n) = knOf hws k'
-      file = "work" </> "randomCheck" ++ show hws ++ show k' <.> "txt"
+      zeroOnesOn x = do
+          j <- random0toLT $ 2 ^ n
+          return $ reverse $ map (\h -> (j `div` 2^(h-1)) `mod` 2) [1..x]
       findLtK = do
-        j <- random0toLT $ 2 ^ n
-        let zeroOnes = reverse $ map (\h -> (j `div` 2^(h-1)) `mod` 2) [1..n] :: [Int]
+        let (a, b) = n `divMod` 30
+        jas <- sequence $ replicate a $ zeroOnesOn 30
+        jb <- zeroOnesOn b
+        let zeroOnes = concat jas ++ jb :: [Int]
             is = findIndices ((==) 1) zeroOnes
         if length is <= k
           then return is
           else findLtK
   is <- findLtK
   bl <- isPossible hws k' is
-  print (is, bl) -- [debug]
-  -- appendFile file $ show $ (is, bl)
+  -- print (is, bl) -- [debug]
+  appendFile (fileRCfor hws k') $ show (is, bl) ++ "\n"
   where
     random0toLT n = newStdGen >>= \gen -> return $ fst (random gen) `mod` n
+
+randomRate :: [HW] -> Int -> IO ()
+randomRate hws k' = do
+  is'bs <- (nub . map (read :: String -> ([Int], Bool)) . lines) <$> readFile (fileRCfor hws k')
+  let is'Trues = filter snd is'bs
+      l = length is'bs
+      lTrue = length is'Trues
+  putStrLn $ show lTrue ++ "/" ++ show l ++ showPercentage lTrue l
