@@ -153,19 +153,20 @@ total (k, n) = do
 
 -- in random
 
-random0toLT n = newStdGen >>= \gen -> return $ fst (random gen) `mod` n
-
-randomTr d = do
-  let hws = replicate d (2, 2)
-      k' = 2
-      (k, n) = knOf hws k'
+randomCheck :: Int -> [HW] -> Int -> IO ()
+randomCheck m hws k' = sequence_ $ replicate m $ do
+  let (k, n) = knOf hws k'
+      file = "work" </> "randomCheck" ++ show hws ++ show k' <.> "txt"
       findLtK = do
-        j <- random0toLT $ 2 ^ (4 * 2^(d-1))
-        let is = findIndices id $ allFTssOf n !! j
+        j <- random0toLT $ 2 ^ n
+        let zeroOnes = reverse $ map (\h -> (j `div` 2^(h-1)) `mod` 2) [1..n] :: [Int]
+            is = findIndices ((==) 1) zeroOnes
         if length is <= k
           then return is
           else findLtK
   is <- findLtK
-  putStr $ show is ++ ": "
   bl <- isPossible hws k' is
-  putStrLn $ show bl
+  print (is, bl) -- [debug]
+  -- appendFile file $ show $ (is, bl)
+  where
+    random0toLT n = newStdGen >>= \gen -> return $ fst (random gen) `mod` n
