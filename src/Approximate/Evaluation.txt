@@ -121,3 +121,4 @@ ghci> randomRate [(2,5),(2,2)] 5
 ghci> reportLiterals (10,20)
 binary: 1230
 counter: 931
+

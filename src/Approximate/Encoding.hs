@@ -29,7 +29,7 @@ labeling = tail . concat . foldl makeH'Isss [[([], 0)]]
   makeH'Isss ishss (h, w) =
     ishss ++ [[ (is ++ [i], h) | (is, _) <- last ishss, i <- [1..w] ]]
 
-approxPwith :: NumberConstraint -> VarScope -> [HW] -> (CNF, [[Int]])
+approxPwith :: NumberConstraint -> VarScope -> [HW] -> (CNF, (m, [[Int]]))
 approxPwith atMost vScope hws =
   let p is j = (True, vScope $ P is j)
       is'hs = labeling hws
