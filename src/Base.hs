@@ -7,6 +7,7 @@ import Prelude hiding (not)
 import qualified Prelude (not)
 
 import Control.Monad
+import Control.Applicative
 
 import Data.Maybe
 import Data.Either
@@ -26,12 +27,7 @@ combinations xs n | n > 0 =
                         ++ go n' b (tail p) x's
 
 allFTssOf :: Int -> [[Bool]]
-allFTssOf n = filter (\ss -> length ss == n) allFTss
-  where
-  allFTss = if n == 0 then [[]] else [] : makeFTss (n - 1) [[False],[True]]
-  makeFTss m bss = if m == 0
-    then bss
-    else makeFTss (m - 1) $ bss ++ [ bs ++ [False] | bs <- bss ] ++ [ bs ++ [True] | bs <- bss ]
+allFTssOf =  foldr (liftA2 (:)) [[]] . flip replicate [(minBound :: Bool)..]
 
 divideInto :: Int -> [a] -> [[a]]
 divideInto n xs = splitBy (((length xs) + n - 1) `div` n) xs
