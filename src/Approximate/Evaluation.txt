@@ -67,4 +67,3 @@ ghci> possibilityRate [(2,3),(2,3)] 3
 ghci> reportLiterals (9,18)
 binary: 1008
 counter: 748
-
