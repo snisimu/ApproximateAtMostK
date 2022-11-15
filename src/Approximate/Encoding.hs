@@ -30,7 +30,7 @@ labeling = tail . concat . foldl makeH'Isss [[([], 0)]]
     ishss ++ [[ (is ++ [i], h) | (is, _) <- last ishss, i <- [1..w] ]]
 
 approxPwith :: NumberConstraint -> VarScope -> [HW] -> (CNF, (m, [[Int]]))
-approxPwith atMost vScope hws =
+approxPwith atMost vScope .ghws =
   let p is j = (True, vScope $ P is j)
       is'hs = labeling hws
       cnfOrder = flip concatMap is'hs \(is, h) ->
