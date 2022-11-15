@@ -65,3 +65,4 @@ approxWith atMost vScope hws k =
           map ((:) $ p is j) $ atMost (vScopeNext $ "X:" ++ show is ++ show j) xs $ j-1
   in  cnfTop ++ cnfP ++ cnfX
   -- > generateDIMACSwithTrue (approxWith counter id [(2,2),(2,2)] 2) [1,2,3,4]
+
