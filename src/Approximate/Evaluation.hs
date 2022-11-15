@@ -63,7 +63,7 @@ reportApproxWith atMost hws k' = do
   let (k, n) = knOf hws k'
   putStrLn $ "(k=" ++ show k ++ ",n=" ++ show n ++ ")"
   -- reportOf $ approxWith atMost id hws k'
-  putStrLn $ "literals: " ++ (show $ sum $ map length $ approxWith atMost id hws k')
+  putStrLn $ "order literals: " ++ (show $ sum $ map length $ approxOrderWith atMost id hws k')
 
 possibilityRate :: [HW] -> Int -> IO ()
 possibilityRate hws k' = do
