@@ -65,7 +65,10 @@ approxOrderPwith atMost vScope hws =
 -- 
 
 {-
-totalExact :: 
+totalExact :: ([[Int], Height]) -> Int -> CNF
+totalExact (iss, h) k =
+  let 
+  in  
 
 approxDirectWith :: NumberConstraint -> VarScope -> [HW] -> Int -> CNF
 approxDirectWith atMost vScope hws k =
