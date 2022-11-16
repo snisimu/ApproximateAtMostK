@@ -20,59 +20,13 @@ import Binomial
 import Approximate.Base
 import Approximate.Lib
 
-approxOrderWith :: NumberConstraint -> VarScope -> [HW] -> Int -> CNF
-approxOrderWith atMost vScope hws k =
+approxOrderWith :: NumberConstraint -> VarScope -> Parameter -> Int -> CNF
+approxOrderWith atMost vScope (hws, m) k =
   let vScopeNext sID = vScope . Scope ("approxOrderWith:" ++ sID)
       p is j = (True, vScope $ P is j)
       (h, w) = head hws
       cnfTop = atMost (vScopeNext "top") [ p [i] j | i <- [1..w], j <- [1..h] ] k
       (cnfP, (hLeaf, isLeafs)) = approxOrderPwith atMost vScope hws
-      cnfX =
-        let (h', w') = last hws
-            m = product $ map snd $ init hws
-            xss = splitBy (h'*w') $ literalXs $ h'*w'*m
-        in  case xss of
-              [xs] -> atMost (vScopeNext "X") xs k
-              _ ->
-                flip concatMap (zip isLeafs xss) \(is, xs) -> 
-                  flip concatMap [1..hLeaf] \j ->
-                    map ((:) $ p is j) $
-                      atMost (vScopeNext $ "X:" ++ show is ++ show j) xs $ ((j-1)*h'*w') `div` hLeaf
-  in  cnfTop ++ cnfP ++ cnfX
-  -- > generateDIMACSwithTrue (approxOrderWith counter id [(2,2),(2,2)] 2) [1,2,3,4]
-  -- > wsl -- ./minisat the.cnf
-
-approxOrderPwith :: NumberConstraint -> VarScope -> [HW] -> (CNF, (Height, [[Int]]))
-approxOrderPwith atMost vScope hws = 
-  let hw's = init hws
-      p is j = (True, vScope $ P is j)
-      is'hs = labeling hw's
-      cnfOrder = flip concatMap is'hs \(is, h) ->
-        flip map [2..h] \j ->
-          [ not $ p is j, p is $ j-1 ]
-      cnfAtMost = flip concatMap is'hs \(is, h) ->
-        let theIs'hs = filter ((==) is . init . fst) is'hs
-            ps = concatMap (\(is, h) -> p is <$> [1..h]) theIs'hs
-            h' = if null theIs'hs then 0 else snd $ head theIs'hs
-            w' = length theIs'hs
-        in  flip concatMap [1..h] \j ->
-              map ((:) $ p is j) $ 
-                atMost vScope ps $ (h'*w'*(j-1)) `div` h
-      hLeaf = if null hw's then 1 else fst $ last hw's
-      isLeafs =
-        let iss = map fst is'hs
-        in  filter ((==) (length hw's) . length) iss
-  in  (cnfOrder ++ cnfAtMost, (hLeaf, isLeafs))
-
---
-
-approxOrderWith' :: NumberConstraint -> VarScope -> Parameter -> Int -> CNF
-approxOrderWith' atMost vScope (hws, m) k =
-  let vScopeNext sID = vScope . Scope ("approxOrderWith':" ++ sID)
-      p is j = (True, vScope $ P is j)
-      (h, w) = head hws
-      cnfTop = atMost (vScopeNext "top") [ p [i] j | i <- [1..w], j <- [1..h] ] k
-      (cnfP, (hLeaf, isLeafs)) = approxOrderPwith' atMost vScope hws
       cnfX =
         let h' = fst $ last hws
             wAll = product $ map snd hws
@@ -83,11 +37,11 @@ approxOrderWith' atMost vScope (hws, m) k =
                   atMost (vScopeNext $ "X:" ++ show is ++ show j) xs $
                     ((j-1)*h'*m) `div` hLeaf
   in  cnfTop ++ cnfP ++ cnfX
-  -- > generateDIMACSwithTrue (approxOrderWith' counter id ([(2,2)],2) 2) [1,2,3,4]
+  -- > generateDIMACSwithTrue (approxOrderWith counter id ([(2,2)],2) 2) [1,2,3,4]
   -- > wsl -- ./minisat the.cnf
 
-approxOrderPwith' :: NumberConstraint -> VarScope -> [HW] -> (CNF, (Height, [[Int]]))
-approxOrderPwith' atMost vScope hws =
+approxOrderPwith :: NumberConstraint -> VarScope -> [HW] -> (CNF, (Height, [[Int]]))
+approxOrderPwith atMost vScope hws =
   let p is j = (True, vScope $ P is j)
       is'hs = labeling hws
       cnfOrder = flip concatMap is'hs \(is, h) ->
@@ -99,7 +53,7 @@ approxOrderPwith' atMost vScope hws =
             h' = if null theIs'hs then 1 else snd $ head theIs'hs
             w' = length theIs'hs
         in  flip concatMap [1..h] \j ->
-              let theScope = vScope . Scope ("approxOrderPwith':" ++ show is ++ show j)
+              let theScope = vScope . Scope ("approxOrderPwith:" ++ show is ++ show j)
               in  map ((:) $ p is j) $ 
                     atMost theScope ps $ (h'*w'*(j-1)) `div` h
       hLeaf = if null hws then 1 else fst $ last hws

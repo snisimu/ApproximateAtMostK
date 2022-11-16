@@ -1,47 +1,73 @@
-- 4/8: 131/163(80.3%)
+- 4/8
+overall: 131/163(80.3%)
+just: 38/70(54.2%)
 
-ghci> reportApproxWith binomial (replicate 2 (2,2)) 2
+ghci> reportApproxWith binomial (replicate 1 (2,2), 2) 2
 (k=4,n=8)
 order literals: 64
-ghci> reportApproxWith counter (replicate 2 (2,2)) 2
-(k=4,n=8)
-literals: 127
 ghci> reportLiterals (4,8)
 binary: 148
 counter: 133
 
-- 8/16: 17411/39203(44.4%)((44.4%))
+approx/counter: 0.481
 
-ghci> reportApproxWith binomial (replicate 3 (2,2)) 2
+- 8/16
+overall: 26755/39203(68.2%)
+just: 4902/12870(38.0%)
+
+ghci> reportApproxWith binomial (replicate 2 (2,2), 2) 2
 (k=8,n=16)
 order literals: 168
-ghci> reportApproxWith counter (replicate 3 (2,2)) 2
-(k=8,n=16)
-literals: 327
 ghci> reportLiterals (8,16)
 binary: 664
 counter: 585
 
-- 16/32: ((12.2%))
+approx/counter: 0.287
 
-ghci> reportApproxWith binomial (replicate 4 (2,2)) 2
+- 16/32:
+ghci> randomRate False (replicate 3 (2,2),2) 2       
+4342/10000(43.4%)
+ghci> randomRate True (replicate 3 (2,2),2) 2 
+681/10000(6.8%)
+
+ghci> reportApproxWith binomial (replicate 3 (2,2), 2) 2
 (k=16,n=32)
 order literals: 376
-ghci> reportApproxWith counter (replicate 4 (2,2)) 2
-(k=16,n=32)
-literals: 727
 ghci> reportLiterals (16,32)
 binary: 3024
 counter: 2449
 
-- 32/64: ((?%))
+approx/counter: 0.154
 
-ghci> reportApproxWith counter (replicate 5 (2,2)) 2
+- 32/64
+ghci> randomRate False (replicate 4 (2,2),2) 2       
+1395/10000(13.9%)
+ghci> randomRate True (replicate 4 (2,2),2) 2 
+8/10000(0.0%)
+
+ghci> reportApproxWith binomial (replicate 4 (2,2), 2) 2
 (k=32,n=64)
-literals: 1527
+order literals: 792
 ghci> reportLiterals (32,64)
 binary: 13792
 counter: 10017
+
+approx/counter: 0.0790
+
+- 64/128
+ghci> randomRate False (replicate 5 (2,2),2) 2
+122/10000(1.2%)
+ghci> randomRate True (replicate 5 (2,2),2) 2 
+0/10000(0.0%)
+
+ghci> reportApproxWith binomial (replicate 5 (2,2), 2) 2
+(k=64,n=128)
+order literals: 1624
+ghci> reportLiterals (64,128)
+binary: 62528
+counter: 40513
+
+approx/counter: 0.0401
 
 - 2-2-3
 
