@@ -45,8 +45,8 @@ showPercentage m n =
 
 -- MyLib candidate
 
-conbinationssOn :: Bounded a => Int -> [[a]]
-conbinationssOn =  foldr (liftA2 (:)) [[]] . flip replicate [(minBound :: a)..]
+allConbinationssOn :: Bounded a => Int -> [[a]]
+allConbinationssOn =  foldr (liftA2 (:)) [[]] . flip replicate [(minBound :: a)..]
 
 distribution :: [[a]] -> [[a]]
 distribution = foldl1 (liftA2 (++))
