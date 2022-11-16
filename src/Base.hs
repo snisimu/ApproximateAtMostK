@@ -26,9 +26,6 @@ combinations xs n | n > 0 =
         | otherwise = map (x:) (go (n'-1) b p x's)
                         ++ go n' b (tail p) x's
 
-allFTssOf :: Int -> [[Bool]]
-allFTssOf =  foldr (liftA2 (:)) [[]] . flip replicate [(minBound :: Bool)..]
-
 divideInto :: Int -> [a] -> [[a]]
 divideInto n xs = splitBy (((length xs) + n - 1) `div` n) xs
 splitBy :: Int -> [a] -> [[a]]
@@ -43,13 +40,13 @@ showPercentage m n =
       n' = fromInteger (toInteger n) :: Float
   in  "(" ++ show (fromInteger (toInteger $ floor $ m' / n' * 1000) / 10) ++ "%)"
 
--- MyLib candidate
-
-allConbinationssOn :: Bounded a => Int -> [[a]]
-allConbinationssOn =  foldr (liftA2 (:)) [[]] . flip replicate [(minBound :: a)..]
+allCombinationssOn :: (Bounded a, Enum a) => Int -> [[a]]
+allCombinationssOn =  foldr (liftA2 (:)) [[]] . flip replicate [minBound..]
 
 distribution :: [[a]] -> [[a]]
-distribution = foldl1 (liftA2 (++))
+distribution = foldl1 (liftA2 (++)) . map (map return)
+
+-- MyLib candidate
 
 -- 
 

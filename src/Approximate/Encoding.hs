@@ -64,22 +64,18 @@ approxOrderPwith atMost vScope hws =
 
 -- 
 
-totalExact :: ([[Int], Height]) -> Int -> CNF
-totalExact (iss, h) k =
-  let jss = distribution [ js | js <- conbinationssOn $ length iss, sum js == k  ]
+totalExact :: VarScope -> ([[Int]], Height) -> Int -> CNF
+totalExact vScope (iss, h) k = 
+  let p is j = (True, vScope $ P is j)
+      jss = distribution [ js | js <- allCombinationssOn $ length iss, sum js == k  ]
   in  [ [ p is j | (is, j) <- zip iss js ] | js <- jss ]
 
-approxDirectWith :: NumberConstraint -> VarScope -> [HW] -> Int -> CNF
-approxDirectWith atMost vScope hws k =
+approxDirectWith :: NumberConstraint -> VarScope -> Parameter -> Int -> CNF
+approxDirectWith atMost vScope (hws, m) k =
   let vScopeNext sID = vScope . Scope ("approxDirectWith:" ++ sID)
       p is j = (True, vScope $ P is j)
       (h, w) = head hws
-      cnfTop = flip concatMap [1..w] \i ->
-        
-        let 
-        in  foldl 
-        let lrs = [ (l,r) | l <- [0..h'], r <- [0..h'], l + r == (h'*w'*j) `div` h ]
-        in  atMost (vScopeNext "top") [ p [i] j | i <- [1..w], j <- [1..h] ] k
+      cnfTop = totalExact (vScopeNext "top") ([ [i] | i <- [1..w] ], h) k
       (cnfP, (hLeaf, isLeafs)) = approxDirectPwith atMost vScope hws
       cnfX =
         let (h', w') = last hws
@@ -95,26 +91,24 @@ approxDirectWith atMost vScope hws k =
   -- > generateDIMACSwithTrue (approxDirectWith counter id [(2,2),(2,2)] 2) [1,2,3,4]
   -- > wsl -- ./minisat the.cnf
 
-approxDirectPwith :: NumberConstraint -> VarScope -> Parameter -> (CNF, (Height, [[Int]]))
-approxDirectPwith atMost vScope (hws, m) = 
-  let hw's = init hws
-      p is j = (True, vScope $ P is j)
-      is'hs = labeling hw's
+approxDirectPwith :: NumberConstraint -> VarScope -> [HW] -> (CNF, (Height, [[Int]]))
+approxDirectPwith atMost vScope hws = 
+  let p is j = (True, vScope $ P is j)
+      is'hs = labeling hws
       cnfDirect = flip concatMap is'hs \(is, h) ->
         let ps = [ p is j | j <- [0..h] ]
         in  binomial vScope ps 1 ++ atLeastBy binomial vScope ps 1
       cnfAtMost = flip concatMap is'hs \(is, h) ->
-        let theIs'hs = filter ((==) is . init . fst) is'hs
-            ps = concatMap (\(is, h) -> p is <$> [1..h]) theIs'hs
+        let theScope = vScope . Scope ("approxDirectPwith:" ++ show is)
+            theIs'hs = filter ((==) is . init . fst) is'hs
+            theIss = map fst theIs'hs
             h' = if null theIs'hs then 0 else snd $ head theIs'hs
-            w' = length theIs'hs
+            w' = length theIss
+            -- ps = concatMap (\(is, h) -> p is <$> [0..h]) theIs'hs
         in  flip concatMap [0..h] \j ->
-              let theScope = vScope . Scope ("approxDirectPwith:" ++ show is ++ show j)
-                  lrs = [ (l,r) | l <- [0..h'], r <- [0..h'], l + r == (h'*w'*j) `div` h ]
-              in  flip map lrs \(l,r) ->
-                    [not $ p is l, p is r]
-      hLeaf = if null hw's then 1 else fst $ last hw's
+              map ((:) $ not $ p is j) $ totalExact theScope (theIss, h) $ (h'*w'*j) `div` h
+      hLeaf = fst $ last hws
       isLeafs =
         let iss = map fst is'hs
-        in  filter ((==) (length hw's) . length) iss
+        in  filter ((==) (length hws) . length) iss
   in  (cnfDirect ++ cnfAtMost, (hLeaf, isLeafs))
