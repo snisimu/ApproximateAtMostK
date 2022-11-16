@@ -40,8 +40,8 @@ showPercentage m n =
       n' = fromInteger (toInteger n) :: Float
   in  "(" ++ show (fromInteger (toInteger $ floor $ m' / n' * 1000) / 10) ++ "%)"
 
-allCombinationssOn :: (Bounded a, Enum a) => Int -> [[a]]
-allCombinationssOn =  foldr (liftA2 (:)) [[]] . flip replicate [minBound..]
+allCombinationssOf :: [a] -> Int -> [[a]]
+allCombinationssOf as = foldr (liftA2 (:)) [[]] . flip replicate as
 
 distribution :: [[a]] -> [[a]]
 distribution = foldl1 (liftA2 (++)) . map (map return)

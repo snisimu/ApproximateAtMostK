@@ -19,7 +19,7 @@ checkParameter = (checkParam <$> fst . head <*> tail) . fst
       unless ((h'*w') `mod` h == 0) $ die $ show (h'*w') ++ " mod " ++ show h ++ " /= 0"
       checkParam h' hws
 
-ftss k n = filter ((==) k . length . filter id) $ allCombinationssOn n
+ftss k n = filter ((==) k . length . filter id) $ allCombinationssOf [False, True] n
 
 combinationNum r n = (product [1..n]) `div` (product [1..r] * product [1..n-r])
 combinationLTnum r n = sum $ map (flip combinationNum n) [0..r]
