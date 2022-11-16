@@ -64,11 +64,10 @@ approxOrderPwith atMost vScope hws =
 
 -- 
 
-{-
 totalExact :: ([[Int], Height]) -> Int -> CNF
 totalExact (iss, h) k =
-  let 
-  in  
+  let jss = distribution [ js | js <- conbinationssOn $ length iss, sum js == k  ]
+  in  [ [ p is j | (is, j) <- zip iss js ] | js <- jss ]
 
 approxDirectWith :: NumberConstraint -> VarScope -> [HW] -> Int -> CNF
 approxDirectWith atMost vScope hws k =
@@ -96,8 +95,8 @@ approxDirectWith atMost vScope hws k =
   -- > generateDIMACSwithTrue (approxDirectWith counter id [(2,2),(2,2)] 2) [1,2,3,4]
   -- > wsl -- ./minisat the.cnf
 
-approxDirectPwith :: NumberConstraint -> VarScope -> [HW] -> (CNF, (Height, [[Int]]))
-approxDirectPwith atMost vScope hws = 
+approxDirectPwith :: NumberConstraint -> VarScope -> Parameter -> (CNF, (Height, [[Int]]))
+approxDirectPwith atMost vScope (hws, m) = 
   let hw's = init hws
       p is j = (True, vScope $ P is j)
       is'hs = labeling hw's
@@ -119,4 +118,3 @@ approxDirectPwith atMost vScope hws =
         let iss = map fst is'hs
         in  filter ((==) (length hw's) . length) iss
   in  (cnfDirect ++ cnfAtMost, (hLeaf, isLeafs))
--}

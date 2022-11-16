@@ -43,6 +43,14 @@ showPercentage m n =
       n' = fromInteger (toInteger n) :: Float
   in  "(" ++ show (fromInteger (toInteger $ floor $ m' / n' * 1000) / 10) ++ "%)"
 
+-- MyLib candidate
+
+conbinationssOn :: Bounded a => Int -> [[a]]
+conbinationssOn =  foldr (liftA2 (:)) [[]] . flip replicate [(minBound :: a)..]
+
+distribution :: [[a]] -> [[a]]
+distribution = foldl1 (liftA2 (++))
+
 -- 
 
 type ScopeID = String
