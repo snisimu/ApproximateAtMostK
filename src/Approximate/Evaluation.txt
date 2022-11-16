@@ -1,5 +1,8 @@
 - 4/8: 131/163(80.3%)
 
+ghci> reportApproxWith binomial (replicate 2 (2,2)) 2
+(k=4,n=8)
+order literals: 64
 ghci> reportApproxWith counter (replicate 2 (2,2)) 2
 (k=4,n=8)
 literals: 127
@@ -9,6 +12,9 @@ counter: 133
 
 - 8/16: 17411/39203(44.4%)((44.4%))
 
+ghci> reportApproxWith binomial (replicate 3 (2,2)) 2
+(k=8,n=16)
+order literals: 168
 ghci> reportApproxWith counter (replicate 3 (2,2)) 2
 (k=8,n=16)
 literals: 327
@@ -18,6 +24,9 @@ counter: 585
 
 - 16/32: ((12.2%))
 
+ghci> reportApproxWith binomial (replicate 4 (2,2)) 2
+(k=16,n=32)
+order literals: 376
 ghci> reportApproxWith counter (replicate 4 (2,2)) 2
 (k=16,n=32)
 literals: 727

@@ -23,58 +23,57 @@ import Approximate.Base
 import Approximate.Lib
 import Approximate.Encoding
 
-isPossible :: Parameter -> Int -> [Int] -> IO Bool
-isPossible (hws, m) k js = do
+knOf :: [HW] -> Int -> KN
+knOf hws k' = 
+  let (h, w) = head hws
+      (h', w') = last hws
+      m = product $ map snd $ init hws
+      n = h' * w' * m
+  in  ((k'*n) `div` (h*w), n)
+
+reportApproxWith :: NumberConstraint -> [HW] -> Int -> IO ()
+reportApproxWith atMost hws k' = do
+  let (k, n) = knOf hws k'
+  putStrLn $ "(k=" ++ show k ++ ",n=" ++ show n ++ ")"
+  -- reportOf $ approxWith atMost id hws k'
+  putStrLn $ "order literals: "
+    ++ (show $ sum $ map length $ approxOrderWith atMost id hws k')
+  -- putStrLn $ "direct literals: "
+  --   ++ (show $ sum $ map length $ approxDirectWith atMost id param k')
+
+isPossible :: [HW] -> Int -> [Int] -> IO Bool
+isPossible hws k js = do
   let (h', w') = head hws
   unless (k < h'*w') $ die "k: too large"
-  let h = fst $ last hws
-      wAll = product $ map snd hws
-      n = h*m * wAll
+  let (h, w) = last hws
+      m = product $ map snd $ init hws
+      n = h * w * m
   unless (null $ filter (>= n) js) $ die $ "js: out of range: " ++ show js
-  let bss = splitBy (h*m) $ foldr makeTrueAt (replicate n False) js
+  let bss = splitBy h $ foldr makeTrueAt (replicate n False) js
         where
-        makeTrueAt a bs =
-          let (b1s, _ : b2s) = splitAt a bs
+        makeTrueAt m bs =
+          let (b1s, _ : b2s) = splitAt m bs
           in  b1s ++ [True] ++ b2s
-  -- print bss -- [debug]
-  let divAlongUp x y =
-        let (a, b) = x `divMod` y
-        in  a + if b == 0 then 0 else 1
       integrate :: [Int] -> [HW] -> IO [Int]
       integrate ls = \case
-        (_, _) : [] -> return $ map (flip divAlongUp m) ls
+        hw : [] -> return ls
         (h', w') : (h, w) : hws -> do
-          let wAll = product $ map snd $ (h, w) : hws
-              l'ss = divideInto wAll ls
+          let m = product $ map snd $ (h, w) : hws
+              l'ss = divideInto m ls
               lsNext = flip map l'ss \l's -> 
-                divAlongUp (sum l's * h) (h' * w')
+                let (a, b) = (sum l's * h) `divMod` (h' * w')
+                in  a + if b == 0 then 0 else 1
           integrate lsNext $ (h, w) : hws
   z <- sum <$> integrate (map (length . filter id) bss) (reverse hws)
   -- print z -- [debug]
   return $ z <= k
 
-knOf :: Parameter -> Int -> KN
-knOf (hws, m) k' = 
-  let (h, w) = head hws
-      (h', w') = last hws
-      wAll = product $ map snd $ init hws
-      n = h' * m * wAll
-  in  ((k'*n) `div` (h*w), n)
-
-reportApproxWith :: NumberConstraint -> Parameter -> Int -> IO ()
-reportApproxWith atMost param k' = do
-  let (k, n) = knOf param k'
-  putStrLn $ "(k=" ++ show k ++ ",n=" ++ show n ++ ")"
-  -- reportOf $ approxWith atMost id hws k'
-  putStrLn $ "order literals: "
-    ++ (show $ sum $ map length $ approxOrderWith atMost id param k')
-
-possibilityRate :: Parameter -> Int -> IO ()
-possibilityRate param k' = do
-  let (k, n) = knOf param k'
+possibilityRate :: [HW] -> Int -> IO ()
+possibilityRate hws k' = do
+  let (k, n) = knOf hws k'
       jss = [] : concatMap (combinations [0..n-1]) [1..k]
       check jss = forM jss \js -> do
-        bl <- isPossible param k' js
+        bl <- isPossible hws k' js
         return (js, bl)
   js'bls <- check jss
   let js'Trues = filter snd js'bls
@@ -162,9 +161,9 @@ total (k, n) = do
 
 fileRCfor param k' = "work" </> "randomCheck" ++ show param ++ show k' <.> "txt"
 
-randomCheck :: Int -> Parameter -> Int -> IO ()
-randomCheck n param k' = sequence_ $ replicate n $ do
-  let (k, n) = knOf param k'
+randomCheck :: Int -> [HW] -> Int -> IO ()
+randomCheck m hws k' = sequence_ $ replicate m $ do
+  let (k, n) = knOf hws k'
       findLtK = do
         zeroOnes <- sequence $ replicate n $ random0toLT 2 :: IO [Int]
         let is = findIndices ((==) 1) zeroOnes
@@ -172,15 +171,15 @@ randomCheck n param k' = sequence_ $ replicate n $ do
           then return is
           else findLtK
   is <- findLtK
-  bl <- isPossible param k' is
+  bl <- isPossible hws k' is
   -- print (is, bl) -- [debug]
-  appendFile (fileRCfor param k') $ show (is, bl) ++ "\n"
+  appendFile (fileRCfor hws k') $ show (is, bl) ++ "\n"
   where
     random0toLT n = newStdGen >>= \gen -> return $ fst (random gen) `mod` n
 
-randomRate :: Parameter -> Int -> IO ()
-randomRate param k' = do
-  is'bs <- (nub . map (read :: String -> ([Int], Bool)) . lines) <$> readFile (fileRCfor param k')
+randomRate :: [HW] -> Int -> IO ()
+randomRate hws k' = do
+  is'bs <- (nub . map (read :: String -> ([Int], Bool)) . lines) <$> readFile (fileRCfor hws k')
   let is'Trues = filter snd is'bs
       l = length is'bs
       lTrue = length is'Trues
