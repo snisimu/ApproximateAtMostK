@@ -101,7 +101,7 @@ type VarScope = Var -> Var
 
 atLeastBy :: NumberConstraint -> NumberConstraint
 atLeastBy atMost vScope literals k
-  = atMost vScope (map not literals) (length literals - k + 1)
+  = atMost vScope (map not literals) (length literals - k)
 
 type KN = (Int, Int)
 

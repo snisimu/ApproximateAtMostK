@@ -67,26 +67,24 @@ approxOrderPwith atMost vScope hws =
 totalExact :: VarScope -> ([[Int]], Height) -> Int -> CNF
 totalExact vScope (iss, h) k = 
   let p is j = (True, vScope $ P is j)
-      jss = distribution [ js | js <- allCombinationssOf [0..k] $ length iss, sum js == k  ]
-  in  [ [ p is j | (is, j) <- zip iss js ] | js <- jss ]
+      isJ'ss = map (zip iss) [ js | js <- allCombinationssOf [0..k] $ length iss, sum js == k ]
+      isJss = distribution  isJ'ss
+  in  [ [ p is j | (is, j) <- isJs ] | isJs <- isJss ]
 
 approxDirectWith :: NumberConstraint -> VarScope -> Parameter -> Int -> CNF
 approxDirectWith atMost vScope (hws, m) k =
-  let vScopeNext sID = vScope . Scope ("approxDirectWith:" ++ sID)
-      p is j = (True, vScope $ P is j)
+  let p is j = (True, vScope $ P is j)
       (h, w) = head hws
-      cnfTop = totalExact (vScopeNext "top") ([ [i] | i <- [1..w] ], h) k
+      cnfTop = totalExact vScope ([ [i] | i <- [1..w] ], h) k
       (cnfP, (hLeaf, isLeafs)) = approxDirectPwith atMost vScope hws
       cnfX =
         let (h', w') = last hws
             wAll = product $ map snd hws
             xss = splitBy (h'*m) $ literalXs $ h'*m*wAll
-        in  case xss of
-              [xs] -> atMost (vScopeNext "X") xs k
-              _ ->
-                flip concatMap (zip isLeafs xss) \(is, xs) -> 
-                  flip concatMap [0..hLeaf] \j ->
-                    map ((:) $ not $ p is j) $ atMost (vScopeNext $ "X:" ++ show is ++ show j) xs $ (h'*w'*j) `div` hLeaf
+        in  flip concatMap (zip isLeafs xss) \(is, xs) -> 
+              flip concatMap [0..hLeaf] \j ->
+                map ((:) $ not $ p is j) $
+                  atMost (vScope . Scope ("approxDirectWith:" ++ show is ++ show j)) xs $ (h'*w'*j) `div` hLeaf
   in  cnfTop ++ cnfP ++ cnfX
   -- > generateDIMACSwithTrue (approxDirectWith counter id ([(2,2)],2) 2) [1,2,3,4]
   -- > wsl -- ./minisat the.cnf
