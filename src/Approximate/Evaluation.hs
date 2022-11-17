@@ -31,15 +31,6 @@ knOf (hws, m) k' =
       n = h' * m * wAll
   in  ((k'*n) `div` (h*w), n)
 
-reportApproxWith :: NumberConstraint -> Parameter -> Int -> IO ()
-reportApproxWith atMost param k' = do
-  let (k, n) = knOf param k'
-  putStrLn $ "(k=" ++ show k ++ ",n=" ++ show n ++ ")"
-  putStrLn $ "order literals: "
-    ++ (show $ sum $ map length $ approxOrderWith atMost id param k')
-  -- putStrLn $ "direct literals: "
-  --   ++ (show $ sum $ map length $ approxDirectWith atMost id param k')
-
 isPossible :: Parameter -> Int -> [Int] -> IO Bool
 isPossible (hws, m) k js = do
   let (h', w') = head hws
@@ -70,7 +61,7 @@ isPossible (hws, m) k js = do
   -- print z -- [debug]
   return $ z <= k
 
-possibilityRate :: Parameter -> Int -> IO ()
+possibilityRate :: Parameter -> Int -> IO Float
 possibilityRate param k' = do
   let (k, n) = knOf param k'
       jss = [] : concatMap (combinations [0..n-1]) [1..k]
@@ -92,6 +83,15 @@ possibilityRate param k' = do
       l = length js'bls
       lTrue = length js'Trues
   putStrLn $ "just: " ++ show lTrue ++ "/" ++ show l ++ showPercentage lTrue l
+  return $ fromInteger (toInteger lTrue) / fromInteger (toInteger l)
+
+accuracy :: Parameter -> Float
+accuracy (hws, m) =
+  let (h, w) = head hws
+      (h', w') = last hws
+      wAll = product $ map snd hws
+      n = h' * m * wAll
+  in  fromInteger (toInteger $ h*w+1) / fromInteger (toInteger $ n+1)
 
 -- for [(2,2)..]
 
@@ -175,27 +175,35 @@ fileRCfor just param k' =
   let justOr = if just then "Just" else "Overall"
   in "work" </> "randomCheck" ++ justOr ++ show param ++ show k' <.> "txt"
 
-randomCheck :: Bool -> Int -> Parameter -> Int -> IO ()
-randomCheck just n param k' = sequence_ $ replicate n $ do
-  let (k, n) = knOf param k'
-      findLtK = do
-        zeroOnes <- sequence $ replicate n $ random0toLT 2 :: IO [Int]
-        let is = findIndices ((==) 1) zeroOnes
-        if (just && length is == k) || (Prelude.not just && length is <= k)
-          then return is
-          else findLtK
-  is <- findLtK
-  bl <- isPossible param k' is
-  -- print (is, bl) -- [debug]
-  appendFile (fileRCfor just param k') $ show (is, bl) ++ "\n"
+randomRate :: Parameter -> Int -> IO Float
+randomRate param k' = do
+  rdRate True param k'
+  rdRate False param k'
   where
-    random0toLT n = newStdGen >>= \gen -> return $ fst (random gen) `mod` n
-
-randomRate :: Bool -> Parameter -> Int -> IO ()
-randomRate just param k' = do
-  is'bs <- (nub . map (read :: String -> ([Int], Bool)) . lines) <$>
-    readFile (fileRCfor just param k')
-  let is'Trues = filter snd is'bs
-      l = length is'bs
-      lTrue = length is'Trues
-  putStrLn $ show lTrue ++ "/" ++ show l ++ showPercentage lTrue l
+    nIteration = 10000
+    rdRate just param k' = do
+      let file = fileRCfor just param k'
+      bl <- doesFileExist file
+      unless bl $ randomCheck just nIteration param k'
+      is'bs <- (nub . map (read :: String -> ([Int], Bool)) . lines) <$> readFile file
+      let is'Trues = filter snd is'bs
+          l = length is'bs
+          lTrue = length is'Trues
+      putStrLn $ (if just then "just" else "overall") ++ "(randam): " ++
+        show lTrue ++ "/" ++ show l ++ showPercentage lTrue l
+      return $ fromInteger (toInteger lTrue) / fromInteger (toInteger l)
+    randomCheck :: Bool -> Int -> Parameter -> Int -> IO ()
+    randomCheck just n param k' = sequence_ $ replicate n $ do
+      let (k, n) = knOf param k'
+          findLtK = do
+            zeroOnes <- sequence $ replicate n $ random0toLT 2 :: IO [Int]
+            let is = findIndices ((==) 1) zeroOnes
+            if (just && length is == k) || (Prelude.not just && length is <= k)
+              then return is
+              else findLtK
+      is <- findLtK
+      bl <- isPossible param k' is
+      -- print (is, bl) -- [debug]
+      appendFile (fileRCfor just param k') $ show (is, bl) ++ "\n"
+      where
+        random0toLT n = newStdGen >>= \gen -> return $ fst (random gen) `mod` n

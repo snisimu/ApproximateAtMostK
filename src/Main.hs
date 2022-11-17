@@ -13,17 +13,20 @@ import Control.Monad
 
 import Data.List
 
+import Text.Printf
+
 import Base
 import Binomial
 import Binary
 import Counter
 import Commander
 import Product
+import Approximate.Base
 import Approximate.Encoding
 import Approximate.Evaluation
 
-report :: KN -> IO ()
-report (k, n) = do
+reportConventionals :: KN -> IO ()
+reportConventionals (k, n) = do
   putStrLn "binomial"; reportOf $ binomial id (literalXs n) k
   putStrLn "binary"; reportOf $ binary id (literalXs n) k
   putStrLn "counter"; reportOf $ counter id (literalXs n) k
@@ -32,11 +35,11 @@ report (k, n) = do
 
 reportLiterals :: KN -> IO ()
 reportLiterals (k, n) = do
-  -- putStrLn $ "binomial: " ++ (show $sum $ map length $ binomial id (literalXs n) k)
-  putStrLn $ "binary: " ++ (show $sum $ map length $ binary id (literalXs n) k)
-  putStrLn $ "counter: " ++ (show $sum $ map length $ counter id (literalXs n) k)
-  -- putStrLn $ "commander(+counter): " ++ (show $sum $ map length $ commanderWith counter id (literalXs n) k)
-  -- putStrLn $ "product(+counter): " ++ (show $sum $ map length $ productWith counter id (literalXs n) k)
+  -- putStrLn $ "binomial: " ++ (show $ sum $ map length $ binomial id (literalXs n) k)
+  putStrLn $ "binary: " ++ (show $ sum $ map length $ binary id (literalXs n) k)
+  putStrLn $ "counter: " ++ (show $ sum $ map length $ counter id (literalXs n) k)
+  -- putStrLn $ "commander(+counter): " ++ (show $ sum $ map length $ commanderWith counter id (literalXs n) k)
+  -- putStrLn $ "product(+counter): " ++ (show $ sum $ map length $ productWith counter id (literalXs n) k)
 
 strDIMACSwithTrue :: CNF -> [Int] -> IO String
 strDIMACSwithTrue cnf ts = do
@@ -74,3 +77,26 @@ check atMost (k, n) = printCNF $ atMost id (literalXs n) k
 
 main :: IO ()
 main = return ()
+
+reportWith :: NumberConstraint -> Parameter -> Int -> IO ()
+reportWith atMost param k' = do
+  putStrLn ""
+  let (k, n) = knOf param k'
+  putStrLn $ "(k=" ++ show k ++ ",n=" ++ show n ++ ")"
+  let lApprox = sum $ map length $ approxOrderWith atMost id param k'
+  putStrLn $ "- approx(order): "   ++ (show lApprox)
+  -- putStrLn $ "direct literals: "
+  --   ++ (show $ sum $ map length $ approxDirectWith atMost id param k')
+  let lCounter = sum $ map length $ counter id (literalXs n) k
+  putStrLn $ "- counter: "   ++ (show lCounter)
+  -- putStrLn $ "approx/counter: " ++ (take 5 $ show $ fromInteger (toInteger lApprox) / fromInteger (toInteger lCounter))
+  let literalRate = fromInteger (toInteger lApprox) / fromInteger (toInteger lCounter) :: Float
+  putStrLn $ "- approx/counter: " ++ (printf "%.8f" literalRate)
+  pRate <- if n <= 20
+    then possibilityRate param k'
+    else randomRate param k'
+  let e = pRate / literalRate
+  putStrLn $ "efficiency: " ++ (printf "%.8f" e)
+  let a = accuracy param
+  putStrLn $ "accuracy: " ++ (printf "%.8f" a)
+  putStrLn $ "point(e*a): " ++ (printf "%.8f" $ e*a)
