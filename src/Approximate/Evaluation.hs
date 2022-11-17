@@ -131,3 +131,27 @@ randomRate param k' = do
       appendFile (fileRCfor just param k') $ show (is, bl) ++ "\n"
       where
         random0toLT n = newStdGen >>= \gen -> return $ fst (random gen) `mod` n
+
+--
+
+{-
+parametersFor :: Int -> [Parameter]
+parametersFor n =
+  let fs0s = factorss n
+      fs1s = filter ((<=) 3 . length) fs0s
+
+      fs3s = nub $ concatMap permutations fs2s
+      makeParams hws = \case
+        m : [] -> (hws, m)
+        a : b : cs -> makeParams (hws ++ [(a, b)]) cs
+      param0s = map (makeParams []) fs3s
+      -- check
+  in  param0s
+-}
+{-
+knOf (hws, m) k' = 
+  let (h, w) = head hws
+      (h', w') = last hws
+      wAll = product $ map snd hws
+      n = h' * m * wAll
+-}

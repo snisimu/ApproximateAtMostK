@@ -9,15 +9,15 @@ import Control.Monad
 import Base
 import Approximate.Base
 
-checkParameter :: Parameter -> IO ()
+checkParameter :: Parameter -> Bool
 checkParameter = (checkParam <$> fst . head <*> tail) . fst
   where
-  checkParam :: Height -> [HW] -> IO ()
+  checkParam :: Height -> [HW] -> Bool
   checkParam h = \case
-    [] -> return ()
-    (h', w') : hws -> do
-      unless ((h'*w') `mod` h == 0) $ die $ show (h'*w') ++ " mod " ++ show h ++ " /= 0"
-      checkParam h' hws
+    [] -> True
+    (h', w') : hws -> if (h'*w') `mod` h /= 0
+      then False
+      else checkParam h' hws
 
 ftss k n = filter ((==) k . length . filter id) $ allCombinationssOf [False, True] n
 
