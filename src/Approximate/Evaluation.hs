@@ -124,51 +124,6 @@ lengthOf (k, n) = do
   unless bl $ die "not exist"
   return . length . lines =<< readFile fileIn
 
--- procedure
-
-makeInit d = do
-  let n = 4 * 2^(d-1)
-      k = n `div` 2
-  writeFile (fileKNfor (k, n) Nothing) $ unlines $
-    map (show . findIndices id) $ possible22bssJust d
-
-dropOne :: KN -> IO ()
-dropOne kn = do
-  nFrom <- (length . lines) <$> readFile (fileKNfor kn Nothing)
-  drOne 1 nFrom kn
-  where
-    drOne j nFrom (k, n) = when (j < nFrom) $ do
-      putStrLn $ show j ++ "/" ++ show nFrom
-      let fileFrom = fileKNfor (k, n) Nothing
-          k' = k-1
-          fileTo = fileKNfor (k', n) $ Just "drop"
-      l <- (flip (!!) (j-1) . lines) <$> readFile fileFrom
-      let is = (read :: String -> [Int]) l
-          iss = flip map [0 .. length is - 1] \h ->
-              let (i1s, _ : i2s) = splitAt h is
-              in  i1s ++ i2s
-      appendFile fileTo $ show iss ++ "\n"
-      drOne (j+1) nFrom (k, n)
-
-concatenation :: KN -> IO ()
-concatenation kn = do
-  let fileFrom = fileKNfor kn $ Just "drop"
-      fileTo = fileKNfor kn $ Just "concat"
-  ls <- lines <$> readFile fileFrom
-  let nFrom = length ls
-  forM_ [1..nFrom] \j -> do
-    putStrLn $ show j ++ "/" ++ show nFrom
-    let l = ls !! (j-1)
-        iss = (read :: String -> [[Int]]) l
-    forM_ iss \is -> appendFile fileTo $ show is ++ "\n"
-
--- Linux> sort -u K-Nconcat.txt > K-N.txt
-
-total :: KN -> IO ()
-total (k, n) = do
-  ls <- forM [0..k] \i -> lengthOf (i, n)
-  print $ sum ls
-
 -- in random
 
 fileRCfor just param k' =
