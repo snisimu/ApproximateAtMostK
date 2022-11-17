@@ -93,37 +93,6 @@ accuracy (hws, m) =
       n = h' * m * wAll
   in  fromInteger (toInteger $ h*w+1) / fromInteger (toInteger $ n+1)
 
--- for [(2,2)..]
-
-possible22bssJust :: Int -> [[Bool]]
-possible22bssJust d = pble22 d 1 2
-  where
-  (+++) a b = (++) <$> a <*> b
-  pble22 d d' = \case
-    0 -> pb22 0 +++ pb22 0
-    1 -> pb22 1 +++ pb22 0
-          ++ pb22 0 +++ pb22 1
-    2 -> pb22 2 +++ pb22 0
-          ++ pb22 1 +++ pb22 1
-          ++ pb22 0 +++ pb22 2
-    3 -> pb22 2 +++ pb22 1
-          ++ pb22 1 +++ pb22 2
-    4 -> pb22 2 +++ pb22 2
-   where
-    pb22 k = if d == d'
-      then ftss k 2
-      else pble22 d (d'+1) (k*2)
-
-fileKNfor :: (Int, Int) -> Maybe String -> FilePath
-fileKNfor (k, n) mbStr = "work" </> show k ++ "-" ++ show n ++ fromMaybe "" mbStr <.> "txt"
-
-lengthOf :: (Int, Int) -> IO Int
-lengthOf (k, n) = do
-  let fileIn = fileKNfor (k, n) Nothing
-  bl <- doesFileExist fileIn
-  unless bl $ die "not exist"
-  return . length . lines =<< readFile fileIn
-
 -- in random
 
 fileRCfor just param k' =
