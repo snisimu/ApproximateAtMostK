@@ -52,6 +52,19 @@ ghci> reportLiterals (9,18)
 binary: 1008
 counter: 748
 
+## ([(3,3)],3) 4
+
+ghci> reportWith binomial ([(3,3)],3) 4
+(k=12,n=27)
+- approx(order): 3450
+- counter: 1540
+- approx/counter: 2.24025960
+just(randam): 975/9997(9.7%)
+overall(randam): 4118/9998(41.1%)
+efficiency: 0.18385474
+accuracy: 0.35714287
+point(e*a): 0.06566241
+
 ## (5,2)
 
 ghci> reportApproxWith binomial (replicate 1 (5,2), 2) 5
