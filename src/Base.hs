@@ -11,7 +11,7 @@ import Control.Applicative
 
 import Data.Maybe
 import Data.Either
-import Data.List (nub, intercalate)
+import Data.List
 
 -- from MyLib
 
@@ -49,15 +49,17 @@ distribution = foldl1 (liftA2 (++)) . map (map return)
 -- MyLib candidate
 
 factorss :: Int -> [[Int]]
-factorss = \case
-  1 -> [[]]
-  n ->
-    let as = [ a | a <- [2..n], n `mod` a == 0 ]
-    in  if null as
-          then [[n]]
-          else
-            flip concatMap as \a ->
-              map ((:) a) $ factorss $ n `div` a
+factorss = nub . init . map sort . fctss
+  where
+  fctss = \case
+    1 -> [[]]
+    n -> 
+      let as = [ a | a <- [2..n], n `mod` a == 0 ]
+      in  if null as
+            then [[n]]
+            else
+              flip concatMap as \a ->
+                map ((:) a) $ fctss $ n `div` a
 
 -- 
 

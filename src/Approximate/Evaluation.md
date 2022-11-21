@@ -34,6 +34,10 @@ approx/counter: 0.04008590
 overall(randam): 123/10000(1.2%)
 just(randam): 0/10000(0.0%)
 
+## (3,3)
+
+reportWith binomial (replicate x (3,3),3) 4
+
 ## (3,2)
 
 ghci> reportApproxWith binomial (replicate 1 (3,2), 2) 3

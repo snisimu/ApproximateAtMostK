@@ -92,11 +92,17 @@ reportWith atMost param k' = do
   -- putStrLn $ "approx/counter: " ++ (take 5 $ show $ fromInteger (toInteger lApprox) / fromInteger (toInteger lCounter))
   let literalRate = fromInteger (toInteger lApprox) / fromInteger (toInteger lCounter) :: Float
   putStrLn $ "- approx/counter: " ++ (printf "%.8f" literalRate)
-  pRate <- if n <= 20
-    then possibilityRate param k'
-    else randomRate param k'
-  let e = pRate / literalRate
-  putStrLn $ "efficiency: " ++ (printf "%.8f" e)
-  let a = accuracy param
-  putStrLn $ "accuracy: " ++ (printf "%.8f" a)
-  putStrLn $ "point(e*a): " ++ (printf "%.8f" $ e*a)
+  forM_ [False, True] $ reportPR n literalRate
+  where
+  reportPR n literalRate just = do
+    putStrLn $ if just then "- just" else "- overall"
+    pRate <- if n <= 20
+      then possibilityRate just param k'
+      else randomRate just param k'
+    let e = pRate / literalRate
+    putStrLn $ " efficiency: " ++ (printf "%.8f" e)
+    {-
+    let a = accuracy param
+    putStrLn $ "accuracy: " ++ (printf "%.8f" a)
+    putStrLn $ "point(e*a): " ++ (printf "%.8f" $ e*a)
+    -}

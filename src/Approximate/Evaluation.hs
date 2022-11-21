@@ -12,9 +12,11 @@ import System.FilePath
 import System.Random
 
 import Control.Monad
+import Control.Applicative
 
 import Data.Maybe
 import Data.List
+import Data.Functor.Identity
 
 import Base
 import Binomial
@@ -61,10 +63,12 @@ isPossible (hws, m) k js = do
   -- print z -- [debug]
   return $ z <= k
 
-possibilityRate :: Parameter -> Int -> IO Float
-possibilityRate param k' = do
+possibilityRate :: Bool -> Parameter -> Int -> IO Float
+possibilityRate just param k' = do
   let (k, n) = knOf param k'
-      jss = [] : concatMap (combinations [0..n-1]) [1..k]
+      jss = if just
+        then combinations [0..n-1] k
+        else [] : concatMap (combinations [0..n-1]) [1..k]
       check jss = forM jss \js -> do
         bl <- isPossible param k' js
         return (js, bl)
@@ -72,17 +76,7 @@ possibilityRate param k' = do
   let js'Trues = filter snd js'bls
       l = length js'bls
       lTrue = length js'Trues
-  putStrLn $ "overall: " ++ show lTrue ++ "/" ++ show l ++ showPercentage lTrue l
-  --
-  let jss = combinations [0..n-1] k
-      check jss = forM jss \js -> do
-        bl <- isPossible param k' js
-        return (js, bl)
-  js'bls <- check jss
-  let js'Trues = filter snd js'bls
-      l = length js'bls
-      lTrue = length js'Trues
-  putStrLn $ "just: " ++ show lTrue ++ "/" ++ show l ++ showPercentage lTrue l
+  putStrLn $ " possibility rate: " ++ show lTrue ++ "/" ++ show l ++ showPercentage lTrue l
   return $ fromInteger (toInteger lTrue) / fromInteger (toInteger l)
 
 accuracy :: Parameter -> Float
@@ -99,24 +93,20 @@ fileRCfor just param k' =
   let justOr = if just then "Just" else "Overall"
   in "work" </> "randomCheck" ++ justOr ++ show param ++ show k' <.> "txt"
 
-randomRate :: Parameter -> Int -> IO Float
-randomRate param k' = do
-  rdRate True param k'
-  rdRate False param k'
+randomRate :: Bool -> Parameter -> Int -> IO Float
+randomRate just param k' = do
+  let nIteration = 10000
+      file = fileRCfor just param k'
+  bl <- doesFileExist file
+  unless bl $ randomCheck just nIteration param k'
+  is'bs <- (nub . map (read :: String -> ([Int], Bool)) . lines) <$> readFile file
+  let is'Trues = filter snd is'bs
+      l = length is'bs
+      lTrue = length is'Trues
+  putStrLn $ " possibility rate(randam): " ++
+    show lTrue ++ "/" ++ show l ++ showPercentage lTrue l
+  return $ fromInteger (toInteger lTrue) / fromInteger (toInteger l)
   where
-    nIteration = 10000
-    rdRate just param k' = do
-      let file = fileRCfor just param k'
-      bl <- doesFileExist file
-      unless bl $ randomCheck just nIteration param k'
-      is'bs <- (nub . map (read :: String -> ([Int], Bool)) . lines) <$> readFile file
-      let is'Trues = filter snd is'bs
-          l = length is'bs
-          lTrue = length is'Trues
-      putStrLn $ (if just then "just" else "overall") ++ "(randam): " ++
-        show lTrue ++ "/" ++ show l ++ showPercentage lTrue l
-      return $ fromInteger (toInteger lTrue) / fromInteger (toInteger l)
-    randomCheck :: Bool -> Int -> Parameter -> Int -> IO ()
     randomCheck just n param k' = sequence_ $ replicate n $ do
       let (k, n) = knOf param k'
           findLtK = do
@@ -134,24 +124,28 @@ randomRate param k' = do
 
 --
 
-{-
-parametersFor :: Int -> [Parameter]
-parametersFor n =
+parametersAt :: Int -> [Parameter]
+parametersAt n = 
   let fs0s = factorss n
       fs1s = filter ((<=) 3 . length) fs0s
+      fs2ss = nub $ concatMap permutations fs1s
+      params = concatMap makeParams fs2ss
+  -- forM_ params $ print . checkParameter
+  in  params
+  where
+    makeParams :: [Int] -> [Parameter]
+    makeParams (m : hn : wn : ws) = mkParams [[(hn, wn)]] (hn*wn) ws
+      where
+      mkParams hwss hw = \case
+        [] -> map (\hws -> (hws, m)) hwss
+        w : ws ->
+          let hs = [ a | a <- [2..hw-1], hw `mod` a == 0 ]
+          in  concatMap (\h -> mkParams (map ((:) (h, w)) hwss) (h*w) ws) hs
 
-      fs3s = nub $ concatMap permutations fs2s
-      makeParams hws = \case
-        m : [] -> (hws, m)
-        a : b : cs -> makeParams (hws ++ [(a, b)]) cs
-      param0s = map (makeParams []) fs3s
-      -- check
-  in  param0s
--}
-{-
-knOf (hws, m) k' = 
-  let (h, w) = head hws
-      (h', w') = last hws
-      wAll = product $ map snd hws
-      n = h' * m * wAll
--}
+parametersFor :: KN -> IO () -- [(Parameter, [Int], [Int])]
+parametersFor (k, n) = do
+  -- print $ length $ concat [ parametersAt i | i <- [n .. n*2-1] ]
+  let params = parametersAt n
+      param = head params
+      k' = head $ dropWhile ((>) k . fst . knOf param) [1..k]
+  print $ (param, k')
