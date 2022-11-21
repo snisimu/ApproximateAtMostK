@@ -142,10 +142,19 @@ parametersAt n =
           let hs = [ a | a <- [2..hw-1], hw `mod` a == 0 ]
           in  concatMap (\h -> mkParams (map ((:) (h, w)) hwss) (h*w) ws) hs
 
-parametersFor :: KN -> IO () -- [(Parameter, [Int], [Int])]
+parametersFor :: KN -> IO () -- [(Parameter, Int, (Int, Int))]
 parametersFor (k, n) = do
   -- print $ length $ concat [ parametersAt i | i <- [n .. n*2-1] ]
-  let params = parametersAt n
-      param = head params
-      k' = head $ dropWhile ((>) k . fst . knOf param) [1..k]
-  print $ (param, k')
+  let d = 2
+  let params = parametersAt $ n+d
+  let param = head params
+      inTheRange i = 
+        let k' = fst (knOf param i)
+        in  k <= k' && k' <= k+d
+  case dropWhile (Prelude.not . inTheRange) [1..k] of
+    [] -> print "no"
+    k0 : _ -> do
+      let (k', n') = knOf param k0
+          nTrue = k' - k
+          nFalse = n' - n - nTrue
+      print $ (param, k0, (nFalse, nTrue))
