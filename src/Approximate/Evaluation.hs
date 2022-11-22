@@ -3,9 +3,6 @@
 
 module Approximate.Evaluation where
 
-import Prelude hiding (not)
-import qualified Prelude (not)
-
 import System.Exit
 import System.Directory
 import System.FilePath
@@ -112,7 +109,7 @@ randomRate just param k' = do
           findLtK = do
             zeroOnes <- sequence $ replicate n $ random0toLT 2 :: IO [Int]
             let is = findIndices ((==) 1) zeroOnes
-            if (just && length is == k) || (Prelude.not just && length is <= k)
+            if (just && length is == k) || (not just && length is <= k)
               then return is
               else findLtK
       is <- findLtK
@@ -142,19 +139,19 @@ parametersAt n =
           let hs = [ a | a <- [2..hw-1], hw `mod` a == 0 ]
           in  concatMap (\h -> mkParams (map ((:) (h, w)) hwss) (h*w) ws) hs
 
-parametersFor :: KN -> IO () -- [(Parameter, Int, (Int, Int))]
-parametersFor (k, n) = do
-  -- print $ length $ concat [ parametersAt i | i <- [n .. n*2-1] ]
-  let d = 2
-  let params = parametersAt $ n+d
-  let param = head params
-      inTheRange i = 
-        let k' = fst (knOf param i)
-        in  k <= k' && k' <= k+d
-  case dropWhile (Prelude.not . inTheRange) [1..k] of
-    [] -> print "no"
-    k0 : _ -> do
-      let (k', n') = knOf param k0
-          nTrue = k' - k
-          nFalse = n' - n - nTrue
-      print $ (param, k0, (nFalse, nTrue))
+parametersFor :: KN -> [((Parameter, Int), (Int, Int))]
+parametersFor (k, n) = 
+  flip concatMap [0..n-1] \d ->
+    catMaybes $ flip map (parametersAt $ n+d) \param ->
+      case dropWhile (not . inTheRange) [1..k] of
+        [] -> Nothing
+        k0 : _ ->
+          let (k', n') = knOf param k0
+              nTrue = k' - k
+              nFalse = n' - n - nTrue
+          in  Just ((param, k0), (nFalse, nTrue))
+  where
+  inTheRange i = 
+    let k' = fst (knOf param i)
+    in  k <= k' && k' <= k+d
+  -- > mapM_ print $ parametersFor (4,12)
