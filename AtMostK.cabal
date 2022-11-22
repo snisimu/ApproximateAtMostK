@@ -14,7 +14,7 @@ cabal-version:       >=1.10
 extra-source-files:  README.md
                      CHANGELOG.md
 
-executable AtMostK
+executable TheBestEfficiencies
   hs-source-dirs:      src
   main-is:             Main.hs
   default-language:    Haskell2010
@@ -33,7 +33,9 @@ executable AtMostK
                       , Counter
                       , Commander
                       , Product
-                      , Approximate
+                      , Approximate.Lib
+                      , Approximate.Encoding
+                      , Approximate.Evaluation
   build-depends:       base >= 4.7 && < 5
                      , directory
                      , filepath
