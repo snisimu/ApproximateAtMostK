@@ -9,7 +9,7 @@ import Control.Monad
 import Base
 import Approximate.Base
 
-checkParameter :: Parameter -> Bool
+checkParameter :: ParameterTree -> Bool
 checkParameter = (checkParam <$> fst . head <*> tail) . fst
   where
   checkParam :: Height -> [HW] -> Bool
@@ -20,9 +20,6 @@ checkParameter = (checkParam <$> fst . head <*> tail) . fst
       else checkParam h' hws
 
 ftss k n = filter ((==) k . length . filter id) $ allCombinationssOf [False, True] n
-
-combinationNum r n = (product [1..n]) `div` (product [1..r] * product [1..n-r])
-combinationLTnum r n = sum $ map (flip combinationNum n) [0..r]
 
 labeling :: [HW] -> [([Int], Height)]
 labeling = tail . concat . foldl makeH'Isss [[([], 0)]]
@@ -36,3 +33,11 @@ trueIndicesToBools n = foldr makeTrueAt (replicate n False)
   makeTrueAt a bs =
     let (b1s, _ : b2s) = splitAt a bs
     in  b1s ++ [True] ++ b2s
+
+accuracy :: ParameterTree -> Float
+accuracy (hws, m) =
+  let (h, w) = head hws
+      (h', w') = last hws
+      wAll = product $ map snd hws
+      n = h' * m * wAll
+  in  fromInteger (toInteger $ h*w+1) / fromInteger (toInteger $ n+1)

@@ -7,6 +7,7 @@ import System.Exit
 import System.Directory
 import System.FilePath
 import System.Random
+import qualified System.IO.Strict
 
 import Control.Monad
 import Control.Applicative
@@ -15,14 +16,17 @@ import Data.Maybe
 import Data.List
 import Data.Functor.Identity
 
+import Text.Printf
+
 import Base hiding (not)
 import Binomial
+import Counter
 
 import Approximate.Base
 import Approximate.Lib
 import Approximate.Encoding
 
-knOf :: Parameter -> Int -> KN
+knOf :: ParameterTree -> Int -> KN
 knOf (hws, m) k' = 
   let (h, w) = head hws
       (h', w') = last hws
@@ -30,15 +34,17 @@ knOf (hws, m) k' =
       n = h' * m * wAll
   in  ((k'*n) `div` (h*w), n)
 
-isPossible :: Parameter -> Int -> [Int] -> IO Bool
-isPossible (hws, m) k js = do
+isInTheSolutionSpace :: ParameterCNF -> [Int] -> IO Bool
+isInTheSolutionSpace (((hws, m), k'), (nFalse, nTrue)) js = do
   let (h', w') = head hws
-  unless (k < h'*w') $ die "k: too large"
+  unless (k' < h'*w') $ die "k': too large"
   let h = fst $ last hws
       wAll = product $ map snd hws
-      n = h*m * wAll
+      n0 = h*m * wAll
+      n = n0 - nFalse - nTrue
   unless (null $ filter (>= n) js) $ die $ "js: out of range: " ++ show js
   let bss = splitBy (h*m) $ trueIndicesToBools n js
+        ++ replicate nFalse False ++ replicate nTrue True
   -- print bss -- [debug]
   let divAlongUp x y =
         let (a, b) = x `divMod` y
@@ -54,44 +60,35 @@ isPossible (hws, m) k js = do
           integrate lsNext $ (h, w) : hws
   z <- sum <$> integrate (map (length . filter id) bss) (reverse hws)
   -- print z -- [debug]
-  return $ z <= k
+  return $ z <= k'
 
-possibilityRate :: Bool -> Parameter -> Int -> IO Float
-possibilityRate just param k' = do
-  let (k, n) = knOf param k'
-      jss = if just
-        then combinations [0..n-1] k
-        else [] : concatMap (combinations [0..n-1]) [1..k]
-      check jss = forM jss \js -> do
-        bl <- isPossible param k' js
-        return (js, bl)
-  js'bls <- check jss
-  let js'Trues = filter snd js'bls
-      l = length js'bls
-      lTrue = length js'Trues
-  -- putStrLn $ " possibility rate: " ++ show lTrue ++ "/" ++ show l ++ showPercentage lTrue l
-  return $ fromInteger (toInteger lTrue) / fromInteger (toInteger l)
+{-
+solutionSpaceRatio :: Bool -> ParameterCNF -> IO Float
+solutionSpaceRatio just paramCNF = do
+  let threshold = 1000000
+      ((paramT, k'), (nFalse, nTrue)) = paramCNF
+      (k0, n0) = knOf paramT k'
+  
+  if threshold < combinationNum just (k, n)
+    then solutionSpaceRatioInRandom just paramCNF
+    else do
+      let jss = if just
+            then combinations [0..n-1] k
+            else [] : concatMap (combinations [0..n-1]) [1..k]
+          check jss = forM jss \js -> do
+            bl <- isInTheSolutionSpace paramCNF k' js
+            return (js, bl)
+      js'bls <- check jss
+      let js'Trues = filter snd js'bls
+          l = length js'bls
+          lTrue = length js'Trues
+      return $ fromInteger (toInteger lTrue) / fromInteger (toInteger l)
 
-accuracy :: Parameter -> Float
-accuracy (hws, m) =
-  let (h, w) = head hws
-      (h', w') = last hws
-      wAll = product $ map snd hws
-      n = h' * m * wAll
-  in  fromInteger (toInteger $ h*w+1) / fromInteger (toInteger $ n+1)
-
--- in random
-
-fileRCfor just param k' =
-  let justOr = if just then "Just" else "Overall"
-  in "work" </> "randomCheck" ++ justOr ++ show param ++ show k' <.> "txt"
-
-randomRate :: Bool -> Parameter -> Int -> IO Float
-randomRate just param k' = do
+solutionSpaceRatioInRandom :: Bool -> ParameterCNF -> IO Float
+solutionSpaceRatioInRandom just paramCNF = do
   let nIteration = 1000 -- or 10000
-      file = fileRCfor just param k'
   bl <- doesFileExist file
-  unless bl $ randomCheck just nIteration param k'
+  unless bl $ randomCheck just nIteration paramCNF k'
   is'bs <- (nub . map (read :: String -> ([Int], Bool)) . lines) <$> readFile file
   let is'Trues = filter snd is'bs
       l = length is'bs
@@ -100,9 +97,12 @@ randomRate just param k' = do
   --   show lTrue ++ "/" ++ show l ++ showPercentage lTrue l
   return $ fromInteger (toInteger lTrue) / fromInteger (toInteger l)
   where
-    randomCheck just nIteration param k' = forM_ [1..nIteration] \j -> do
+    file =
+      let justOr = if just then "Just" else "Overall"
+      in "work" </> "randomCheck" ++ justOr ++ show paramCNF ++ show k' <.> "txt"
+    randomCheck just nIteration paramCNF = forM_ [1..nIteration] \j -> do
       -- putStr $ show j ++ if j == nIteration then "\n" else " "
-      let (k, n) = knOf param k'
+      let (k, n) = knOf paramCNF k'
           findLtK = do
             zeroOnes <- sequence $ replicate n $ random0toLT 2 :: IO [Int]
             let is = findIndices ((==) 1) zeroOnes
@@ -110,20 +110,22 @@ randomRate just param k' = do
               then return is
               else findLtK
       is <- if k == 1 
-              then return <$> random0toLT n
+              then do
+                i1s <- return <$> random0toLT n
+                return $ [] : i1s
               else if just
                 then randomChoice $ combinations [0..n-1] k
                 else findLtK
-      bl <- isPossible param k' is
+      bl <- isInTheSolutionSpace paramCNF k' is
       -- print (is, bl) -- [debug]
-      appendFile (fileRCfor just param k') $ show (is, bl) ++ "\n"
+      appendFile file $ show (is, bl) ++ "\n"
       where
         random0toLT n = newStdGen >>= \gen -> return $ fst (random gen) `mod` n
 
 --
 
-parametersAt :: Int -> [Parameter]
-parametersAt n = 
+parameterTreesAt :: Int -> [ParameterTree]
+parameterTreesAt n = 
   let fs0s = factorss n
       fs1s = filter ((<=) 3 . length) fs0s
       fs2ss = nub $ concatMap permutations fs1s
@@ -131,7 +133,7 @@ parametersAt n =
   -- forM_ params $ print . checkParameter
   in  params
   where
-    makeParams :: [Int] -> [Parameter]
+    makeParams :: [Int] -> [ParameterTree]
     makeParams (m : hn : wn : ws) = mkParams [[(hn, wn)]] (hn*wn) ws
       where
       mkParams hwss hw = \case
@@ -140,12 +142,10 @@ parametersAt n =
           let hs = [ a | a <- [2..hw-1], hw `mod` a == 0 ]
           in  concatMap (\h -> mkParams (map ((:) (h, w)) hwss) (h*w) ws) hs
 
-type ParamPlus = ((Parameter, Int), (Int, Int))
-
-parametersFor :: KN -> [ParamPlus]
-parametersFor (k, n) = 
+parameterCNFsFor :: KN -> [ParameterCNF]
+parameterCNFsFor (k, n) = 
   flip concatMap [0..n-1] \d ->
-    catMaybes $ flip map (parametersAt $ n+d) \param ->
+    catMaybes $ flip map (parameterTreesAt $ n+d) \param ->
       let inTheRange i = 
             let k' = fst (knOf param i)
             in  k <= k' && k' <= k+d
@@ -157,4 +157,38 @@ parametersFor (k, n) =
                   nFalse = n' - n - nTrue
               in  Just ((param, k0), (nFalse, nTrue))
   where
-  -- > mapM_ print $ parametersFor (4,12)
+  -- > mapM_ print $ parameterCNFsFor (4,12)
+
+efficiency :: Bool -> Int -> ParameterCNF -> IO Float
+efficiency just l ((param, k'), (nFalse, nTrue)) = do
+  let (k, n) = knOf param k'
+      lApprox = sum (map length $ approxOrderWith binomial id param k') + nFalse + nTrue
+      literalRate = fromInteger (toInteger lApprox) / fromInteger (toInteger l) :: Float
+  putStr $ " " ++ show (param, k') ++ " -> "
+  pRate <- solutionSpaceRatio just param k'
+  let e = pRate / literalRate
+  putStrLn $ printf "%.8f" e
+  return e
+
+theBestEfficiency :: Bool -> KN -> IO (Float, ParameterCNF)
+theBestEfficiency just (k, n) = do
+  let lCounter = sum $ map length $ counter id (literalXs n) k
+      paramCNFs = parameterCNFsFor (k, n)
+  effs <- forM paramCNFs $ efficiency just lCounter
+  let effParamPluss = sort $ zip effs paramCNFs
+  return $ last effParamPluss
+
+theBestEfficiencies :: IO ()
+theBestEfficiencies = do
+  let file = "TheBestEfficiencies.txt"
+  knMbs <- (map (read :: String -> ((Int, Int), Maybe ((Float, ParameterCNF), (Float, ParameterCNF)))) . lines) <$>
+    System.IO.Strict.readFile file
+  let (knMbHds, ((k, n), _) : knMbTls) = break (isNothing . snd) knMbs
+  eParamPlusOverall <- theBestEfficiency False (k, n)
+  eParamPlusJust <- theBestEfficiency True (k, n)
+  let the = (eParamPlusOverall, eParamPlusJust)
+  putStrLn $ "\n" ++ show the ++ "\n"
+  writeFile file $ unlines $ map show $
+    knMbHds ++ [((k, n), Just the)] ++ knMbTls
+  theBestEfficiencies
+-}

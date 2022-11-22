@@ -20,7 +20,7 @@ import Binomial
 import Approximate.Base
 import Approximate.Lib
 
-approxOrderWith :: NumberConstraint -> VarScope -> Parameter -> Int -> CNF
+approxOrderWith :: NumberConstraint -> VarScope -> ParameterTree -> Int -> CNF
 approxOrderWith atMost vScope (hws, m) k =
   let vScopeNext sID = vScope . Scope ("approxOrderWith:" ++ sID)
       p is j = (True, vScope $ P is j)
@@ -71,7 +71,7 @@ totalExact vScope (iss, h) k =
       isJss = distribution  isJ'ss
   in  [ [ p is j | (is, j) <- isJs ] | isJs <- isJss ]
 
-approxDirectWith :: NumberConstraint -> VarScope -> Parameter -> Int -> CNF
+approxDirectWith :: NumberConstraint -> VarScope -> ParameterTree -> Int -> CNF
 approxDirectWith atMost vScope (hws, m) k =
   let p is j = (True, vScope $ P is j)
       (h, w) = head hws

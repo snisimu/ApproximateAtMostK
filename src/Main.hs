@@ -8,15 +8,12 @@ module Main where
 import Prelude hiding (not, product)
 
 import System.Exit
-import System.IO.Strict
 
 import Control.Monad
 
 import Data.Maybe
 import Data.Tuple
 import Data.List
-
-import Text.Printf
 
 import Base
 import Binomial
@@ -98,7 +95,7 @@ reportWith atMost param k' = do
   reportPR n literalRate just = do
     putStrLn $ if just then "- just" else "- overall"
     pRate <- if n <= 20
-      then possibilityRate just param k'
+      then solutionSpaceRatio just param k'
       else randomRate just param k'
     let e = pRate / literalRate
     putStrLn $ " efficiency: " ++ (printf "%.8f" e)
@@ -108,50 +105,6 @@ reportWith atMost param k' = do
     putStrLn $ "point(e*a): " ++ (printf "%.8f" $ e*a)
     -}
 -}
-
-{-
-theBestEfficienciesHalf :: Bool -> Int -> Int -> IO ()
-theBestEfficienciesHalf just nMin nMax = forM_ [nMin..nMax] \n -> do
-  let (k, n) = (n `div` 2, n)
-      lCounter = sum $ map length $ counter id (literalXs n) k
-  bestE <- theBestE just lCounter (k, n)
-  putStrLn $ show (k, n) ++ ": " ++ show bestE
--}
-
-getEfficiency :: Bool -> Int -> ParamPlus -> IO Float
-getEfficiency just l ((param, k'), (nFalse, nTrue)) = do
-  let (k, n) = knOf param k'
-      lApprox = sum (map length $ approxOrderWith binomial id param k') + nFalse + nTrue
-      literalRate = fromInteger (toInteger lApprox) / fromInteger (toInteger l) :: Float
-  putStr $ " " ++ show (param, k') ++ " -> "
-  pRate <- if n <= 20
-    then possibilityRate just param k'
-    else randomRate just param k'
-  let e = pRate / literalRate
-  putStrLn $ printf "%.8f" e
-  return e
-
-theBestEfficiency :: Bool -> KN -> IO (Float, ParamPlus)
-theBestEfficiency just (k, n) = do
-  let lCounter = sum $ map length $ counter id (literalXs n) k
-      paramPluss = parametersFor (k, n)
-  effs <- forM paramPluss $ getEfficiency just lCounter
-  let effParamPluss = sort $ zip effs paramPluss
-  return $ last effParamPluss
-
-theBestEfficiencies :: IO ()
-theBestEfficiencies = do
-  let file = "TheBestEfficiencies.txt"
-  knMbs <- (map (read :: String -> ((Int, Int), Maybe ((Float, ParamPlus), (Float, ParamPlus)))) . lines) <$>
-    System.IO.Strict.readFile file
-  let (knMbHds, ((k, n), _) : knMbTls) = break (isNothing . snd) knMbs
-  eParamPlusOverall <- theBestEfficiency False (k, n)
-  eParamPlusJust <- theBestEfficiency True (k, n)
-  let the = (eParamPlusOverall, eParamPlusJust)
-  putStrLn $ "\n" ++ show the ++ "\n"
-  writeFile file $ unlines $ map show $
-    knMbHds ++ [((k, n), Just the)] ++ knMbTls
-  theBestEfficiencies
 
 main :: IO ()
 main = theBestEfficiencies
