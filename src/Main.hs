@@ -11,6 +11,7 @@ import System.Exit
 
 import Control.Monad
 
+import Data.Tuple
 import Data.List
 
 import Text.Printf
@@ -78,6 +79,7 @@ check atMost (k, n) = printCNF $ atMost id (literalXs n) k
 main :: IO ()
 main = return ()
 
+{-
 reportWith :: NumberConstraint -> Parameter -> Int -> IO ()
 reportWith atMost param k' = do
   putStrLn ""
@@ -106,8 +108,25 @@ reportWith atMost param k' = do
     putStrLn $ "accuracy: " ++ (printf "%.8f" a)
     putStrLn $ "point(e*a): " ++ (printf "%.8f" $ e*a)
     -}
-
-{-
-theBestEfficiencies :: Int -> Int -> IO ()
-theBestEfficiencies nMin nMax = do
 -}
+
+theBestEfficiencies :: Int -> Int -> IO ()
+theBestEfficiencies nMin nMax = return ()
+
+theBestE :: Bool -> KN -> IO (ParamPlus, Float)
+theBestE just kn = do
+  let paramPluss = parametersFor kn
+  effs <- forM paramPluss $ getEfficiency just
+  let effParamPluss = sort $ zip effs paramPluss
+  return $ swap $ last effParamPluss
+
+getEfficiency :: Bool -> ParamPlus -> IO Float
+getEfficiency just ((param, k'), (nFalse, nTrue)) = do
+  let (k, n) = knOf param k'
+      lApprox = sum (map length $ approxOrderWith binomial id param k') + nFalse + nTrue
+      lCounter = sum $ map length $ counter id (literalXs n) k
+      literalRate = fromInteger (toInteger lApprox) / fromInteger (toInteger lCounter) :: Float
+  pRate <- if n <= 20
+    then possibilityRate just param k'
+    else randomRate just param k'
+  return $ pRate / literalRate

@@ -73,7 +73,7 @@ possibilityRate just param k' = do
   let js'Trues = filter snd js'bls
       l = length js'bls
       lTrue = length js'Trues
-  putStrLn $ " possibility rate: " ++ show lTrue ++ "/" ++ show l ++ showPercentage lTrue l
+  -- putStrLn $ " possibility rate: " ++ show lTrue ++ "/" ++ show l ++ showPercentage lTrue l
   return $ fromInteger (toInteger lTrue) / fromInteger (toInteger l)
 
 accuracy :: Parameter -> Float
@@ -100,8 +100,8 @@ randomRate just param k' = do
   let is'Trues = filter snd is'bs
       l = length is'bs
       lTrue = length is'Trues
-  putStrLn $ " possibility rate(randam): " ++
-    show lTrue ++ "/" ++ show l ++ showPercentage lTrue l
+  -- putStrLn $ " possibility rate(randam): " ++
+  --   show lTrue ++ "/" ++ show l ++ showPercentage lTrue l
   return $ fromInteger (toInteger lTrue) / fromInteger (toInteger l)
   where
     randomCheck just n param k' = sequence_ $ replicate n $ do
@@ -139,7 +139,9 @@ parametersAt n =
           let hs = [ a | a <- [2..hw-1], hw `mod` a == 0 ]
           in  concatMap (\h -> mkParams (map ((:) (h, w)) hwss) (h*w) ws) hs
 
-parametersFor :: KN -> [((Parameter, Int), (Int, Int))]
+type ParamPlus = ((Parameter, Int), (Int, Int))
+
+parametersFor :: KN -> [ParamPlus]
 parametersFor (k, n) = 
   flip concatMap [0..n-1] \d ->
     catMaybes $ flip map (parametersAt $ n+d) \param ->
