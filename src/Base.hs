@@ -6,6 +6,8 @@ module Base where
 import Prelude hiding (not)
 import qualified Prelude (not)
 
+import System.Random
+
 import Control.Monad
 import Control.Applicative
 
@@ -45,6 +47,9 @@ allCombinationssOf as = foldr (liftA2 (:)) [[]] . flip replicate as
 
 distribution :: [[a]] -> [[a]]
 distribution = foldl1 (liftA2 (++)) . map (map return)
+
+randomChoice :: [a] -> IO a
+randomChoice as = newStdGen >>= \gen -> return $ as !! (fst (random gen) `mod` length as)
 
 -- MyLib candidate
 

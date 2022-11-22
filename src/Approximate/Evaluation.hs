@@ -38,11 +38,7 @@ isPossible (hws, m) k js = do
       wAll = product $ map snd hws
       n = h*m * wAll
   unless (null $ filter (>= n) js) $ die $ "js: out of range: " ++ show js
-  let bss = splitBy (h*m) $ foldr makeTrueAt (replicate n False) js
-        where
-        makeTrueAt a bs =
-          let (b1s, _ : b2s) = splitAt a bs
-          in  b1s ++ [True] ++ b2s
+  let bss = splitBy (h*m) $ trueIndicesToBools n js
   -- print bss -- [debug]
   let divAlongUp x y =
         let (a, b) = x `divMod` y
@@ -104,15 +100,20 @@ randomRate just param k' = do
   --   show lTrue ++ "/" ++ show l ++ showPercentage lTrue l
   return $ fromInteger (toInteger lTrue) / fromInteger (toInteger l)
   where
-    randomCheck just n param k' = sequence_ $ replicate n $ do
+    randomCheck just nIteration param k' = forM_ [1..nIteration] \j -> do
+      -- putStr $ show j ++ if j == nIteration then "\n" else " "
       let (k, n) = knOf param k'
           findLtK = do
             zeroOnes <- sequence $ replicate n $ random0toLT 2 :: IO [Int]
             let is = findIndices ((==) 1) zeroOnes
-            if (just && length is == k) || (not just && length is <= k)
+            if length is <= k
               then return is
               else findLtK
-      is <- findLtK
+      is <- if k == 1 
+              then return <$> random0toLT n
+              else if just
+                then randomChoice $ combinations [0..n-1] k
+                else findLtK
       bl <- isPossible param k' is
       -- print (is, bl) -- [debug]
       appendFile (fileRCfor just param k') $ show (is, bl) ++ "\n"
@@ -157,10 +158,3 @@ parametersFor (k, n) =
               in  Just ((param, k0), (nFalse, nTrue))
   where
   -- > mapM_ print $ parametersFor (4,12)
-
-is22 :: Parameter -> Bool
-is22 (hws, m) = m == 2 && is22' hws
-  where
-  is22' = \case
-    [] -> True
-    (h, w) : hws -> h == 2 && w == 2 && is22' hws

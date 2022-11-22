@@ -29,3 +29,10 @@ labeling = tail . concat . foldl makeH'Isss [[([], 0)]]
   where
   makeH'Isss ishss (h, w) =
     ishss ++ [[ (is ++ [i], h) | (is, _) <- last ishss, i <- [1..w] ]]
+
+trueIndicesToBools :: Int -> [Int] -> [Bool]
+trueIndicesToBools n = foldr makeTrueAt (replicate n False)
+  where
+  makeTrueAt a bs =
+    let (b1s, _ : b2s) = splitAt a bs
+    in  b1s ++ [True] ++ b2s

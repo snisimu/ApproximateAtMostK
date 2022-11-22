@@ -118,6 +118,19 @@ theBestEfficienciesHalf just nMin nMax = forM_ [nMin..nMax] \n -> do
   putStrLn $ show (k, n) ++ ": " ++ show bestE
 -}
 
+getEfficiency :: Bool -> Int -> ParamPlus -> IO Float
+getEfficiency just l ((param, k'), (nFalse, nTrue)) = do
+  let (k, n) = knOf param k'
+      lApprox = sum (map length $ approxOrderWith binomial id param k') + nFalse + nTrue
+      literalRate = fromInteger (toInteger lApprox) / fromInteger (toInteger l) :: Float
+  putStr $ " " ++ show (param, k') ++ " -> "
+  pRate <- if n <= 20
+    then possibilityRate just param k'
+    else randomRate just param k'
+  let e = pRate / literalRate
+  putStrLn $ printf "%.8f" e
+  return e
+
 theBestEfficiency :: Bool -> KN -> IO (Float, ParamPlus)
 theBestEfficiency just (k, n) = do
   let lCounter = sum $ map length $ counter id (literalXs n) k
@@ -125,18 +138,6 @@ theBestEfficiency just (k, n) = do
   effs <- forM paramPluss $ getEfficiency just lCounter
   let effParamPluss = sort $ zip effs paramPluss
   return $ last effParamPluss
-
-getEfficiency :: Bool -> Int -> ParamPlus -> IO Float
-getEfficiency just l ((param, k'), (nFalse, nTrue)) = do
-  let (k, n) = knOf param k'
-      lApprox = sum (map length $ approxOrderWith binomial id param k') + nFalse + nTrue
-      literalRate = fromInteger (toInteger lApprox) / fromInteger (toInteger l) :: Float
-  pRate <- if n <= 20
-    then possibilityRate just param k'
-    else randomRate just param k'
-  let e = pRate / literalRate
-  putStrLn $ " " ++ show (param, k') ++ " -> " ++ (printf "%.8f" e)
-  return e
 
 theBestEfficiencies :: IO ()
 theBestEfficiencies = do
