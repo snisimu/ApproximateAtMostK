@@ -106,3 +106,8 @@ reportWith atMost param k' = do
     putStrLn $ "accuracy: " ++ (printf "%.8f" a)
     putStrLn $ "point(e*a): " ++ (printf "%.8f" $ e*a)
     -}
+
+{-
+theBestEfficiencies :: Int -> Int -> IO ()
+theBestEfficiencies nMin nMax = do
+-}

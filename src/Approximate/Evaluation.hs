@@ -15,7 +15,7 @@ import Data.Maybe
 import Data.List
 import Data.Functor.Identity
 
-import Base
+import Base hiding (not)
 import Binomial
 
 import Approximate.Base
@@ -143,15 +143,15 @@ parametersFor :: KN -> [((Parameter, Int), (Int, Int))]
 parametersFor (k, n) = 
   flip concatMap [0..n-1] \d ->
     catMaybes $ flip map (parametersAt $ n+d) \param ->
-      case dropWhile (not . inTheRange) [1..k] of
-        [] -> Nothing
-        k0 : _ ->
-          let (k', n') = knOf param k0
-              nTrue = k' - k
-              nFalse = n' - n - nTrue
-          in  Just ((param, k0), (nFalse, nTrue))
+      let inTheRange i = 
+            let k' = fst (knOf param i)
+            in  k <= k' && k' <= k+d
+      in  case dropWhile (not . inTheRange) [1..k] of
+            [] -> Nothing
+            k0 : _ ->
+              let (k', n') = knOf param k0
+                  nTrue = k' - k
+                  nFalse = n' - n - nTrue
+              in  Just ((param, k0), (nFalse, nTrue))
   where
-  inTheRange i = 
-    let k' = fst (knOf param i)
-    in  k <= k' && k' <= k+d
   -- > mapM_ print $ parametersFor (4,12)
