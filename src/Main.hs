@@ -8,9 +8,11 @@ module Main where
 import Prelude hiding (not, product)
 
 import System.Exit
+import System.IO.Strict
 
 import Control.Monad
 
+import Data.Maybe
 import Data.Tuple
 import Data.List
 
@@ -76,9 +78,6 @@ check :: NumberConstraint -> KN -> IO ()
 check atMost (k, n) = printCNF $ atMost id (literalXs n) k
 -- > check commander (5,10)
 
-main :: IO ()
-main = return ()
-
 {-
 reportWith :: NumberConstraint -> Parameter -> Int -> IO ()
 reportWith atMost param k' = do
@@ -110,17 +109,20 @@ reportWith atMost param k' = do
     -}
 -}
 
+{-
 theBestEfficienciesHalf :: Bool -> Int -> Int -> IO ()
 theBestEfficienciesHalf just nMin nMax = forM_ [nMin..nMax] \n -> do
   let (k, n) = (n `div` 2, n)
       lCounter = sum $ map length $ counter id (literalXs n) k
   bestE <- theBestE just lCounter (k, n)
   putStrLn $ show (k, n) ++ ": " ++ show bestE
+-}
 
-theBestE :: Bool -> Int -> KN -> IO (Float, ParamPlus)
-theBestE just l kn = do
-  let paramPluss = parametersFor kn
-  effs <- forM paramPluss $ getEfficiency just l
+theBestEfficiency :: Bool -> KN -> IO (Float, ParamPlus)
+theBestEfficiency just (k, n) = do
+  let lCounter = sum $ map length $ counter id (literalXs n) k
+      paramPluss = parametersFor (k, n)
+  effs <- forM paramPluss $ getEfficiency just lCounter
   let effParamPluss = sort $ zip effs paramPluss
   return $ last effParamPluss
 
@@ -135,3 +137,20 @@ getEfficiency just l ((param, k'), (nFalse, nTrue)) = do
   let e = pRate / literalRate
   putStrLn $ " " ++ show (param, k') ++ " -> " ++ (printf "%.8f" e)
   return e
+
+theBestEfficiencies :: IO ()
+theBestEfficiencies = do
+  let file = "TheBestEfficiencies.txt"
+  knMbs <- (map (read :: String -> ((Int, Int), Maybe ((Float, ParamPlus), (Float, ParamPlus)))) . lines) <$>
+    System.IO.Strict.readFile file
+  let (knMbHds, ((k, n), _) : knMbTls) = break (isNothing . snd) knMbs
+  eParamPlusOverall <- theBestEfficiency False (k, n)
+  eParamPlusJust <- theBestEfficiency True (k, n)
+  let the = (eParamPlusOverall, eParamPlusJust)
+  putStrLn $ "\n" ++ show the ++ "\n"
+  writeFile file $ unlines $ map show $
+    knMbHds ++ [((k, n), Just the)] ++ knMbTls
+  theBestEfficiencies
+
+main :: IO ()
+main = theBestEfficiencies

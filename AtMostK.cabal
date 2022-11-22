@@ -37,4 +37,5 @@ executable AtMostK
   build-depends:       base >= 4.7 && < 5
                      , directory
                      , filepath
+                     , strict
                      , random

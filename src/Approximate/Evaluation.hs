@@ -157,3 +157,10 @@ parametersFor (k, n) =
               in  Just ((param, k0), (nFalse, nTrue))
   where
   -- > mapM_ print $ parametersFor (4,12)
+
+is22 :: Parameter -> Bool
+is22 (hws, m) = m == 2 && is22' hws
+  where
+  is22' = \case
+    [] -> True
+    (h, w) : hws -> h == 2 && w == 2 && is22' hws
