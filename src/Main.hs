@@ -110,8 +110,8 @@ reportWith atMost param k' = do
     -}
 -}
 
-theBestEfficiencies :: Bool -> Int -> Int -> IO ()
-theBestEfficiencies just nMin nMax = forM_ [nMin..nMax] \n -> do
+theBestEfficienciesHalf :: Bool -> Int -> Int -> IO ()
+theBestEfficienciesHalf just nMin nMax = forM_ [nMin..nMax] \n -> do
   let kn = (n `div` 2, n)
   bestE <- theBestE just kn
   putStrLn $ show kn ++ ": " ++ show bestE
@@ -122,6 +122,11 @@ theBestE just kn = do
   effs <- forM paramPluss $ getEfficiency just
   let effParamPluss = sort $ zip effs paramPluss
   return $ last effParamPluss
+theBestE' :: Bool -> KN -> IO ()
+theBestE' just kn = do
+  let paramPluss = parametersFor kn
+  forM paramPluss $ getEfficiency just
+  return ()
 
 getEfficiency :: Bool -> ParamPlus -> IO Float
 getEfficiency just ((param, k'), (nFalse, nTrue)) = do

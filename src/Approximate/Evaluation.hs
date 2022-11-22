@@ -92,7 +92,7 @@ fileRCfor just param k' =
 
 randomRate :: Bool -> Parameter -> Int -> IO Float
 randomRate just param k' = do
-  let nIteration = 10000
+  let nIteration = 1000 -- or 10000
       file = fileRCfor just param k'
   bl <- doesFileExist file
   unless bl $ randomCheck just nIteration param k'
