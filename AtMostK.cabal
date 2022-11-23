@@ -29,10 +29,11 @@ executable TheBestEfficiencies
                        -Wredundant-constraints
   other-modules:        Base
                       , Binomial
-                      , Binary
+                      , Birary
                       , Counter
                       , Commander
                       , Product
+                      , Approximate.Base
                       , Approximate.Lib
                       , Approximate.Encoding
                       , Approximate.Evaluation

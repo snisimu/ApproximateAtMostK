@@ -72,7 +72,9 @@ solutionSpaceRatio just paramCNF = do
   let iterationThreshold = 1000000
       ((paramT, k'), (nFalse, nTrue)) = paramCNF
       (k, n) = knOfSpace paramCNF
-  if iterationThreshold < combinationNum just (k, n)
+      nSpace = combinationNum just (toInteger k, toInteger n) :: Integer
+  -- putStr $ " space size " ++ show (k, n) ++ ": " ++ show nSpace ++ " " -- [debug]
+  if iterationThreshold < nSpace
     then solutionSpaceRatioInRandom just paramCNF
     else do
       let jss = if just
@@ -90,31 +92,38 @@ solutionSpaceRatio just paramCNF = do
 solutionSpaceRatioInRandom :: Bool -> ParameterCNF -> IO Float
 solutionSpaceRatioInRandom just paramCNF = do
   let nIteration = 1000 -- or 10000
-  bl <- doesFileExist file
-  unless bl $ randomCheck just nIteration paramCNF
-  is'bs <- (nub . map (read :: String -> ([Int], Bool)) . lines) <$> readFile file
-  let is'Trues = filter snd is'bs
-      l = length is'bs
-      lTrue = length is'Trues
-  -- when (50 < nIteration - l) $
-  --   die $ "too small amount(" ++ show (nIteration - l) ++ ") in: " ++ file
+  randomCheck just nIteration paramCNF
+  js'bs <- (map (read :: String -> ([Int], Bool)) . lines) <$> readFile file
+  let js'Trues = filter snd js'bs
+      l = length js'bs
+      lTrue = length js'Trues
   return $ fromInteger (toInteger lTrue) / fromInteger (toInteger l)
   where
     file = "work" </> "randomCheck" ++ show just ++ show paramCNF <.> "txt"
-    randomCheck just nIteration paramCNF = forM_ [1..nIteration] \j -> do
-      -- putStr $ show j ++ if j == nIteration then "\n" else " "
-      let -- ((paramT, k'), (nFalse, nTrue)) = paramCNF
-          (k, n) = knOfSpace paramCNF
-          findJs just = do
-            zeroOnes <- sequence $ replicate n $ random0toLT 2 :: IO [Int]
-            let js = findIndices ((==) 1) zeroOnes
-            if (not just && length js <= k) || (just && length js == k)
-              then return js
-              else findJs just
-      js <- findJs just
-      bl <- isInTheSolutionSpace paramCNF js
-      -- print (js, bl) -- [debug]
-      appendFile file $ show (js, bl) ++ "\n"
+    randomCheck just nIteration paramCNF = do
+      existFile <- doesFileExist file
+      continue <- do
+        if existFile
+          then do
+            l <- (length . lines) <$> readFile file
+            return $ l < nIteration
+          else return True
+      when continue $ do
+        let (k, n) = knOfSpace paramCNF
+        jss <- if existFile
+          then (map (fst . (read :: String -> ([Int], Bool))) . lines) <$> readFile file
+          else return []
+        let findJs just = do
+              zeroOnes <- sequence $ replicate n $ random0toLT 2 :: IO [Int]
+              let js = findIndices ((==) 1) zeroOnes
+              if ((not just && length js <= k) || (just && length js == k)) && (not $ elem js jss)
+                then return js
+                else findJs just
+        js <- findJs just
+        bl <- isInTheSolutionSpace paramCNF js
+        -- print (js, bl) -- [debug]
+        appendFile file $ show (js, bl) ++ "\n"
+        randomCheck just nIteration paramCNF
       where
         random0toLT n = newStdGen >>= \gen -> return $ fst (random gen) `mod` n
 
@@ -155,13 +164,14 @@ parameterCNFsFor (k, n) =
   where
   -- > mapM_ print $ parameterCNFsFor (4,12)
 
-efficiency :: Bool -> Int -> ParameterCNF -> IO Float
-efficiency just l paramCNF = do
+efficiency :: Bool -> Int -> Int -> (Int, ParameterCNF) -> IO Float
+efficiency just nLiteralOther nParamCNFs (no, paramCNF) = do
   let ((paramT, k'), (nFalse, nTrue)) = paramCNF
   let (k, n) = knOfTree paramT k'
       lApprox = sum (map length $ approxOrderWith binomial id paramT k') + nFalse + nTrue
-      literalRate = fromInteger (toInteger lApprox) / fromInteger (toInteger l) :: Float
-  putStr $ " " ++ show paramCNF ++ " -> "
+      literalRate = fromInteger (toInteger lApprox) / fromInteger (toInteger nLiteralOther) :: Float
+  putStr $ " " ++ show no ++ "/" ++ show nParamCNFs ++ " "
+    ++ show just ++ " " ++ show paramCNF ++ " -> "
   pRate <- solutionSpaceRatio just paramCNF
   let e = pRate / literalRate
   putStrLn $ printf "%.8f" e
@@ -171,7 +181,8 @@ theBestEfficiency :: Bool -> KN -> IO (Float, ParameterCNF)
 theBestEfficiency just (k, n) = do
   let lCounter = sum $ map length $ counter id (literalXs n) k
       paramCNFs = parameterCNFsFor (k, n)
-  effs <- forM paramCNFs $ efficiency just lCounter
+      nParamCNFs = length paramCNFs
+  effs <- forM (zip [1..] paramCNFs) $ efficiency just lCounter nParamCNFs
   let effParamPluss = sort $ zip effs paramCNFs
   return $ last effParamPluss
 
@@ -184,7 +195,7 @@ theBestEfficiencies = do
   eParamPlusOverall <- theBestEfficiency False (k, n)
   eParamPlusJust <- theBestEfficiency True (k, n)
   let the = (eParamPlusOverall, eParamPlusJust)
-  putStrLn $ "\n" ++ show the ++ "\n"
+  putStrLn $ "\n" ++ show (k, n) ++ "\n" ++ show the ++ "\n"
   writeFile file $ unlines $ map show $
     knMbHds ++ [((k, n), Just the)] ++ knMbTls
   theBestEfficiencies

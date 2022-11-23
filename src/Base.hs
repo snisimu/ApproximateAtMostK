@@ -66,7 +66,7 @@ factorss = nub . init . map sort . fctss
               flip concatMap as \a ->
                 map ((:) a) $ fctss $ n `div` a
 
-combinationNum :: Bool -> KN -> Int
+combinationNum :: Integral a => Bool -> (a, a) -> a
 combinationNum just (r, n) = if just
   then (product [1..n]) `div` (product [1..r] * product [1..n-r])
   else sum $ map (\r' -> combinationNum True (r', n)) [0..r]
