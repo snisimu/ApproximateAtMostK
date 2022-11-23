@@ -26,13 +26,18 @@ import Approximate.Base
 import Approximate.Lib
 import Approximate.Encoding
 
-knOf :: ParameterTree -> Int -> KN
-knOf (hws, m) k' = 
+knOfTree :: ParameterTree -> Int -> KN
+knOfTree (hws, m) k' = 
   let (h, w) = head hws
       (h', w') = last hws
       wAll = product $ map snd hws
       n = h' * m * wAll
   in  ((k'*n) `div` (h*w), n)
+
+knOfSpace :: ParameterCNF -> KN
+knOfSpace ((paramT, k'), (nFalse, nTrue)) = 
+  let (k0, n0) = knOfTree paramT k'
+  in  (k0 - nTrue, n0 - nFalse - nTrue)
 
 isInTheSolutionSpace :: ParameterCNF -> [Int] -> IO Bool
 isInTheSolutionSpace (((hws, m), k'), (nFalse, nTrue)) js = do
@@ -64,13 +69,11 @@ isInTheSolutionSpace (((hws, m), k'), (nFalse, nTrue)) js = do
 
 solutionSpaceRatio :: Bool -> ParameterCNF -> IO Float
 solutionSpaceRatio just paramCNF = do
-  let threshold = 1000000
+  let iterationThreshold = 1000000
       ((paramT, k'), (nFalse, nTrue)) = paramCNF
-      (k0, n0) = knOf paramT k'
-      k = k0 - nTrue
-      n = n0 - nFalse - nTrue
-  if threshold < combinationNum just (k, n)
-    then return 0 -- solutionSpaceRatioInRandom just paramCNF
+      (k, n) = knOfSpace paramCNF
+  if iterationThreshold < combinationNum just (k, n)
+    then solutionSpaceRatioInRandom just paramCNF
     else do
       let jss = if just
             then combinations [0..n-1] k
@@ -84,40 +87,34 @@ solutionSpaceRatio just paramCNF = do
           lTrue = length js'Trues
       return $ fromInteger (toInteger lTrue) / fromInteger (toInteger l)
 
-{-
 solutionSpaceRatioInRandom :: Bool -> ParameterCNF -> IO Float
 solutionSpaceRatioInRandom just paramCNF = do
   let nIteration = 1000 -- or 10000
   bl <- doesFileExist file
-  unless bl $ randomCheck just nIteration paramCNF k'
+  unless bl $ randomCheck just nIteration paramCNF
   is'bs <- (nub . map (read :: String -> ([Int], Bool)) . lines) <$> readFile file
   let is'Trues = filter snd is'bs
       l = length is'bs
       lTrue = length is'Trues
-  -- putStrLn $ " possibility rate(randam): " ++
-  --   show lTrue ++ "/" ++ show l ++ showPercentage lTrue l
+  -- when (50 < nIteration - l) $
+  --   die $ "too small amount(" ++ show (nIteration - l) ++ ") in: " ++ file
   return $ fromInteger (toInteger lTrue) / fromInteger (toInteger l)
   where
-    file = "work" </> "randomCheck" ++ show just ++ show paramCNF ++ show k' <.> "txt"
+    file = "work" </> "randomCheck" ++ show just ++ show paramCNF <.> "txt"
     randomCheck just nIteration paramCNF = forM_ [1..nIteration] \j -> do
       -- putStr $ show j ++ if j == nIteration then "\n" else " "
-      let (k, n) = knOf paramCNF k'
-          findLtK = do
+      let -- ((paramT, k'), (nFalse, nTrue)) = paramCNF
+          (k, n) = knOfSpace paramCNF
+          findJs just = do
             zeroOnes <- sequence $ replicate n $ random0toLT 2 :: IO [Int]
-            let is = findIndices ((==) 1) zeroOnes
-            if length is <= k
-              then return is
-              else findLtK
-      is <- if k == 1 
-              then do
-                i1s <- return <$> random0toLT n
-                return $ [] : i1s
-              else if just
-                then randomChoice $ combinations [0..n-1] k
-                else findLtK
-      bl <- isInTheSolutionSpace paramCNF k' is
-      -- print (is, bl) -- [debug]
-      appendFile file $ show (is, bl) ++ "\n"
+            let js = findIndices ((==) 1) zeroOnes
+            if (not just && length js <= k) || (just && length js == k)
+              then return js
+              else findJs just
+      js <- findJs just
+      bl <- isInTheSolutionSpace paramCNF js
+      -- print (js, bl) -- [debug]
+      appendFile file $ show (js, bl) ++ "\n"
       where
         random0toLT n = newStdGen >>= \gen -> return $ fst (random gen) `mod` n
 
@@ -146,12 +143,12 @@ parameterCNFsFor (k, n) =
   flip concatMap [0..n-1] \d ->
     catMaybes $ flip map (parameterTreesAt $ n+d) \param ->
       let inTheRange i = 
-            let k' = fst (knOf param i)
+            let k' = fst (knOfTree param i)
             in  k <= k' && k' <= k+d
       in  case dropWhile (not . inTheRange) [1..k] of
             [] -> Nothing
             k0 : _ ->
-              let (k', n') = knOf param k0
+              let (k', n') = knOfTree param k0
                   nTrue = k' - k
                   nFalse = n' - n - nTrue
               in  Just ((param, k0), (nFalse, nTrue))
@@ -159,12 +156,13 @@ parameterCNFsFor (k, n) =
   -- > mapM_ print $ parameterCNFsFor (4,12)
 
 efficiency :: Bool -> Int -> ParameterCNF -> IO Float
-efficiency just l ((param, k'), (nFalse, nTrue)) = do
-  let (k, n) = knOf param k'
-      lApprox = sum (map length $ approxOrderWith binomial id param k') + nFalse + nTrue
+efficiency just l paramCNF = do
+  let ((paramT, k'), (nFalse, nTrue)) = paramCNF
+  let (k, n) = knOfTree paramT k'
+      lApprox = sum (map length $ approxOrderWith binomial id paramT k') + nFalse + nTrue
       literalRate = fromInteger (toInteger lApprox) / fromInteger (toInteger l) :: Float
-  putStr $ " " ++ show (param, k') ++ " -> "
-  pRate <- solutionSpaceRatio just param k'
+  putStr $ " " ++ show paramCNF ++ " -> "
+  pRate <- solutionSpaceRatio just paramCNF
   let e = pRate / literalRate
   putStrLn $ printf "%.8f" e
   return e
@@ -190,4 +188,9 @@ theBestEfficiencies = do
   writeFile file $ unlines $ map show $
     knMbHds ++ [((k, n), Just the)] ++ knMbTls
   theBestEfficiencies
--}
+
+makeTheBestEfficienciesInit = do
+  forM_ [10..16] \n -> do
+    let k = n `div` 2
+    forM_ [1..k] \k' ->
+      putStrLn $ show $ (((k',n),Nothing) :: ((Int, Int), Maybe ((Float, ParameterCNF), (Float, ParameterCNF))))
