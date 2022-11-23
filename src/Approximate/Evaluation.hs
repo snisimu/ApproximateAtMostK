@@ -62,21 +62,21 @@ isInTheSolutionSpace (((hws, m), k'), (nFalse, nTrue)) js = do
   -- print z -- [debug]
   return $ z <= k'
 
-{-
 solutionSpaceRatio :: Bool -> ParameterCNF -> IO Float
 solutionSpaceRatio just paramCNF = do
   let threshold = 1000000
       ((paramT, k'), (nFalse, nTrue)) = paramCNF
       (k0, n0) = knOf paramT k'
-  
+      k = k0 - nTrue
+      n = n0 - nFalse - nTrue
   if threshold < combinationNum just (k, n)
-    then solutionSpaceRatioInRandom just paramCNF
+    then return 0 -- solutionSpaceRatioInRandom just paramCNF
     else do
       let jss = if just
             then combinations [0..n-1] k
             else [] : concatMap (combinations [0..n-1]) [1..k]
           check jss = forM jss \js -> do
-            bl <- isInTheSolutionSpace paramCNF k' js
+            bl <- isInTheSolutionSpace paramCNF js
             return (js, bl)
       js'bls <- check jss
       let js'Trues = filter snd js'bls
@@ -84,6 +84,7 @@ solutionSpaceRatio just paramCNF = do
           lTrue = length js'Trues
       return $ fromInteger (toInteger lTrue) / fromInteger (toInteger l)
 
+{-
 solutionSpaceRatioInRandom :: Bool -> ParameterCNF -> IO Float
 solutionSpaceRatioInRandom just paramCNF = do
   let nIteration = 1000 -- or 10000
@@ -97,9 +98,7 @@ solutionSpaceRatioInRandom just paramCNF = do
   --   show lTrue ++ "/" ++ show l ++ showPercentage lTrue l
   return $ fromInteger (toInteger lTrue) / fromInteger (toInteger l)
   where
-    file =
-      let justOr = if just then "Just" else "Overall"
-      in "work" </> "randomCheck" ++ justOr ++ show paramCNF ++ show k' <.> "txt"
+    file = "work" </> "randomCheck" ++ show just ++ show paramCNF ++ show k' <.> "txt"
     randomCheck just nIteration paramCNF = forM_ [1..nIteration] \j -> do
       -- putStr $ show j ++ if j == nIteration then "\n" else " "
       let (k, n) = knOf paramCNF k'
