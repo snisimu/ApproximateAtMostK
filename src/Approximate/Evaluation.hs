@@ -99,7 +99,7 @@ solutionSpaceRatioInRandom just paramCNF = do
       lTrue = length js'Trues
   return $ fromInteger (toInteger lTrue) / fromInteger (toInteger l)
   where
-    file = "work" </> "randomCheck" ++ show just ++ show paramCNF <.> "txt"
+    file = "SolutionSpaceRatioInRandom" </> show just ++ show paramCNF <.> "txt"
     randomCheck just nIteration paramCNF = do
       existFile <- doesFileExist file
       continue <- do

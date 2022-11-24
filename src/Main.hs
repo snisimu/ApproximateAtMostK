@@ -1,8 +1,6 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE BlockArguments #-}
 
--- stack ghci --ghc-options -w
-
 module Main where
 
 import Prelude hiding (not, product)

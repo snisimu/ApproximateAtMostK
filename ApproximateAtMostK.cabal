@@ -1,8 +1,8 @@
-name:                AtMostK
+name:                ApproximateAtMostK
 version:             0.1.0.0
 -- synopsis:
 -- description:
-homepage:            https://github.com/githubuser/AtMostK#readme
+homepage:            https://github.com/githubuser/ApproximateAtMostK#readme
 license:             BSD3
 license-file:        LICENSE
 author:              Author name here
