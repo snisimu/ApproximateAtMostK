@@ -2,17 +2,16 @@ name:                ApproximateAtMostK
 version:             0.1.0.0
 -- synopsis:
 -- description:
-homepage:            https://github.com/githubuser/ApproximateAtMostK#readme
+homepage:            https://github.com/snisimu/ApproximateAtMostK#readme
 license:             BSD3
 license-file:        LICENSE
-author:              Author name here
-maintainer:          example@example.com
-copyright:           2022 Author name here
-category:            Web
+author:              Shunji Nishimura
+maintainer:          snisimu@gmail.com
+copyright:           2022 Shunji Nishimura
+category:            Research
 build-type:          Simple
 cabal-version:       >=1.10
 extra-source-files:  README.md
-                     CHANGELOG.md
 
 executable TheBestEfficiencies
   hs-source-dirs:      src
