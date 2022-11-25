@@ -25,7 +25,7 @@ import Approximate.Evaluation
 
 reportConventionals :: KN -> IO ()
 reportConventionals (k, n) = do
-  putStrLn "binomial"; reportOf $ binomial id (literalXs n) k
+  -- putStrLn "binomial"; reportOf $ binomial id (literalXs n) k
   putStrLn "binary"; reportOf $ binary id (literalXs n) k
   putStrLn "counter"; reportOf $ counter id (literalXs n) k
   putStrLn "commander(+counter)"; reportOf $ commanderWith counter id (literalXs n) k
