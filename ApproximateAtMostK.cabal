@@ -36,6 +36,7 @@ executable TheBestEfficiencies
                       , Approximate.Lib
                       , Approximate.Encoding
                       , Approximate.Evaluation
+                      , Approximate.Problem
   build-depends:       base >= 4.7 && < 5
                      , directory
                      , filepath
