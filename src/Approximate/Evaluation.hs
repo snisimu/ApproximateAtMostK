@@ -174,7 +174,7 @@ efficiency just nLiteralOther nParamCNFs (no, paramCNF) = do
   let e = pRate / literalRate
       strItem = show no ++ "/" ++ show nParamCNFs ++ " " ++ show just ++ " " ++ show paramCNF ++ " -> "
   putStrLn $ strItem ++ printf "%.8f" e
-  appendFile "efficiency.log" $ strItem ++ show e ++ "\n"
+  -- appendFile "efficiency.log" $ strItem ++ show e ++ "\n"
   return e
 
 theBestEfficiency :: Bool -> KN -> IO (Float, ParameterCNF)
