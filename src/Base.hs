@@ -110,10 +110,11 @@ printCNF :: CNF -> IO ()
 printCNF = do
   mapM_ \literals -> do
     putStrLn $ intercalate " or " $ flip map literals \(bl, v) ->
-      (if bl then "" else "~ ") ++
-        case v of
-          Scope sID v -> "(" ++ sID ++ ")" ++ show v
-          _ -> show v
+      (if bl then "" else "~ ") ++ showVar v
+  where
+    showVar = \case
+      Scope sID v -> "(" ++ sID ++ ")" ++ showVar v
+      v -> show v
 showSIDs sIDs = if null sIDs
   then ""
   else "(" ++ (intercalate ">" $ reverse sIDs) ++ ")"

@@ -170,11 +170,11 @@ efficiency just nLiteralOther nParamCNFs (no, paramCNF) = do
   let (k, n) = knOfTree paramT k'
       lApprox = sum (map length $ approxOrderWith binomial id paramT k') + nFalse + nTrue
       literalRate = fromInteger (toInteger lApprox) / fromInteger (toInteger nLiteralOther) :: Float
-  putStr $ " " ++ show no ++ "/" ++ show nParamCNFs ++ " "
-    ++ show just ++ " " ++ show paramCNF ++ " -> "
   pRate <- solutionSpaceRatio just paramCNF
   let e = pRate / literalRate
-  putStrLn $ printf "%.8f" e
+      strItem = show no ++ "/" ++ show nParamCNFs ++ " " ++ show just ++ " " ++ show paramCNF ++ " -> "
+  putStrLn $ strItem ++ printf "%.8f" e
+  appendFile "efficiency.log" $ strItem ++ show e ++ "\n"
   return e
 
 theBestEfficiency :: Bool -> KN -> IO (Float, ParameterCNF)
