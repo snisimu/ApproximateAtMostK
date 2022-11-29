@@ -28,7 +28,7 @@ executable TheBestEfficiencies
                        -Wredundant-constraints
   other-modules:        Base
                       , Binomial
-                      , Birary
+                      , Binary
                       , Counter
                       , Commander
                       , Product

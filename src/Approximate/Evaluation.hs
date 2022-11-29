@@ -73,7 +73,7 @@ solutionSpaceRatio just paramCNF = do
       ((paramT, k'), (nFalse, nTrue)) = paramCNF
       (k, n) = knOfSpace paramCNF
       nSpace = combinationNum just (toInteger k, toInteger n) :: Integer
-  putStrLn $ " space size " ++ show (k, n) ++ ": " ++ show nSpace ++ " " -- [debug]
+  -- putStrLn $ " space size " ++ show (k, n) ++ ": " ++ show nSpace ++ " " -- [debug]
   if iterationThreshold < nSpace
     then solutionSpaceRatioInRandom just paramCNF
     else do
@@ -82,18 +82,18 @@ solutionSpaceRatio just paramCNF = do
             else [] : concatMap (combinations [0..n-1]) [1..k]
           check jss = forM jss \js -> do
             bl <- isInTheSolutionSpace paramCNF js
-            print (js, bl) -- [debug]
+            -- print (js, bl) -- [debug]
             return (js, bl)
       js'bls <- check jss
       let js'Trues = filter snd js'bls
           l = length js'bls
           lTrue = length js'Trues
-      print "solutionSpaceRatio: done" -- [debug]
+      -- print "solutionSpaceRatio: done" -- [debug]
       return $ fromInteger (toInteger lTrue) / fromInteger (toInteger l)
 
 solutionSpaceRatioInRandom :: Bool -> ParameterCNF -> IO Float
 solutionSpaceRatioInRandom just paramCNF = do
-  print "in randam" -- [debug]
+  -- print "in randam" -- [debug]
   let nIteration = 1000 -- or 10000
   randomCheck just nIteration paramCNF
   js'bs <- (map (read :: String -> ([Int], Bool)) . lines) <$> readFile file
@@ -134,12 +134,17 @@ solutionSpaceRatioInRandom just paramCNF = do
 
 parameterTreesAt :: Int -> [ParameterTree]
 parameterTreesAt n = 
-  let fs0s = factorss n
+  let atMostLimit = 20
+      fs0s = factorss n
       fs1s = filter ((<=) 3 . length) fs0s
       fs2ss = nub $ concatMap permutations fs1s
-      params = concatMap makeParams fs2ss
+      param0s = concatMap makeParams fs2ss
+      param1s = flip filter param0s \(hws, m) -> 
+        let nums = map (\(h,w) -> h*w) hws
+            num = fst (last hws) * m
+        in  and $ map ((>=) atMostLimit) $ num : nums
   -- forM_ params $ print . checkParameter
-  in  params
+  in  param1s
   where
     makeParams :: [Int] -> [ParameterTree]
     makeParams (m : hn : wn : ws) = mkParams [[(hn, wn)]] (hn*wn) ws
@@ -174,9 +179,8 @@ efficiency just nLiteralOther nParamCNFs (no, paramCNF) = do
       lApprox = sum (map length $ approxOrderWith binomial id paramT k') + nFalse + nTrue
       literalRate = fromInteger (toInteger lApprox) / fromInteger (toInteger nLiteralOther) :: Float
   pRate <- solutionSpaceRatio just paramCNF
-  print pRate -- [debug]
-  exitFailure
-  print lApprox -- [debug]
+  -- print pRate -- [debug]
+  -- print lApprox -- [debug]
   let e = pRate / literalRate
       strItem = show no ++ "/" ++ show nParamCNFs ++ " " ++ show just ++ " " ++ show paramCNF ++ " -> "
   putStrLn $ strItem ++ printf "%.8f" e
@@ -189,7 +193,7 @@ theBestEfficiency just (k, n) = do
       paramCNFs = parameterCNFsFor (k, n)
       nParamCNFs = length paramCNFs
   effs <- forM (zip [1..] paramCNFs) \iParamCNF -> do
-    print iParamCNF -- [debug]
+    -- print iParamCNF -- [debug]
     efficiency just lCounter nParamCNFs iParamCNF
   let effParamPluss = sort $ zip effs paramCNFs
   return $ last effParamPluss
@@ -209,7 +213,9 @@ theBestEfficiencies = do
   theBestEfficiencies
 
 makeTheBestEfficienciesInit = do
-  forM_ [10..16] \n -> do
-    let k = n `div` 2
-    forM_ [1..k] \k' ->
-      putStrLn $ show $ (((k',n),Nothing) :: ((Int, Int), Maybe ((Float, ParameterCNF), (Float, ParameterCNF))))
+  let f n = forM_ [2..n-2] \k ->
+        putStrLn $ show $ (((k,n),Nothing) :: ((Int, Int), Maybe ((Float, ParameterCNF), (Float, ParameterCNF))))
+  forM_ [10..20] f
+  f 30
+  f 50
+  f 100

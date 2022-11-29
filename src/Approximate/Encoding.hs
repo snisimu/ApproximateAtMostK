@@ -55,7 +55,9 @@ approxOrderPwith atMost vScope hws =
         in  flip concatMap [1..h] \j ->
               let theScope = vScope . Scope ("approxOrderPwith:" ++ show is ++ show j)
               in  map ((:) $ p is j) $ 
+                    --
                     atMost theScope ps $ (h'*w'*(j-1)) `div` h
+                    --
       hLeaf = if null hws then 1 else fst $ last hws
       isLeafs =
         let iss = map fst is'hs
