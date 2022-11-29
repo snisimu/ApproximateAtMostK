@@ -73,7 +73,7 @@ solutionSpaceRatio just paramCNF = do
       ((paramT, k'), (nFalse, nTrue)) = paramCNF
       (k, n) = knOfSpace paramCNF
       nSpace = combinationNum just (toInteger k, toInteger n) :: Integer
-  -- putStr $ " space size " ++ show (k, n) ++ ": " ++ show nSpace ++ " " -- [debug]
+  putStrLn $ " space size " ++ show (k, n) ++ ": " ++ show nSpace ++ " " -- [debug]
   if iterationThreshold < nSpace
     then solutionSpaceRatioInRandom just paramCNF
     else do
@@ -82,15 +82,18 @@ solutionSpaceRatio just paramCNF = do
             else [] : concatMap (combinations [0..n-1]) [1..k]
           check jss = forM jss \js -> do
             bl <- isInTheSolutionSpace paramCNF js
+            print (js, bl) -- [debug]
             return (js, bl)
       js'bls <- check jss
       let js'Trues = filter snd js'bls
           l = length js'bls
           lTrue = length js'Trues
+      print "solutionSpaceRatio: done" -- [debug]
       return $ fromInteger (toInteger lTrue) / fromInteger (toInteger l)
 
 solutionSpaceRatioInRandom :: Bool -> ParameterCNF -> IO Float
 solutionSpaceRatioInRandom just paramCNF = do
+  print "in randam" -- [debug]
   let nIteration = 1000 -- or 10000
   randomCheck just nIteration paramCNF
   js'bs <- (map (read :: String -> ([Int], Bool)) . lines) <$> readFile file
@@ -171,6 +174,9 @@ efficiency just nLiteralOther nParamCNFs (no, paramCNF) = do
       lApprox = sum (map length $ approxOrderWith binomial id paramT k') + nFalse + nTrue
       literalRate = fromInteger (toInteger lApprox) / fromInteger (toInteger nLiteralOther) :: Float
   pRate <- solutionSpaceRatio just paramCNF
+  print pRate -- [debug]
+  exitFailure
+  print lApprox -- [debug]
   let e = pRate / literalRate
       strItem = show no ++ "/" ++ show nParamCNFs ++ " " ++ show just ++ " " ++ show paramCNF ++ " -> "
   putStrLn $ strItem ++ printf "%.8f" e
@@ -182,7 +188,9 @@ theBestEfficiency just (k, n) = do
   let lCounter = sum $ map length $ counter id (literalXs n) k
       paramCNFs = parameterCNFsFor (k, n)
       nParamCNFs = length paramCNFs
-  effs <- forM (zip [1..] paramCNFs) $ efficiency just lCounter nParamCNFs
+  effs <- forM (zip [1..] paramCNFs) \iParamCNF -> do
+    print iParamCNF -- [debug]
+    efficiency just lCounter nParamCNFs iParamCNF
   let effParamPluss = sort $ zip effs paramCNFs
   return $ last effParamPluss
 
