@@ -11,15 +11,13 @@ a = 2
 pN = 10/100
 pK = 1/100
 
-n = 20
-k = n `div` 2
-
-pOf i =
+solutionNum (k,n) i =
     let n' = fromInteger $ toInteger n
         k' = fromInteger $ toInteger k
         i' = fromInteger $ toInteger i
-        x = (pN-pK) / (n'-k') * i' - (pN-pK) / (n'-k') * n' + pN
-    in  if x < 0
+        p' = (pN-pK) / (n'-k') * i' - (pN-pK) / (n'-k') * n' + pN
+        p = if p' < 0
             then 0
-            else x
+            else p'
+    in  p * solutionNumAll
     -- > forM_ [0..n] $ \i -> putStrLn (show i ++ ": " ++ printf "%.8f" (pOf i))
