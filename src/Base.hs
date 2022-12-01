@@ -51,6 +51,13 @@ distribution = foldl1 (liftA2 (++)) . map (map return)
 randomChoice :: [a] -> IO a
 randomChoice as = newStdGen >>= \gen -> return $ as !! (fst (random gen) `mod` length as)
 
+roundUpOn5 :: (RealFrac a, Integral b) => a -> b
+roundUpOn5 x
+  | n <= -0.5 = m - 1
+  | n >= 0.5 = m + 1
+  | otherwise = m
+  where (m, n) = properFraction x
+
 -- MyLib candidate
 
 factorss :: Int -> [[Int]]
@@ -70,6 +77,8 @@ combinationNum :: Integral a => Bool -> (a, a) -> a
 combinationNum just (r, n) = if just
   then (product [1..n]) `div` (product [1..r] * product [1..n-r])
   else sum $ map (\r' -> combinationNum True (r', n)) [0..r]
+
+random0toLT n = newStdGen >>= \gen -> return $ fst (random gen) `mod` n
 
 -- 
 

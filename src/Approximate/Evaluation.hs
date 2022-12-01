@@ -67,68 +67,116 @@ isInTheSolutionSpace (((hws, m), k'), (nFalse, nTrue)) js = do
   -- print z -- [debug]
   return $ z <= k'
 
-solutionSpaceRatio :: Bool -> ParameterCNF -> IO Float
-solutionSpaceRatio just paramCNF = do
+solutionSpaceRatio :: Bool -> Bool -> ParameterCNF -> IO Float
+solutionSpaceRatio debug just paramCNF = do
   let iterationThreshold = 1000000
       ((paramT, k'), (nFalse, nTrue)) = paramCNF
       (k, n) = knOfSpace paramCNF
       nSpace = combinationNum just (toInteger k, toInteger n) :: Integer
-  -- putStrLn $ " space size " ++ show (k, n) ++ ": " ++ show nSpace ++ " " -- [debug]
+  when debug $
+    putStrLn $ " space size " ++ show (k, n) ++ ": " ++ show nSpace ++ " "
   if iterationThreshold < nSpace
-    then solutionSpaceRatioInRandom just paramCNF
+    then solutionSpaceRatioInRandom debug just paramCNF
     else do
       let jss = if just
             then combinations [0..n-1] k
             else [] : concatMap (combinations [0..n-1]) [1..k]
           check jss = forM jss \js -> do
             bl <- isInTheSolutionSpace paramCNF js
-            -- print (js, bl) -- [debug]
+            when debug $ print (js, bl)
             return (js, bl)
       js'bls <- check jss
       let js'Trues = filter snd js'bls
           l = length js'bls
           lTrue = length js'Trues
-      -- print "solutionSpaceRatio: done" -- [debug]
+      when debug $ print "solutionSpaceRatio: done"
       return $ fromInteger (toInteger lTrue) / fromInteger (toInteger l)
 
-solutionSpaceRatioInRandom :: Bool -> ParameterCNF -> IO Float
-solutionSpaceRatioInRandom just paramCNF = do
-  -- print "in randam" -- [debug]
+solutionSpaceRatioInRandom :: Bool -> Bool -> ParameterCNF -> IO Float
+solutionSpaceRatioInRandom debug just paramCNF = do
   let nIteration = 1000 -- or 10000
-  randomCheck just nIteration paramCNF
+      limitRate = 1 / 1000000 -- genuine random or..
+      (k, n) = knOfSpace paramCNF
+      theRate = fromInteger (toInteger $ combinationNum just (k, n)) / fromInteger (toInteger $ combinationNum just (n, n))
+      file = "SolutionSpaceRatioInRandom" </> show just ++ show paramCNF <.> "txt"
+  when debug $ putStrLn $ "theRate: " ++ show theRate
+  -- 
+  if limitRate < theRate
+    then do
+      when debug $ putStrLn "in genuine random"
+      checkInGenuineRandom debug just nIteration paramCNF file
+    else do
+      when debug $ putStrLn "in pseudo random"
+      checkInPseudoRandom debug just nIteration paramCNF file
+  -- 
   js'bs <- (map (read :: String -> ([Int], Bool)) . lines) <$> readFile file
   let js'Trues = filter snd js'bs
       l = length js'bs
       lTrue = length js'Trues
   return $ fromInteger (toInteger lTrue) / fromInteger (toInteger l)
+  -- > solutionSpaceRatioInRandom True False (((replicate 2 (2,2),2),2),(0,0))
+
+checkInGenuineRandom :: Bool -> Bool -> Int -> ParameterCNF -> FilePath -> IO ()
+checkInGenuineRandom debug just nIteration paramCNF file = do
+  existFile <- doesFileExist file
+  continue <- do
+    if existFile
+      then do
+        l <- (length . lines) <$> readFile file
+        return $ l < nIteration
+      else return True
+  when continue $ do
+    let (k, n) = knOfSpace paramCNF
+    jss <- if existFile
+      then (map (fst . (read :: String -> ([Int], Bool))) . lines) <$> readFile file
+      else return []
+    -- 
+    js <- findJs just (k, n) jss
+    -- 
+    bl <- isInTheSolutionSpace paramCNF js
+    when debug $ print (js, bl)
+    appendFile file $ show (js, bl) ++ "\n"
+    checkInGenuineRandom debug just nIteration paramCNF file
   where
-    file = "SolutionSpaceRatioInRandom" </> show just ++ show paramCNF <.> "txt"
-    randomCheck just nIteration paramCNF = do
-      existFile <- doesFileExist file
-      continue <- do
-        if existFile
-          then do
-            l <- (length . lines) <$> readFile file
-            return $ l < nIteration
-          else return True
-      when continue $ do
-        let (k, n) = knOfSpace paramCNF
-        jss <- if existFile
-          then (map (fst . (read :: String -> ([Int], Bool))) . lines) <$> readFile file
-          else return []
-        let findJs just = do
-              zeroOnes <- sequence $ replicate n $ random0toLT 2 :: IO [Int]
-              let js = findIndices ((==) 1) zeroOnes
-              if ((not just && length js <= k) || (just && length js == k)) && (not $ elem js jss)
-                then return js
-                else findJs just
-        js <- findJs just
-        bl <- isInTheSolutionSpace paramCNF js
-        -- print (js, bl) -- [debug]
-        appendFile file $ show (js, bl) ++ "\n"
-        randomCheck just nIteration paramCNF
-      where
-        random0toLT n = newStdGen >>= \gen -> return $ fst (random gen) `mod` n
+    findJs just (k, n) jss = do
+      zeroOnes <- sequence $ replicate n $ random0toLT 2 :: IO [Int]
+      let js = findIndices ((==) 1) zeroOnes
+      if ((not just && length js <= k) || (just && length js == k)) && (notElem js jss)
+        then return js
+        else findJs just (k, n) jss
+
+checkInPseudoRandom :: Bool -> Bool -> Int -> ParameterCNF -> FilePath -> IO ()
+checkInPseudoRandom debug just nIteration paramCNF file = do
+  existFile <- doesFileExist file
+  unless existFile $ do
+    let (k, n) = knOfSpace paramCNF
+        nIs = if just
+          then flip map [0..n] \k' -> if k' == k then nIteration else 0
+          else 
+            let r0s :: [Float]
+                r0s= flip map [0..n] \k' -> fromInteger (toInteger $ combinationNum True (k', n)) / fromInteger (toInteger $ combinationNum False (n, n))
+                r1s :: [Float]
+                r1s = flip map r0s \r -> r / sum r0s
+            in  flip map r1s \r -> roundUpOn5 $ r * fromInteger (toInteger nIteration)
+    when debug $ print nIs
+    let findJss k' jss = \case
+          0 -> return ()
+          m -> do
+            js <- findJs k' jss
+            findJss k' (js : jss) $ m-1
+          where
+            findJs k' jss = do
+              -- when debug $ print (k',jss) -- [debug]
+              i <- random0toLT $ combinationNum True (k', n)
+              let js = combinations [0..n-1] k' !! i
+              if elem js jss
+                then findJs k' jss
+                else do
+                  bl <- isInTheSolutionSpace paramCNF js
+                  when debug $ print (js, bl)
+                  appendFile file $ show (js, bl) ++ "\n"
+                  return js
+    forM_ [1..n] \k' -> findJss k' [] $ nIs !! k'
 
 --
 
@@ -172,29 +220,30 @@ parameterCNFsFor (k, n) =
   where
   -- > mapM_ print $ parameterCNFsFor (4,12)
 
-efficiency :: Bool -> Int -> Int -> (Int, ParameterCNF) -> IO Float
-efficiency just nLiteralOther nParamCNFs (no, paramCNF) = do
+efficiency :: Bool -> Bool -> Int -> Int -> (Int, ParameterCNF) -> IO Float
+efficiency debug just nLiteralOther nParamCNFs (no, paramCNF) = do
   let ((paramT, k'), (nFalse, nTrue)) = paramCNF
   let (k, n) = knOfTree paramT k'
       lApprox = sum (map length $ approxOrderWith binomial id paramT k') + nFalse + nTrue
       literalRate = fromInteger (toInteger lApprox) / fromInteger (toInteger nLiteralOther) :: Float
-  pRate <- solutionSpaceRatio just paramCNF
-  -- print pRate -- [debug]
-  -- print lApprox -- [debug]
+  pRate <- solutionSpaceRatio debug just paramCNF
+  when debug $ do
+    print pRate
+    print lApprox
   let e = pRate / literalRate
       strItem = show no ++ "/" ++ show nParamCNFs ++ " " ++ show just ++ " " ++ show paramCNF ++ " -> "
   putStrLn $ strItem ++ printf "%.8f" e
-  -- appendFile "efficiency.log" $ strItem ++ show e ++ "\n"
+  -- appendFile "efficiency.log" $ strItem ++ show e ++ "\n" -- [just in case]
   return e
 
-theBestEfficiency :: Bool -> KN -> IO (Float, ParameterCNF)
-theBestEfficiency just (k, n) = do
+theBestEfficiency :: Bool -> Bool -> KN -> IO (Float, ParameterCNF)
+theBestEfficiency debug just (k, n) = do
   let lCounter = sum $ map length $ counter id (literalXs n) k
       paramCNFs = parameterCNFsFor (k, n)
       nParamCNFs = length paramCNFs
   effs <- forM (zip [1..] paramCNFs) \iParamCNF -> do
-    -- print iParamCNF -- [debug]
-    efficiency just lCounter nParamCNFs iParamCNF
+    when debug $ print iParamCNF
+    efficiency debug just lCounter nParamCNFs iParamCNF
   let effParamPluss = sort $ zip effs paramCNFs
   return $ last effParamPluss
 
@@ -204,8 +253,8 @@ theBestEfficiencies = do
   knMbs <- (map (read :: String -> ((Int, Int), Maybe ((Float, ParameterCNF), (Float, ParameterCNF)))) . lines) <$>
     System.IO.Strict.readFile file
   let (knMbHds, ((k, n), _) : knMbTls) = break (isNothing . snd) knMbs
-  eParamPlusOverall <- theBestEfficiency False (k, n)
-  eParamPlusJust <- theBestEfficiency True (k, n)
+  eParamPlusOverall <- theBestEfficiency False False (k, n)
+  eParamPlusJust <- theBestEfficiency False True (k, n)
   let the = (eParamPlusOverall, eParamPlusJust)
   putStrLn $ "\n" ++ show (k, n) ++ "\n" ++ show the ++ "\n"
   writeFile file $ unlines $ map show $
