@@ -22,6 +22,7 @@ import Product
 import Approximate.Base
 import Approximate.Encoding
 import Approximate.Evaluation
+import Approximate.Problem
 
 reportConventionals :: KN -> IO ()
 reportConventionals (k, n) = do

@@ -46,7 +46,9 @@ allCombinationssOf :: [a] -> Int -> [[a]]
 allCombinationssOf as = foldr (liftA2 (:)) [[]] . flip replicate as
 
 distribution :: [[a]] -> [[a]]
-distribution = foldl1 (liftA2 (++)) . map (map return)
+distribution = \case
+  [] -> []
+  as -> foldl1 (liftA2 (++)) $ map (map return) as
 
 randomChoice :: [a] -> IO a
 randomChoice as = newStdGen >>= \gen -> return $ as !! (fst (random gen) `mod` length as)
