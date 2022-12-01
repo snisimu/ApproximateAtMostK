@@ -162,21 +162,22 @@ checkInPseudoRandom debug just nIteration paramCNF file = do
                 r1s = flip map r0s \r -> r / sum r0s
             return $ flip map r1s \r -> roundUpOn5 $ r * fromInteger (toInteger nIteration)
     when debug $ print nIs
-    let findJss k' jss = \case
+    let findJss :: Int -> [[Int]] -> Int -> IO ()
+        findJss k' jss = \case
           0 -> return ()
           m -> do
+            when debug $ putStrLn $ "m: " ++ show m
             js <- findJs k' jss
             findJss k' (js : jss) $ m-1
           where
             findJs k' jss = do
-              when debug $ print (k',jss) -- [debug]
-              i <- random0toLT $ combinationNum True (k', n)
-              let js = combinations [0..n-1] k' !! i
-              print js -- [debug]
+              when debug $ putStrLn $ "(k', n): " ++ show (k', n)
+              i <- random0toLT $ combinationNum True (toInteger k', toInteger n)
+              when debug $ putStrLn $ "i: " ++ show i
+              let js = (combinations [0..n-1] k') !! (fromInteger i)
               if elem js jss
                 then findJs k' jss
                 else do
-                  print js -- [debug]
                   bl <- isInTheSolutionSpace paramCNF js
                   when debug $ print (js, bl)
                   appendFile file $ show (js, bl) ++ "\n"
