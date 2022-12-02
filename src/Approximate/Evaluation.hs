@@ -94,13 +94,13 @@ solutionSpaceRatio debug just paramCNF = do
 
 solutionSpaceRatioInRandom :: Bool -> Bool -> ParameterCNF -> IO Float
 solutionSpaceRatioInRandom debug just paramCNF = do
-  let nIteration = 1000 -- or 10000
-      limitRate = 1 / 1000000 -- genuine random or..
+  let nIteration = 100 -- 1000 -- or 10000
+      limitRate = 1 / 1000 -- 1000000 -- genuine random or..
       file = "SolutionSpaceRatioInRandom" </> show just ++ show paramCNF <.> "txt"
       (k, n) = knOfSpace paramCNF
       k' = toInteger k :: Integer
       n' = toInteger n :: Integer
-      theRate = fromInteger (combinationNum just (k', n')) / fromInteger (combinationNum just (n', n')) :: Float
+      theRate = fromInteger (combinationNum just (k', n')) / fromInteger (combinationNum False (n', n')) :: Float
   when debug $ putStrLn $ "theRate: " ++ show theRate
   -- 
   if limitRate < theRate
