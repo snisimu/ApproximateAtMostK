@@ -93,6 +93,7 @@ data Var
   | C Int Int -- commander
   | A Int [Int] -- product
   | P [Int] Int -- approximate
+  | Repr Int -- problem
   | Scope ScopeID Var
    deriving (Eq, Show)
 

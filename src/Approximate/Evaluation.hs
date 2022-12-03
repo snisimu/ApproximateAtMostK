@@ -26,19 +26,6 @@ import Approximate.Base
 import Approximate.Lib
 import Approximate.Encoding
 
-knOfTree :: ParameterTree -> Int -> KN
-knOfTree (hws, m) k' = 
-  let (h, w) = head hws
-      (h', w') = last hws
-      wAll = product $ map snd hws
-      n = h' * m * wAll
-  in  ((k'*n) `div` (h*w), n)
-
-knOfSpace :: ParameterCNF -> KN
-knOfSpace ((paramT, k'), (nFalse, nTrue)) = 
-  let (k0, n0) = knOfTree paramT k'
-  in  (k0 - nTrue, n0 - nFalse - nTrue)
-
 isInTheSolutionSpace :: ParameterCNF -> [Int] -> IO Bool
 isInTheSolutionSpace (((hws, m), k'), (nFalse, nTrue)) js = do
   let (h', w') = head hws
@@ -252,8 +239,8 @@ theBestEfficiency debug just (k, n) = do
   effs <- forM (zip [1..] paramCNFs) \iParamCNF -> do
     when debug $ print iParamCNF
     efficiency debug just lCounter nParamCNFs iParamCNF
-  let effParamPluss = sort $ zip effs paramCNFs
-  return $ last effParamPluss
+  let effParamCNFs = sort $ zip effs paramCNFs
+  return $ last effParamCNFs
 
 theBestEfficiencies :: IO ()
 theBestEfficiencies = do

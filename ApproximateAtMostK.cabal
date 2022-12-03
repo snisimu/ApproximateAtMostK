@@ -27,6 +27,7 @@ executable TheBestEfficiencies
                        -Wpartial-fields
                        -Wredundant-constraints
   other-modules:        Base
+                      , Lib
                       , Binomial
                       , Binary
                       , Counter
