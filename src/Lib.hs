@@ -3,10 +3,26 @@
 
 module Lib where
 
+import Prelude hiding (not)
+import qualified Prelude (not)
+
 import System.Exit
+
 import Control.Monad
+
 import Data.List
+
 import Base
+
+atLeastBy :: NumberConstraint -> NumberConstraint
+atLeastBy atMost vScope literals k
+  = atMost vScope (map not literals) (length literals - k)
+
+reportOf :: CNF -> IO ()
+reportOf cnf = do
+  putStrLn $ "aux vars: " ++ show (length $ auxsOf cnf)
+  putStrLn $ "clauses : " ++ show (length cnf)
+  putStrLn $ "literals: " ++ show (sum $ map length cnf)
 
 strDIMACSwithTrue :: CNF -> [Int] -> IO String
 strDIMACSwithTrue cnf ts = do

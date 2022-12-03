@@ -15,6 +15,7 @@ import Data.Maybe
 import Data.List
 
 import Base
+import Lib
 import Binomial
 
 import Approximate.Base

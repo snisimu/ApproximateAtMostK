@@ -14,6 +14,7 @@ import Data.Tuple
 import Data.List
 
 import Base
+import Lib
 import Binomial
 import Binary
 import Counter

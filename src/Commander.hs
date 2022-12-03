@@ -10,6 +10,7 @@ import Control.Monad
 import Data.Maybe
 
 import Base
+import Lib
 import Binomial
 
 sFor :: KN -> Int

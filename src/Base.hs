@@ -60,6 +60,9 @@ roundUpOn5 x
   | otherwise = m
   where (m, n) = properFraction x
 
+showZero :: Int -> Int -> String
+showZero m n = replicate (length $ takeWhile (\p -> n < 10^p) $ reverse [1..m-1]) '0' ++ show n
+
 -- MyLib candidate
 
 factorss :: Int -> [[Int]]
@@ -122,7 +125,7 @@ printCNF :: CNF -> IO ()
 printCNF = do
   mapM_ \literals -> do
     putStrLn $ intercalate " or " $ flip map literals \(bl, v) ->
-      (if bl then "" else "~ ") ++ showVar v
+        (if bl then "" else "~ ") ++ showVar v
   where
     showVar = \case
       Scope sID v -> "(" ++ sID ++ ")" ++ showVar v
@@ -135,14 +138,4 @@ type NumberConstraint
   = VarScope -> [Literal] -> Int -> CNF
 type VarScope = Var -> Var
 
-atLeastBy :: NumberConstraint -> NumberConstraint
-atLeastBy atMost vScope literals k
-  = atMost vScope (map not literals) (length literals - k)
-
 type KN = (Int, Int)
-
-reportOf :: CNF -> IO ()
-reportOf cnf = do
-  putStrLn $ "aux vars: " ++ show (length $ auxsOf cnf)
-  putStrLn $ "clauses : " ++ show (length cnf)
-  putStrLn $ "literals: " ++ show (sum $ map length cnf)
