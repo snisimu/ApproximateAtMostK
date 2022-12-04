@@ -1,12 +1,12 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE BlockArguments #-}
 
-module Counter (counter) where
+module Conventional.Counter (counter) where
          
 import Prelude hiding (not)
 
 import Base
-import Binomial
+import Conventional.Binomial
 
 counter :: NumberConstraint
 counter vScope xs 0 = binomial vScope xs 0

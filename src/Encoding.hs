@@ -1,7 +1,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE BlockArguments #-}
 
-module Approximate.Encoding where
+module Encoding where
 
 import Prelude hiding (not)
 
@@ -16,10 +16,7 @@ import Data.List
 
 import Base
 import Lib
-import Binomial
-
-import Approximate.Base
-import Approximate.Lib
+import Conventional.Binomial
 
 approxOrderWith :: NumberConstraint -> VarScope -> (ParameterTree, Int) -> CNF
 approxOrderWith atMost vScope ((hws, m), k) =

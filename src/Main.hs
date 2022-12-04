@@ -15,15 +15,14 @@ import Data.List
 
 import Base
 import Lib
-import Binomial
-import Binary
-import Counter
-import Commander
-import Product
-import Approximate.Base
-import Approximate.Encoding
-import Approximate.Evaluation
-import Approximate.Problem
+import Conventional.Binomial
+import Conventional.Binary
+import Conventional.Counter
+import Conventional.Commander
+import Conventional.Product
+import Encoding
+import Evaluation
+import Problem
 
 reportConventionals :: KN -> IO ()
 reportConventionals (k, n) = do

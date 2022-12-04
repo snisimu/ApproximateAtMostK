@@ -139,3 +139,13 @@ type NumberConstraint
 type VarScope = Var -> Var
 
 type KN = (Int, Int)
+
+-- for approximate
+
+type Height = Int
+type Width = Int
+type HW = (Height, Width)
+
+type ParameterTree = ([HW], Int)
+
+type ParameterCNF = ((ParameterTree, Int), (Int, Int))

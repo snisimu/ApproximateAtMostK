@@ -1,7 +1,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE BlockArguments #-}
 
-module Approximate.Problem where
+module Problem where
 
 import System.FilePath
 
@@ -11,12 +11,10 @@ import Text.Printf
 
 import Base
 import Lib
-import Binomial
-import Counter
-import Approximate.Base
-import Approximate.Lib
-import Approximate.Encoding
-import Approximate.Evaluation
+import Conventional.Binomial
+import Conventional.Counter
+import Encoding
+import Evaluation
 
 pN = 10/100
 pK = 1/100

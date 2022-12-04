@@ -1,7 +1,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE BlockArguments #-}
 
-module Binary (binary) where
+module Conventional.Binary (binary) where
 
 import Prelude hiding (not)
 

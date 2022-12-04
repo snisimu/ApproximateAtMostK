@@ -1,7 +1,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE BlockArguments #-}
 
-module Commander (commanderWith) where
+module Conventional.Commander (commanderWith) where
 
 import Prelude hiding (not)
 
@@ -11,7 +11,7 @@ import Data.Maybe
 
 import Base
 import Lib
-import Binomial
+import Conventional.Binomial
 
 sFor :: KN -> Int
 sFor (k, n) = k + n `div` 3

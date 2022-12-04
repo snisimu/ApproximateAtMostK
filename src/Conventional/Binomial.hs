@@ -1,4 +1,4 @@
-module Binomial (binomial) where
+module Conventional.Binomial (binomial) where
          
 import Prelude hiding (not)
 

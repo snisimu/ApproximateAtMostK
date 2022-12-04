@@ -1,7 +1,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE BlockArguments #-}
 
-module Approximate.Evaluation where
+module Evaluation where
 
 import System.Exit
 import System.Directory
@@ -19,12 +19,10 @@ import Data.Functor.Identity
 import Text.Printf
 
 import Base hiding (not)
-import Binomial
-import Counter
-
-import Approximate.Base
-import Approximate.Lib
-import Approximate.Encoding
+import Lib
+import Conventional.Binomial
+import Conventional.Counter
+import Encoding
 
 isInTheSolutionSpace :: ParameterCNF -> [Int] -> IO Bool
 isInTheSolutionSpace (((hws, m), k'), (nFalse, nTrue)) js = do
