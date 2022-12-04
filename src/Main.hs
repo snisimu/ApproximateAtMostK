@@ -41,4 +41,7 @@ reportLiterals (k, n) = do
   -- putStrLn $ "product(+counter): " ++ (show $ sum $ map length $ productWith counter id (literalXs n) k)
 
 main :: IO ()
-main = writeProblems -- theBestEfficiencies
+main = do
+  writeProblem ((([(2,2),(2,3)],2),2),(2,2)) Nothing
+  -- writeProblems
+  -- theBestEfficiencies

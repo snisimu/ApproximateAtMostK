@@ -76,6 +76,7 @@ solutionSpaceRatio debug just paramCNF = do
           lTrue = length js'Trues
       when debug $ print "solutionSpaceRatio: done"
       return $ fromInteger (toInteger lTrue) / fromInteger (toInteger l)
+  -- > solutionSpaceRatio False False ((([(2,2),(2,3)],2),2),(2,2))
 
 solutionSpaceRatioInRandom :: Bool -> Bool -> ParameterCNF -> IO Float
 solutionSpaceRatioInRandom debug just paramCNF = do
