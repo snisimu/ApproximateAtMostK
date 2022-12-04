@@ -48,7 +48,7 @@ generateProblem (k, n) = do
         let num = nums !! k
             newSolution :: [[Int]] -> IO [Int]
             newSolution js's = do
-                putStrLn $ show k ++ "/" ++ show n ++ " - " ++ show (length js's) ++ "/" ++ show num -- [debug]
+                -- putStrLn $ show k ++ "/" ++ show n ++ " - " ++ show (length js's) ++ "/" ++ show num -- [debug]
                 i <- random0toLT $ combinationNum True (k, n)
                 let js = (combinations [0..n-1] k) !! i
                 if notElem js js's
@@ -77,7 +77,7 @@ generateProblem (k, n) = do
         nLitsss = length litsss
     let cnfRepr = return $ map (\i -> (True, Repr i)) [0..nLitsss-1]
     cnfXpre <- forM [0..nLitsss-1] \i -> do
-        putStrLn $ "distribution " ++ show i ++ "/" ++ show nLitsss -- [debug]
+        -- putStrLn $ "distribution " ++ show i ++ "/" ++ show nLitsss -- [debug]
         return $ map ((:) (False, Repr i)) $ distribution $ litsss !! i
     let cnfX = concat cnfXpre
     return $ cnfRepr ++ cnfX
@@ -88,7 +88,7 @@ writeProblem paramCNF mbNo = do
         (kT, nT) = knOfTree paramT k'
         (kS, nS) = knOfSpace paramCNF
     cnfSolution <- generateProblem (kS, nS)
-    let cnfAppr = approxOrderWith binomial id paramT k'
+    let cnfAppr = approxOrderWith binomial id (paramT, k')
         cnfFix = map (\i -> [(False, X i)]) [nT-nTrue-nFalse+1..nT-nTrue]
             ++ map (\i -> [(True, X i)]) [nT-nTrue+1..nT]
     let cnfApprox = cnfSolution ++ cnfAppr ++ cnfFix
@@ -98,7 +98,7 @@ writeProblem paramCNF mbNo = do
             Just no -> 
                 let file x = "CNF" </> "problem" ++ show paramCNF ++ "-" ++ showZero 3 no ++ "-" ++ x <.> "cnf"
                 in  (file "approx", file "counter")
-    print "writing.." -- [debug]
+    -- print "writing.." -- [debug]
     writeFile fileApprox =<< strDIMACSwithTrue cnfApprox []
     writeFile fileCounter =<< strDIMACSwithTrue cnfCounter []
     -- > writeProblem ((([(2,3)],2),3),(1,1)) Nothing -- (5,10)
@@ -108,4 +108,7 @@ writeProblem paramCNF mbNo = do
 writeProblems :: IO ()
 writeProblems = do
     let paramCNF = ((([(2,2),(2,3)],2),2),(2,2)) -- (10,20)
-    forM_ [1..100] $ writeProblem ((([(2,2),(2,3)],2),2),(2,2)) . Just
+    forM_ [8..100] $ writeProblem ((([(2,2),(2,3)],2),2),(2,2)) . Just
+
+compareToCounter :: IO ()
+compareToCounter = do

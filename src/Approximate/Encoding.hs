@@ -21,8 +21,8 @@ import Binomial
 import Approximate.Base
 import Approximate.Lib
 
-approxOrderWith :: NumberConstraint -> VarScope -> ParameterTree -> Int -> CNF
-approxOrderWith atMost vScope (hws, m) k =
+approxOrderWith :: NumberConstraint -> VarScope -> (ParameterTree, Int) -> CNF
+approxOrderWith atMost vScope ((hws, m), k) =
   let vScopeNext sID = vScope . Scope ("approxOrderWith:" ++ sID)
       p is j = (True, vScope $ P is j)
       (h, w) = head hws

@@ -219,7 +219,7 @@ efficiency :: Bool -> Bool -> Int -> Int -> (Int, ParameterCNF) -> IO Float
 efficiency debug just nLiteralOther nParamCNFs (no, paramCNF) = do
   let ((paramT, k'), (nFalse, nTrue)) = paramCNF
   let (k, n) = knOfTree paramT k'
-      lApprox = sum (map length $ approxOrderWith binomial id paramT k') + nFalse + nTrue
+      lApprox = sum (map length $ approxOrderWith binomial id (paramT, k')) + nFalse + nTrue
       literalRate = fromInteger (toInteger lApprox) / fromInteger (toInteger nLiteralOther) :: Float
   pRate <- solutionSpaceRatio debug just paramCNF
   when debug $ do
