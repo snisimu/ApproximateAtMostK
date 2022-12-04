@@ -4,8 +4,11 @@
 module Problem where
 
 import System.FilePath
+import System.Process
 
 import Control.Monad
+
+import Data.List.Extra
 
 import Text.Printf
 
@@ -69,7 +72,7 @@ generateProblem (k, n) = do
     let l = length litss
     -- print l -- [debug]
     let nChunk =
-            let limitChunk = 100000
+            let limitChunk = 1000000
             in  last $ takeWhile (\i -> n^i <= limitChunk) [1..]
     -- print nChunk -- [debug]
     let litsss = splitBy nChunk litss
@@ -106,18 +109,14 @@ writeProblem paramCNF mbNo = do
 
 writeProblems :: IO ()
 writeProblems = do
-    let paramCNF = ((([(2,2),(2,3)],2),2),(2,2)) -- (10,20)
-    forM_ [8..100] $ writeProblem ((([(2,2),(2,3)],2),2),(2,2)) . Just
+    let paramCNF = ((([(2,2),(2,3)],2),2),(2,2)) :: ParameterCNF -- (10,20)
+    forM_ [1..100] $ \i -> do
+        print i
+        writeProblem paramCNF $ Just i
 
-compareToCounter :: Int -> IO ()
-compareToCounter m = forM_ [1..m] \l -> do
-  let paramTk' = ((replicate l (2,2), 2), 2)
-      (k, n) = knOfTree paramTk'
-  print (k, n)
-  let nApprox = sum $ map length $ approxOrderWith binomial id paramTk'
-      nCounter = sum $ map length $ counter id (literalXs n) k
-  putStrLn $ "approx: " ++ show nApprox
-  putStrLn $ "counter: " ++ show nCounter
-  putStrLn $ showPercentage nApprox nCounter
-  e <- efficiency False False nCounter (paramTk', (0,0)) Nothing
-  putStrLn $ "efficiency: " ++ show e
+tr1 = do
+  let paramCNF = ((([(2,2),(2,3)],2),2),(2,2)) :: ParameterCNF -- (10,20)
+      x = "approx"
+  forM_ [1..100] \no -> do
+    system $ "wsl -- ./minisat ./CNF/100K/problem" ++ escape (show paramCNF) ++ "-" ++ showZero 3 no ++ "-" ++ x <.> "cnf > the.log"
+    readFile "the.log" >>= putStr

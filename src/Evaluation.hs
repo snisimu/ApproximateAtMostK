@@ -171,7 +171,7 @@ checkInPseudoRandom debug just nIteration paramCNF file = do
       when debug $ putStrLn $ "k'=" ++ show k' ++ ":"
       findJss k' [] $ nIs !! k'
 
---
+-- efficiency
 
 parameterTreesAt :: Int -> [ParameterTree]
 parameterTreesAt n = 
@@ -263,3 +263,18 @@ makeTheBestEfficienciesInit = do
   f 30
   f 50
   f 100
+
+--
+
+compareToCounter :: Int -> IO ()
+compareToCounter m = forM_ [1..m] \l -> do
+  let paramTk' = ((replicate l (2,2), 2), 2)
+      (k, n) = knOfTree paramTk'
+  print (k, n)
+  let nApprox = sum $ map length $ approxOrderWith binomial id paramTk'
+      nCounter = sum $ map length $ counter id (literalXs n) k
+  putStrLn $ "approx: " ++ show nApprox
+  putStrLn $ "counter: " ++ show nCounter
+  putStrLn $ showPercentage nApprox nCounter
+  e <- efficiency False False nCounter (paramTk', (0,0)) Nothing
+  putStrLn $ "efficiency: " ++ show e

@@ -41,3 +41,5 @@ executable ApproximateAtMostK
                      , filepath
                      , strict
                      , random
+                     , process
+                     , extra

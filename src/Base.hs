@@ -85,6 +85,12 @@ combinationNum just (r, n) = if just
 
 random0toLT n = newStdGen >>= \gen -> return $ fst (random gen) `mod` n
 
+escape str = 
+  let cs = "()[].+-"
+  in  concat $ flip map str \c -> if elem c cs
+        then ['\\', c]
+        else [c]
+
 -- 
 
 type ScopeID = String
