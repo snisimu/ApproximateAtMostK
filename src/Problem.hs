@@ -44,7 +44,8 @@ solutionNums (k,n) =
 
 generateProblem :: KN -> IO CNF
 generateProblem (k, n) = do
-    let nums = solutionNums (k, n)
+    let limitChunk = 100000
+        nums = solutionNums (k, n)
     -- print nums -- [debug]
     litss <- concat <$> forM [0..n] \k -> do
         let num = nums !! k
@@ -71,9 +72,7 @@ generateProblem (k, n) = do
     -- mapM_ print $ take 10 litss -- [debug]
     let l = length litss
     -- print l -- [debug]
-    let nChunk =
-            let limitChunk = 1000000
-            in  last $ takeWhile (\i -> n^i <= limitChunk) [1..]
+    let nChunk = last $ takeWhile (\i -> n^i <= limitChunk) [1..]
     -- print nChunk -- [debug]
     let litsss = splitBy nChunk litss
         nLitsss = length litsss
@@ -109,14 +108,20 @@ writeProblem paramCNF mbNo = do
 
 writeProblems :: IO ()
 writeProblems = do
-    let paramCNF = ((([(2,2),(2,3)],2),2),(2,2)) :: ParameterCNF -- (10,20)
-    forM_ [1..100] $ \i -> do
+    -- let paramCNF = ((([(2,2),(2,3)],2),2),(2,2)) :: ParameterCNF -- (10,20)
+    let paramCNF = ((([(2,3)],2),3),(1,1)) :: ParameterCNF -- (5,10)
+    forM_ [101..999] $ \i -> do
         print i
         writeProblem paramCNF $ Just i
 
-tr1 = do
-  let paramCNF = ((([(2,2),(2,3)],2),2),(2,2)) :: ParameterCNF -- (10,20)
-      x = "approx"
-  forM_ [1..100] \no -> do
-    system $ "wsl -- ./minisat ./CNF/100K/problem" ++ escape (show paramCNF) ++ "-" ++ showZero 3 no ++ "-" ++ x <.> "cnf > the.log"
-    readFile "the.log" >>= putStr
+checkResult = do
+  -- let paramCNF = ((([(2,2),(2,3)],2),2),(2,2)) :: ParameterCNF -- (10,20)
+  let paramCNF = ((([(2,3)],2),3),(1,1)) :: ParameterCNF -- (5,10)
+      which = "counter" -- "approx"
+      fileID = "problem" ++ show paramCNF
+      nos = [0..999]
+  forM_ nos \no -> do
+    print no
+    system $ "wsl -- ./minisat ./CNF/" ++ escape fileID ++ "-" ++ showZero 3 no ++ "-" ++ which <.> "cnf > the.log"
+    -- readFile "the.log" >>= putStr -- [debug]
+    readFile "the.log" >>= appendFile (fileID ++ "-" ++ which <.> "log")

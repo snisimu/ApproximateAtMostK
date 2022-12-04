@@ -2,14 +2,14 @@
 | Conflicts |     ORIGINAL     |              LEARNT              | Progress |
 |           | Clauses Literals |   Limit Clauses Literals  Lit/Cl |          |
 ==============================================================================
-|         0 | 2468697  9668496 |  822899       0        0     nan |  0.000 % |
+|         0 |  131350   703000 |   43783       0        0     nan |  0.000 % |
 ==============================================================================
 restarts              : 1
-conflicts             : 18             (15 /sec)
-decisions             : 154            (125 /sec)
-propagations          : 881            (716 /sec)
-conflict literals     : 1431           (53.75 % deleted)
-Memory used           : 108.80 MB
-CPU time              : 1.23058 s
+conflicts             : 4              (53 /sec)
+decisions             : 11             (145 /sec)
+propagations          : 184            (2423 /sec)
+conflict literals     : 8              (50.00 % deleted)
+Memory used           : 7.86 MB
+CPU time              : 0.075944 s
 
 SATISFIABLE

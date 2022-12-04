@@ -118,12 +118,7 @@ counter: 931
 > binary: 1008
 > counter: 748
 
-# the best efficiencies
+# 
 
-## almost half
-
-### overall
-
-
- 
-### just
+ghci> solutionSpaceRatio False False ((([(2,3)],2),3),(1,1))
+0.64890283
