@@ -28,16 +28,14 @@ executable TheBestEfficiencies
                        -Wredundant-constraints
   other-modules:        Base
                       , Lib
-                      , Binomial
-                      , Binary
-                      , Counter
-                      , Commander
-                      , Product
-                      , Approximate.Base
-                      , Approximate.Lib
-                      , Approximate.Encoding
-                      , Approximate.Evaluation
-                      , Approximate.Problem
+                      , Conventional.Binomial
+                      , Conventional.Binary
+                      , Conventional.Counter
+                      , Conventional.Commander
+                      , Conventional.Product
+                      , Encoding
+                      , Evaluation
+                      , Problem
   build-depends:       base >= 4.7 && < 5
                      , directory
                      , filepath
