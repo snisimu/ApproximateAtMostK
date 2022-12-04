@@ -201,24 +201,24 @@ parameterTreesAt n =
 parameterCNFsFor :: KN -> [ParameterCNF]
 parameterCNFsFor (k, n) = 
   flip concatMap [0..n-1] \d ->
-    catMaybes $ flip map (parameterTreesAt $ n+d) \param ->
+    catMaybes $ flip map (parameterTreesAt $ n+d) \paramT ->
       let inTheRange i = 
-            let k' = fst (knOfTree param i)
+            let k' = fst (knOfTree (paramT, i))
             in  k <= k' && k' <= k+d
       in  case dropWhile (not . inTheRange) [1..k] of
             [] -> Nothing
             k0 : _ ->
-              let (k', n') = knOfTree param k0
+              let (k', n') = knOfTree (paramT, k0)
                   nTrue = k' - k
                   nFalse = n' - n - nTrue
-              in  Just ((param, k0), (nFalse, nTrue))
+              in  Just ((paramT, k0), (nFalse, nTrue))
   where
   -- > mapM_ print $ parameterCNFsFor (4,12)
 
-efficiency :: Bool -> Bool -> Int -> Int -> (Int, ParameterCNF) -> IO Float
-efficiency debug just nLiteralOther nParamCNFs (no, paramCNF) = do
+efficiency :: Bool -> Bool -> Int -> ParameterCNF -> Maybe (Int, Int) -> IO Float
+efficiency debug just nLiteralOther paramCNF mbNoTotal = do
   let ((paramT, k'), (nFalse, nTrue)) = paramCNF
-  let (k, n) = knOfTree paramT k'
+  let (k, n) = knOfTree (paramT, k')
       lApprox = sum (map length $ approxOrderWith binomial id (paramT, k')) + nFalse + nTrue
       literalRate = fromInteger (toInteger lApprox) / fromInteger (toInteger nLiteralOther) :: Float
   pRate <- solutionSpaceRatio debug just paramCNF
@@ -226,9 +226,11 @@ efficiency debug just nLiteralOther nParamCNFs (no, paramCNF) = do
     putStrLn $ "pRate: " ++ show pRate
     putStrLn $ "lApprox: " ++ show lApprox
   let e = pRate / literalRate
-      strItem = show no ++ "/" ++ show nParamCNFs ++ " " ++ show just ++ " " ++ show paramCNF ++ " -> "
-  putStrLn $ strItem ++ printf "%.8f" e
-  -- appendFile "efficiency.log" $ strItem ++ show e ++ "\n" -- [just in case]
+  case mbNoTotal of
+    Nothing -> return ()
+    Just (no, nTotal) -> do
+      let strItem = show no ++ "/" ++ show nTotal ++ " " ++ show just ++ " " ++ show paramCNF ++ " -> "
+      putStrLn $ strItem ++ printf "%.8f" e
   return e
 
 theBestEfficiency :: Bool -> Bool -> KN -> IO (Float, ParameterCNF)
@@ -236,9 +238,9 @@ theBestEfficiency debug just (k, n) = do
   let lCounter = sum $ map length $ counter id (literalXs n) k
       paramCNFs = parameterCNFsFor (k, n)
       nParamCNFs = length paramCNFs
-  effs <- forM (zip [1..] paramCNFs) \iParamCNF -> do
-    when debug $ print iParamCNF
-    efficiency debug just lCounter nParamCNFs iParamCNF
+  effs <- forM (zip [1..] paramCNFs) \(i, paramCNF) -> do
+    when debug $ print (i, paramCNF)
+    efficiency debug just lCounter paramCNF $ Just (i, nParamCNFs)
   let effParamCNFs = sort $ zip effs paramCNFs
   return $ last effParamCNFs
 

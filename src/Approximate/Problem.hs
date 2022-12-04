@@ -16,6 +16,7 @@ import Counter
 import Approximate.Base
 import Approximate.Lib
 import Approximate.Encoding
+import Approximate.Evaluation
 
 pN = 10/100
 pK = 1/100
@@ -85,7 +86,7 @@ generateProblem (k, n) = do
 writeProblem :: ParameterCNF -> Maybe Int -> IO ()
 writeProblem paramCNF mbNo = do
     let ((paramT, k'), (nFalse, nTrue)) = paramCNF
-        (kT, nT) = knOfTree paramT k'
+        (kT, nT) = knOfTree (paramT, k')
         (kS, nS) = knOfSpace paramCNF
     cnfSolution <- generateProblem (kS, nS)
     let cnfAppr = approxOrderWith binomial id (paramT, k')
@@ -110,5 +111,15 @@ writeProblems = do
     let paramCNF = ((([(2,2),(2,3)],2),2),(2,2)) -- (10,20)
     forM_ [8..100] $ writeProblem ((([(2,2),(2,3)],2),2),(2,2)) . Just
 
-compareToCounter :: IO ()
-compareToCounter = do
+compareToCounter :: Int -> IO ()
+compareToCounter m = forM_ [1..m] \l -> do
+  let paramTk' = ((replicate l (2,2), 2), 2)
+      (k, n) = knOfTree paramTk'
+  print (k, n)
+  let nApprox = sum $ map length $ approxOrderWith binomial id paramTk'
+      nCounter = sum $ map length $ counter id (literalXs n) k
+  putStrLn $ "approx: " ++ show nApprox
+  putStrLn $ "counter: " ++ show nCounter
+  putStrLn $ showPercentage nApprox nCounter
+  e <- efficiency False False nCounter (paramTk', (0,0)) Nothing
+  putStrLn $ "efficiency: " ++ show e

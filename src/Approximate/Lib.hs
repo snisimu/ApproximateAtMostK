@@ -42,8 +42,8 @@ accuracy (hws, m) =
       n = h' * m * wAll
   in  fromInteger (toInteger $ h*w+1) / fromInteger (toInteger $ n+1)
 
-knOfTree :: ParameterTree -> Int -> KN
-knOfTree (hws, m) k' = 
+knOfTree :: (ParameterTree, Int) -> KN
+knOfTree ((hws, m), k') = 
   let (h, w) = head hws
       (h', w') = last hws
       wAll = product $ map snd hws
@@ -51,6 +51,6 @@ knOfTree (hws, m) k' =
   in  ((k'*n) `div` (h*w), n)
 
 knOfSpace :: ParameterCNF -> KN
-knOfSpace ((paramT, k'), (nFalse, nTrue)) = 
-  let (k0, n0) = knOfTree paramT k'
+knOfSpace (paramTk', (nFalse, nTrue)) = 
+  let (k0, n0) = knOfTree paramTk'
   in  (k0 - nTrue, n0 - nFalse - nTrue)
