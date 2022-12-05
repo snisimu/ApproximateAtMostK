@@ -80,7 +80,7 @@ solutionSpaceRatio debug just paramCNF = do
 
 solutionSpaceRatioInRandom :: Bool -> Bool -> ParameterCNF -> IO Float
 solutionSpaceRatioInRandom debug just paramCNF = do
-  let nIteration = 100 -- 1000 -- or 10000
+  let nIteration = 1000 -- or 10000
       limitRate = 1 / 1000 -- 1000000 -- genuine random or..
       file = "SolutionSpaceRatioInRandom" </> show just ++ show paramCNF <.> "txt"
       (k, n) = knOfSpace paramCNF
@@ -158,9 +158,14 @@ checkInPseudoRandom debug just nIteration paramCNF file = do
           where
             findJs k' jss = do
               when debug $ putStrLn $ "(k', n): " ++ show (k', n)
-              i <- random0toLT $ combinationNum True (toInteger k', toInteger n)
-              when debug $ putStrLn $ "i: " ++ show i
-              let js = (combinations [0..n-1] k') !! (fromInteger i)
+              let nMax = combinationNum True (toInteger k', toInteger n)
+              js <- if limitCombination < nMax
+                then do
+
+                else do
+                  i <- random0toLT nMax
+                  when debug $ putStrLn $ "i: " ++ show i
+                  return $ (combinations [0..n-1] k') !! (fromInteger i)
               if elem js jss
                 then findJs k' jss
                 else do
