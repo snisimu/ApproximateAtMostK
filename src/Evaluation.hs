@@ -52,16 +52,18 @@ isInTheSolutionSpace (((hws, m), k'), (nFalse, nTrue)) js = do
   -- print z -- [debug]
   return $ z <= k'
 
-solutionSpaceRatio :: Bool -> Bool -> ParameterCNF -> IO Float
-solutionSpaceRatio debug just paramCNF = do
+solutionSpaceRate :: Bool -> Either Bool Int -> ParameterCNF -> IO Float
+solutionSpaceRate debug eth paramCNF = do
   let iterationThreshold = 1000000
-      ((paramT, k'), (nFalse, nTrue)) = paramCNF
-      (k, n) = knOfSpace paramCNF
+      (k0, n) = knOfSpace paramCNF
+      (k, just) = case eth of
+        Left bl -> (k0, bl)
+        Right k -> (k, True)
       nSpace = combinationNum just (toInteger k, toInteger n) :: Integer
   when debug $
     putStrLn $ " space size " ++ show (k, n) ++ ": " ++ show nSpace ++ " "
   if iterationThreshold < nSpace
-    then solutionSpaceRatioInRandom debug just paramCNF
+    then solutionSpaceRateInRandom debug just paramCNF
     else do
       let jss = if just
             then combinations [0..n-1] k
@@ -74,15 +76,15 @@ solutionSpaceRatio debug just paramCNF = do
       let js'Trues = filter snd js'bls
           l = length js'bls
           lTrue = length js'Trues
-      when debug $ print "solutionSpaceRatio: done"
+      when debug $ print "solutionSpaceRate: done"
       return $ fromInteger (toInteger lTrue) / fromInteger (toInteger l)
-  -- > solutionSpaceRatio False False ((([(2,2),(2,3)],2),2),(2,2))
+  -- > solutionSpaceRate False (Left False) ((([(2,2),(2,3)],2),2),(2,2))
 
-solutionSpaceRatioInRandom :: Bool -> Bool -> ParameterCNF -> IO Float
-solutionSpaceRatioInRandom debug just paramCNF = do
+solutionSpaceRateInRandom :: Bool -> Bool -> ParameterCNF -> IO Float
+solutionSpaceRateInRandom debug just paramCNF = do
   let nIteration = 1000 -- or 10000
       limitRate = 1 / 1000 -- 1000000 -- genuine random or..
-      file = "SolutionSpaceRatioInRandom" </> show just ++ show paramCNF <.> "txt"
+      file = "SolutionSpaceRateInRandom" </> show just ++ show paramCNF <.> "txt"
       (k, n) = knOfSpace paramCNF
       k' = toInteger k :: Integer
       n' = toInteger n :: Integer
@@ -101,7 +103,7 @@ solutionSpaceRatioInRandom debug just paramCNF = do
       l = length js'bs
       lTrue = length js'Trues
   return $ fromInteger (toInteger lTrue) / fromInteger (toInteger l)
-  -- > solutionSpaceRatioInRandom True False (((replicate 2 (2,2),2),2),(0,0))
+  -- > solutionSpaceRateInRandom True False (((replicate 2 (2,2),2),2),(0,0))
 
 checkInGenuineRandom :: Bool -> Bool -> Int -> ParameterCNF -> FilePath -> IO ()
 checkInGenuineRandom debug just nIteration paramCNF file = do
@@ -224,7 +226,7 @@ efficiency debug just nLiteralOther paramCNF mbNoTotal = do
   let (k, n) = knOfTree (paramT, k')
       lApprox = sum (map length $ approxOrderWith binomial id (paramT, k')) + nFalse + nTrue
       literalRate = fromInteger (toInteger lApprox) / fromInteger (toInteger nLiteralOther) :: Float
-  pRate <- solutionSpaceRatio debug just paramCNF
+  pRate <- solutionSpaceRate debug (Left just) paramCNF
   when debug $ do
     putStrLn $ "pRate: " ++ show pRate
     putStrLn $ "lApprox: " ++ show lApprox
