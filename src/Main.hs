@@ -23,6 +23,7 @@ import Conventional.Product
 import Encoding
 import Evaluation
 import Problem
+import Statistics
 
 reportConventionals :: KN -> IO ()
 reportConventionals (k, n) = do
