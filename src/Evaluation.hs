@@ -148,34 +148,33 @@ checkInPseudoRandom debug just nIteration paramCNF file = do
                 r1s = flip map r0s \r -> r / sum r0s
             return $ flip map r1s \r -> roundUpOn5 $ r * fromInteger (toInteger nIteration)
     when debug $ print nIs
-    let findJss :: Int -> [[Int]] -> Int -> IO ()
-        findJss k' jss = \case
-          0 -> return ()
-          m -> do
-            when debug $ putStrLn $ "m: " ++ show m
-            js <- findJs k' jss
-            findJss k' (js : jss) $ m-1
-          where
-            findJs k' jss = do
-              when debug $ putStrLn $ "(k', n): " ++ show (k', n)
-              let nMax = combinationNum True (toInteger k', toInteger n)
-              js <- if limitCombination < nMax
-                then do
-
-                else do
-                  i <- random0toLT nMax
-                  when debug $ putStrLn $ "i: " ++ show i
-                  return $ (combinations [0..n-1] k') !! (fromInteger i)
-              if elem js jss
-                then findJs k' jss
-                else do
-                  bl <- isInTheSolutionSpace paramCNF js
-                  when debug $ print (js, bl)
-                  appendFile file $ show (js, bl) ++ "\n"
-                  return js
     forM_ [1..k] \k' -> do
       when debug $ putStrLn $ "k'=" ++ show k' ++ ":"
-      findJss k' [] $ nIs !! k'
+      findJss (k', n) [] $ nIs !! k'
+  where
+  findJss :: KN -> [[Int]] -> Int -> IO ()
+  findJss (k, n) jss = \case
+    0 -> return ()
+    m -> do
+      when debug $ putStrLn $ "m: " ++ show m
+      js <- findJs (k, n) jss
+      findJss (k, n) (js : jss) $ m-1
+  findJs (k, n) jss = do
+    when debug $ putStrLn $ "(k, n): " ++ show (k, n)
+    js <- randamJs (k, n) []
+    if elem js jss
+      then findJs (k, n) jss
+      else do
+        bl <- isInTheSolutionSpace paramCNF js
+        when debug $ print (js, bl)
+        appendFile file $ show (js, bl) ++ "\n"
+        return js
+  randamJs (k, n) js = do
+    if length js == k
+      then return js
+      else do
+        j <- randomChoice $ [0..n-1] \\ js
+        randamJs (k, n) $ j : js
 
 -- efficiency
 
