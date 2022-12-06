@@ -249,9 +249,11 @@ theBestEfficiency debug just (k, n) = do
   let effParamCNFs = sort $ zip effs paramCNFs
   return $ last effParamCNFs
 
+fileTheBestEfficiencies = "TheBestEfficiencies.txt"
+
 theBestEfficiencies :: IO ()
 theBestEfficiencies = do
-  let file = "TheBestEfficiencies.txt"
+  let file = fileTheBestEfficiencies
   knMbs <- (map (read :: String -> ((Int, Int), Maybe ((Float, ParameterCNF), (Float, ParameterCNF)))) . lines) <$>
     System.IO.Strict.readFile file
   let (knMbHds, ((k, n), _) : knMbTls) = break (isNothing . snd) knMbs
@@ -270,6 +272,15 @@ makeTheBestEfficienciesInit = do
   f 30
   f 50
   f 100
+
+readTheBestEfficiencies :: IO ()
+readTheBestEfficiencies = do
+  let file = fileTheBestEfficiencies
+  knMbs <- (map (read :: String -> ((Int, Int), Maybe ((Float, ParameterCNF), (Float, ParameterCNF)))) . lines) <$>
+    readFile file
+  let (knMbJusts, knMbNothings) = break (isNothing . snd) knMbs
+  forM_ knMbJusts \((k, n), Just ((eF, pramCNFf),(eT, paramCNFt))) -> do
+    putStrLn $ intercalate "," $ [show k, show n, printf "%.8f" eF, printf "%.8f" eT]
 
 --
 
