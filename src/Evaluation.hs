@@ -70,7 +70,7 @@ solutionSpaceRate debug eth paramCNF = do
             else [] : concatMap (combinations [0..n-1]) [1..k]
           check jss = forM jss \js -> do
             bl <- isInTheSolutionSpace paramCNF js
-            when debug $ print (js, bl)
+            -- when debug $ print (js, bl) -- [debug]
             return (js, bl)
       js'bls <- check jss
       let js'Trues = filter snd js'bls
@@ -88,10 +88,10 @@ solutionSpaceRateInRandom debug just paramCNF = do
       (k, n) = knOfSpace paramCNF
       k' = toInteger k :: Integer
       n' = toInteger n :: Integer
-      theRate = fromInteger (combinationNum just (k', n')) / fromInteger (combinationNum False (n', n')) :: Float
-  when debug $ putStrLn $ "theRate: " ++ show theRate
+      rateJustFull = fromInteger (combinationNum just (k', n')) / fromInteger (combinationNum False (n', n')) :: Float
+  when debug $ putStrLn $ "rateJustFull: " ++ show rateJustFull
   -- 
-  if limitRate < theRate
+  if limitRate < rateJustFull
     then do
       when debug $ putStrLn "in genuine random"
       checkInGenuineRandom debug just nIteration paramCNF file
@@ -123,7 +123,7 @@ checkInGenuineRandom debug just nIteration paramCNF file = do
     js <- findJs just (k, n) jss
     -- 
     bl <- isInTheSolutionSpace paramCNF js
-    when debug $ print (js, bl)
+    -- when debug $ print (js, bl) -- [debug]
     appendFile file $ show (js, bl) ++ "\n"
     checkInGenuineRandom debug just nIteration paramCNF file
   where
