@@ -35,7 +35,7 @@ approxOrderWith atMost vScope ((hws, m), k) =
                   atMost (vScopeNext $ "X:" ++ show is ++ show j) xs $
                     ((j-1)*h'*m) `div` hLeaf
   in  cnfTop ++ cnfP ++ cnfX
-  -- > reportOf $ approxOrderWith binomial id ([(2,2)],2) 2)
+  -- > reportOf $ approxOrderWith binomial id (([(2,2)],2), 2)
   -- > generateDIMACSwithTrue (approxOrderWith counter id ([(2,2)],2) 2) [1,2,3,4]
   -- > wsl -- ./minisat the.cnf
 
