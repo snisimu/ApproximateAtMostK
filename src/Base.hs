@@ -104,7 +104,19 @@ data Var
   | P [Int] Int -- approximate
   | Repr Int -- problem
   | Scope ScopeID Var
-   deriving (Eq, Show)
+   deriving (Eq)
+
+instance Show Var where
+  show = \case
+    X i -> "X" ++ show i
+    B i j -> "B" ++ show i ++ "_" ++ show j
+    T i j -> "T" ++ show i ++ "_" ++ show j
+    R i j -> "R" ++ show i ++ "_" ++ show j
+    C i j -> "C" ++ show i ++ "_" ++ show j
+    A i js -> "A" ++ show i ++ show js
+    P is j -> "P" ++ show is ++ show j
+    Repr i -> "Repr" ++ show i
+    Scope sID v -> "(" ++ sID ++ ")" ++ show v
 
 isAux :: Var -> Bool
 isAux =  \case
@@ -131,7 +143,7 @@ printCNF :: CNF -> IO ()
 printCNF = do
   mapM_ \literals -> do
     putStrLn $ intercalate " or " $ flip map literals \(bl, v) ->
-        (if bl then "" else "~ ") ++ showVar v
+        (if bl then "" else "~") ++ showVar v
   where
     showVar = \case
       Scope sID v -> "(" ++ sID ++ ")" ++ showVar v
