@@ -25,21 +25,21 @@ import Evaluation
 import Problem
 import Statistics
 
-reportConventionals :: KN -> IO ()
-reportConventionals (k, n) = do
-  -- putStrLn "binomial"; reportOf $ binomial id (literalXs n) k
+reportConventionals :: Bool -> KN -> IO ()
+reportConventionals blBinomial (k, n) = do
+  when blBinomial $ putStrLn "binomial"; reportOf $ binomial id (literalXs n) k
   putStrLn "binary"; reportOf $ binary id (literalXs n) k
   putStrLn "counter"; reportOf $ counter id (literalXs n) k
   putStrLn "commander(+counter)"; reportOf $ commanderWith counter id (literalXs n) k
   putStrLn "product(+counter)"; reportOf $ productWith counter id (literalXs n) k
 
-reportLiterals :: KN -> IO ()
-reportLiterals (k, n) = do
-  -- putStrLn $ "binomial: " ++ (show $ sum $ map length $ binomial id (literalXs n) k)
+reportLiterals :: Bool -> KN -> IO ()
+reportLiterals blBinomial (k, n) = do
+  when blBinomial $ putStrLn $ "binomial: " ++ (show $ sum $ map length $ binomial id (literalXs n) k)
   putStrLn $ "binary: " ++ (show $ sum $ map length $ binary id (literalXs n) k)
   putStrLn $ "counter: " ++ (show $ sum $ map length $ counter id (literalXs n) k)
-  -- putStrLn $ "commander(+counter): " ++ (show $ sum $ map length $ commanderWith counter id (literalXs n) k)
-  -- putStrLn $ "product(+counter): " ++ (show $ sum $ map length $ productWith counter id (literalXs n) k)
+  putStrLn $ "commander(+counter): " ++ (show $ sum $ map length $ commanderWith counter id (literalXs n) k)
+  putStrLn $ "product(+counter): " ++ (show $ sum $ map length $ productWith counter id (literalXs n) k)
 
 main :: IO ()
 main = do
