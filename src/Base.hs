@@ -166,4 +166,5 @@ type HW = (Height, Width)
 
 type ParameterTree = ([HW], Int)
 
-type ParameterCNF = ((ParameterTree, Int), (Int, Int))
+type ParameterCNF = ((ParameterTree, Int), (Int {- False -}, Int {- True -}))
+

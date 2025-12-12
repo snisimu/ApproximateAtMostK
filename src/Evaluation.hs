@@ -248,6 +248,7 @@ theBestEfficiency debug just (k, n) = do
     efficiency debug just lCounter paramCNF $ Just (i, nParamCNFs)
   let effParamCNFs = sort $ zip effs paramCNFs
   return $ last effParamCNFs
+  -- > theBestEfficiency False False (3, 30)
 
 fileTheBestEfficiencies = "TheBestEfficiencies.txt"
 
