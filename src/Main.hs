@@ -6,6 +6,7 @@ module Main where
 import Prelude hiding (not, product)
 
 import System.Exit
+import System.Environment (getArgs)
 
 import Control.Monad
 
@@ -43,6 +44,8 @@ reportLiterals blBinomial (k, n) = do
 
 main :: IO ()
 main = do
-  writeProblem ((([(2,2),(2,3)],2),2),(2,2)) Nothing
+  -- writeProblem ((([(2,2),(2,3)],2),2),(2,2)) Nothing
   -- writeProblems
   -- theBestEfficiencies
+  [k, n] <- getArgs
+  theBestEfficiency False True (read k, read n) >>= print
