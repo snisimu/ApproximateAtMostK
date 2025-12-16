@@ -25,6 +25,7 @@ import Encoding
 import Evaluation
 import Problem
 import Statistics
+import PigeonHole
 
 reportConventionals :: Bool -> KN -> IO ()
 reportConventionals blBinomial (k, n) = do

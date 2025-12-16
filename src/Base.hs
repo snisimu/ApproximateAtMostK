@@ -102,6 +102,7 @@ data Var
   | C Int Int -- commander
   | A Int [Int] -- product
   | P [Int] Int -- approximate
+  | V String -- general
   | Repr Int -- problem
   | Scope ScopeID Var
    deriving (Eq)
@@ -114,6 +115,7 @@ instance Show Var where
     R i j -> "R" ++ show i ++ "_" ++ show j
     C i j -> "C" ++ show i ++ "_" ++ show j
     A i js -> "A" ++ show i ++ show js
+    V s -> "V" ++ s
     P is j -> "P" ++ show is ++ show j
     Repr i -> "Repr" ++ show i
     Scope sID v -> "(" ++ sID ++ ")" ++ show v
