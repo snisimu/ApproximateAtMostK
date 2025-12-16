@@ -1,0 +1,327 @@
+~(holeAM1)P[1]1 or ~(holeAM1)P[1]2 or ~(holeAM1)P[1]3
+~(holeAM1)P[1]1 or ~(holeAM1)P[1]2 or ~(holeAM1)P[2]1
+~(holeAM1)P[1]1 or ~(holeAM1)P[1]2 or ~(holeAM1)P[2]2
+~(holeAM1)P[1]1 or ~(holeAM1)P[1]2 or ~(holeAM1)P[2]3
+~(holeAM1)P[1]1 or ~(holeAM1)P[1]3 or ~(holeAM1)P[2]1
+~(holeAM1)P[1]1 or ~(holeAM1)P[1]3 or ~(holeAM1)P[2]2
+~(holeAM1)P[1]1 or ~(holeAM1)P[1]3 or ~(holeAM1)P[2]3
+~(holeAM1)P[1]1 or ~(holeAM1)P[2]1 or ~(holeAM1)P[2]2
+~(holeAM1)P[1]1 or ~(holeAM1)P[2]1 or ~(holeAM1)P[2]3
+~(holeAM1)P[1]1 or ~(holeAM1)P[2]2 or ~(holeAM1)P[2]3
+~(holeAM1)P[1]2 or ~(holeAM1)P[1]3 or ~(holeAM1)P[2]1
+~(holeAM1)P[1]2 or ~(holeAM1)P[1]3 or ~(holeAM1)P[2]2
+~(holeAM1)P[1]2 or ~(holeAM1)P[1]3 or ~(holeAM1)P[2]3
+~(holeAM1)P[1]2 or ~(holeAM1)P[2]1 or ~(holeAM1)P[2]2
+~(holeAM1)P[1]2 or ~(holeAM1)P[2]1 or ~(holeAM1)P[2]3
+~(holeAM1)P[1]2 or ~(holeAM1)P[2]2 or ~(holeAM1)P[2]3
+~(holeAM1)P[1]3 or ~(holeAM1)P[2]1 or ~(holeAM1)P[2]2
+~(holeAM1)P[1]3 or ~(holeAM1)P[2]1 or ~(holeAM1)P[2]3
+~(holeAM1)P[1]3 or ~(holeAM1)P[2]2 or ~(holeAM1)P[2]3
+~(holeAM1)P[2]1 or ~(holeAM1)P[2]2 or ~(holeAM1)P[2]3
+~(holeAM1)P[1]2 or (holeAM1)P[1]1
+~(holeAM1)P[1]3 or (holeAM1)P[1]2
+~(holeAM1)P[2]2 or (holeAM1)P[2]1
+~(holeAM1)P[2]3 or (holeAM1)P[2]2
+(holeAM1)P[1]1 or ~Vp1h1
+(holeAM1)P[1]1 or ~Vp2h1
+(holeAM1)P[1]1 or ~Vp3h1
+(holeAM1)P[1]1 or ~Vp4h1
+(holeAM1)P[1]1 or ~Vp5h1
+(holeAM1)P[1]1 or ~Vp6h1
+(holeAM1)P[1]2 or ~Vp1h1 or ~Vp2h1 or ~Vp3h1
+(holeAM1)P[1]2 or ~Vp1h1 or ~Vp2h1 or ~Vp4h1
+(holeAM1)P[1]2 or ~Vp1h1 or ~Vp2h1 or ~Vp5h1
+(holeAM1)P[1]2 or ~Vp1h1 or ~Vp2h1 or ~Vp6h1
+(holeAM1)P[1]2 or ~Vp1h1 or ~Vp3h1 or ~Vp4h1
+(holeAM1)P[1]2 or ~Vp1h1 or ~Vp3h1 or ~Vp5h1
+(holeAM1)P[1]2 or ~Vp1h1 or ~Vp3h1 or ~Vp6h1
+(holeAM1)P[1]2 or ~Vp1h1 or ~Vp4h1 or ~Vp5h1
+(holeAM1)P[1]2 or ~Vp1h1 or ~Vp4h1 or ~Vp6h1
+(holeAM1)P[1]2 or ~Vp1h1 or ~Vp5h1 or ~Vp6h1
+(holeAM1)P[1]2 or ~Vp2h1 or ~Vp3h1 or ~Vp4h1
+(holeAM1)P[1]2 or ~Vp2h1 or ~Vp3h1 or ~Vp5h1
+(holeAM1)P[1]2 or ~Vp2h1 or ~Vp3h1 or ~Vp6h1
+(holeAM1)P[1]2 or ~Vp2h1 or ~Vp4h1 or ~Vp5h1
+(holeAM1)P[1]2 or ~Vp2h1 or ~Vp4h1 or ~Vp6h1
+(holeAM1)P[1]2 or ~Vp2h1 or ~Vp5h1 or ~Vp6h1
+(holeAM1)P[1]2 or ~Vp3h1 or ~Vp4h1 or ~Vp5h1
+(holeAM1)P[1]2 or ~Vp3h1 or ~Vp4h1 or ~Vp6h1
+(holeAM1)P[1]2 or ~Vp3h1 or ~Vp5h1 or ~Vp6h1
+(holeAM1)P[1]2 or ~Vp4h1 or ~Vp5h1 or ~Vp6h1
+(holeAM1)P[1]3 or ~Vp1h1 or ~Vp2h1 or ~Vp3h1 or ~Vp4h1 or ~Vp5h1
+(holeAM1)P[1]3 or ~Vp1h1 or ~Vp2h1 or ~Vp3h1 or ~Vp4h1 or ~Vp6h1
+(holeAM1)P[1]3 or ~Vp1h1 or ~Vp2h1 or ~Vp3h1 or ~Vp5h1 or ~Vp6h1
+(holeAM1)P[1]3 or ~Vp1h1 or ~Vp2h1 or ~Vp4h1 or ~Vp5h1 or ~Vp6h1
+(holeAM1)P[1]3 or ~Vp1h1 or ~Vp3h1 or ~Vp4h1 or ~Vp5h1 or ~Vp6h1
+(holeAM1)P[1]3 or ~Vp2h1 or ~Vp3h1 or ~Vp4h1 or ~Vp5h1 or ~Vp6h1
+(holeAM1)P[2]1 or ~Vp7h1
+(holeAM1)P[2]1 or ~Vp8h1
+(holeAM1)P[2]1 or ~Vp9h1
+(holeAM1)P[2]1 or (holeAM1)Vfalse
+(holeAM1)P[2]1 or (holeAM1)Vfalse
+(holeAM1)P[2]1 or ~(holeAM1)Vtrue
+(holeAM1)P[2]2 or ~Vp7h1 or ~Vp8h1 or ~Vp9h1
+(holeAM1)P[2]2 or ~Vp7h1 or ~Vp8h1 or (holeAM1)Vfalse
+(holeAM1)P[2]2 or ~Vp7h1 or ~Vp8h1 or (holeAM1)Vfalse
+(holeAM1)P[2]2 or ~Vp7h1 or ~Vp8h1 or ~(holeAM1)Vtrue
+(holeAM1)P[2]2 or ~Vp7h1 or ~Vp9h1 or (holeAM1)Vfalse
+(holeAM1)P[2]2 or ~Vp7h1 or ~Vp9h1 or (holeAM1)Vfalse
+(holeAM1)P[2]2 or ~Vp7h1 or ~Vp9h1 or ~(holeAM1)Vtrue
+(holeAM1)P[2]2 or ~Vp7h1 or (holeAM1)Vfalse or (holeAM1)Vfalse
+(holeAM1)P[2]2 or ~Vp7h1 or (holeAM1)Vfalse or ~(holeAM1)Vtrue
+(holeAM1)P[2]2 or ~Vp7h1 or (holeAM1)Vfalse or ~(holeAM1)Vtrue
+(holeAM1)P[2]2 or ~Vp8h1 or ~Vp9h1 or (holeAM1)Vfalse
+(holeAM1)P[2]2 or ~Vp8h1 or ~Vp9h1 or (holeAM1)Vfalse
+(holeAM1)P[2]2 or ~Vp8h1 or ~Vp9h1 or ~(holeAM1)Vtrue
+(holeAM1)P[2]2 or ~Vp8h1 or (holeAM1)Vfalse or (holeAM1)Vfalse
+(holeAM1)P[2]2 or ~Vp8h1 or (holeAM1)Vfalse or ~(holeAM1)Vtrue
+(holeAM1)P[2]2 or ~Vp8h1 or (holeAM1)Vfalse or ~(holeAM1)Vtrue
+(holeAM1)P[2]2 or ~Vp9h1 or (holeAM1)Vfalse or (holeAM1)Vfalse
+(holeAM1)P[2]2 or ~Vp9h1 or (holeAM1)Vfalse or ~(holeAM1)Vtrue
+(holeAM1)P[2]2 or ~Vp9h1 or (holeAM1)Vfalse or ~(holeAM1)Vtrue
+(holeAM1)P[2]2 or (holeAM1)Vfalse or (holeAM1)Vfalse or ~(holeAM1)Vtrue
+(holeAM1)P[2]3 or ~Vp7h1 or ~Vp8h1 or ~Vp9h1 or (holeAM1)Vfalse or (holeAM1)Vfalse
+(holeAM1)P[2]3 or ~Vp7h1 or ~Vp8h1 or ~Vp9h1 or (holeAM1)Vfalse or ~(holeAM1)Vtrue
+(holeAM1)P[2]3 or ~Vp7h1 or ~Vp8h1 or ~Vp9h1 or (holeAM1)Vfalse or ~(holeAM1)Vtrue
+(holeAM1)P[2]3 or ~Vp7h1 or ~Vp8h1 or (holeAM1)Vfalse or (holeAM1)Vfalse or ~(holeAM1)Vtrue
+(holeAM1)P[2]3 or ~Vp7h1 or ~Vp9h1 or (holeAM1)Vfalse or (holeAM1)Vfalse or ~(holeAM1)Vtrue
+(holeAM1)P[2]3 or ~Vp8h1 or ~Vp9h1 or (holeAM1)Vfalse or (holeAM1)Vfalse or ~(holeAM1)Vtrue
+~(holeAM1)Vfalse
+~(holeAM1)Vfalse
+(holeAM1)Vtrue
+~(holeAM2)P[1]1 or ~(holeAM2)P[1]2 or ~(holeAM2)P[1]3
+~(holeAM2)P[1]1 or ~(holeAM2)P[1]2 or ~(holeAM2)P[2]1
+~(holeAM2)P[1]1 or ~(holeAM2)P[1]2 or ~(holeAM2)P[2]2
+~(holeAM2)P[1]1 or ~(holeAM2)P[1]2 or ~(holeAM2)P[2]3
+~(holeAM2)P[1]1 or ~(holeAM2)P[1]3 or ~(holeAM2)P[2]1
+~(holeAM2)P[1]1 or ~(holeAM2)P[1]3 or ~(holeAM2)P[2]2
+~(holeAM2)P[1]1 or ~(holeAM2)P[1]3 or ~(holeAM2)P[2]3
+~(holeAM2)P[1]1 or ~(holeAM2)P[2]1 or ~(holeAM2)P[2]2
+~(holeAM2)P[1]1 or ~(holeAM2)P[2]1 or ~(holeAM2)P[2]3
+~(holeAM2)P[1]1 or ~(holeAM2)P[2]2 or ~(holeAM2)P[2]3
+~(holeAM2)P[1]2 or ~(holeAM2)P[1]3 or ~(holeAM2)P[2]1
+~(holeAM2)P[1]2 or ~(holeAM2)P[1]3 or ~(holeAM2)P[2]2
+~(holeAM2)P[1]2 or ~(holeAM2)P[1]3 or ~(holeAM2)P[2]3
+~(holeAM2)P[1]2 or ~(holeAM2)P[2]1 or ~(holeAM2)P[2]2
+~(holeAM2)P[1]2 or ~(holeAM2)P[2]1 or ~(holeAM2)P[2]3
+~(holeAM2)P[1]2 or ~(holeAM2)P[2]2 or ~(holeAM2)P[2]3
+~(holeAM2)P[1]3 or ~(holeAM2)P[2]1 or ~(holeAM2)P[2]2
+~(holeAM2)P[1]3 or ~(holeAM2)P[2]1 or ~(holeAM2)P[2]3
+~(holeAM2)P[1]3 or ~(holeAM2)P[2]2 or ~(holeAM2)P[2]3
+~(holeAM2)P[2]1 or ~(holeAM2)P[2]2 or ~(holeAM2)P[2]3
+~(holeAM2)P[1]2 or (holeAM2)P[1]1
+~(holeAM2)P[1]3 or (holeAM2)P[1]2
+~(holeAM2)P[2]2 or (holeAM2)P[2]1
+~(holeAM2)P[2]3 or (holeAM2)P[2]2
+(holeAM2)P[1]1 or ~Vp1h2
+(holeAM2)P[1]1 or ~Vp2h2
+(holeAM2)P[1]1 or ~Vp3h2
+(holeAM2)P[1]1 or ~Vp4h2
+(holeAM2)P[1]1 or ~Vp5h2
+(holeAM2)P[1]1 or ~Vp6h2
+(holeAM2)P[1]2 or ~Vp1h2 or ~Vp2h2 or ~Vp3h2
+(holeAM2)P[1]2 or ~Vp1h2 or ~Vp2h2 or ~Vp4h2
+(holeAM2)P[1]2 or ~Vp1h2 or ~Vp2h2 or ~Vp5h2
+(holeAM2)P[1]2 or ~Vp1h2 or ~Vp2h2 or ~Vp6h2
+(holeAM2)P[1]2 or ~Vp1h2 or ~Vp3h2 or ~Vp4h2
+(holeAM2)P[1]2 or ~Vp1h2 or ~Vp3h2 or ~Vp5h2
+(holeAM2)P[1]2 or ~Vp1h2 or ~Vp3h2 or ~Vp6h2
+(holeAM2)P[1]2 or ~Vp1h2 or ~Vp4h2 or ~Vp5h2
+(holeAM2)P[1]2 or ~Vp1h2 or ~Vp4h2 or ~Vp6h2
+(holeAM2)P[1]2 or ~Vp1h2 or ~Vp5h2 or ~Vp6h2
+(holeAM2)P[1]2 or ~Vp2h2 or ~Vp3h2 or ~Vp4h2
+(holeAM2)P[1]2 or ~Vp2h2 or ~Vp3h2 or ~Vp5h2
+(holeAM2)P[1]2 or ~Vp2h2 or ~Vp3h2 or ~Vp6h2
+(holeAM2)P[1]2 or ~Vp2h2 or ~Vp4h2 or ~Vp5h2
+(holeAM2)P[1]2 or ~Vp2h2 or ~Vp4h2 or ~Vp6h2
+(holeAM2)P[1]2 or ~Vp2h2 or ~Vp5h2 or ~Vp6h2
+(holeAM2)P[1]2 or ~Vp3h2 or ~Vp4h2 or ~Vp5h2
+(holeAM2)P[1]2 or ~Vp3h2 or ~Vp4h2 or ~Vp6h2
+(holeAM2)P[1]2 or ~Vp3h2 or ~Vp5h2 or ~Vp6h2
+(holeAM2)P[1]2 or ~Vp4h2 or ~Vp5h2 or ~Vp6h2
+(holeAM2)P[1]3 or ~Vp1h2 or ~Vp2h2 or ~Vp3h2 or ~Vp4h2 or ~Vp5h2
+(holeAM2)P[1]3 or ~Vp1h2 or ~Vp2h2 or ~Vp3h2 or ~Vp4h2 or ~Vp6h2
+(holeAM2)P[1]3 or ~Vp1h2 or ~Vp2h2 or ~Vp3h2 or ~Vp5h2 or ~Vp6h2
+(holeAM2)P[1]3 or ~Vp1h2 or ~Vp2h2 or ~Vp4h2 or ~Vp5h2 or ~Vp6h2
+(holeAM2)P[1]3 or ~Vp1h2 or ~Vp3h2 or ~Vp4h2 or ~Vp5h2 or ~Vp6h2
+(holeAM2)P[1]3 or ~Vp2h2 or ~Vp3h2 or ~Vp4h2 or ~Vp5h2 or ~Vp6h2
+(holeAM2)P[2]1 or ~Vp7h2
+(holeAM2)P[2]1 or ~Vp8h2
+(holeAM2)P[2]1 or ~Vp9h2
+(holeAM2)P[2]1 or (holeAM2)Vfalse
+(holeAM2)P[2]1 or (holeAM2)Vfalse
+(holeAM2)P[2]1 or ~(holeAM2)Vtrue
+(holeAM2)P[2]2 or ~Vp7h2 or ~Vp8h2 or ~Vp9h2
+(holeAM2)P[2]2 or ~Vp7h2 or ~Vp8h2 or (holeAM2)Vfalse
+(holeAM2)P[2]2 or ~Vp7h2 or ~Vp8h2 or (holeAM2)Vfalse
+(holeAM2)P[2]2 or ~Vp7h2 or ~Vp8h2 or ~(holeAM2)Vtrue
+(holeAM2)P[2]2 or ~Vp7h2 or ~Vp9h2 or (holeAM2)Vfalse
+(holeAM2)P[2]2 or ~Vp7h2 or ~Vp9h2 or (holeAM2)Vfalse
+(holeAM2)P[2]2 or ~Vp7h2 or ~Vp9h2 or ~(holeAM2)Vtrue
+(holeAM2)P[2]2 or ~Vp7h2 or (holeAM2)Vfalse or (holeAM2)Vfalse
+(holeAM2)P[2]2 or ~Vp7h2 or (holeAM2)Vfalse or ~(holeAM2)Vtrue
+(holeAM2)P[2]2 or ~Vp7h2 or (holeAM2)Vfalse or ~(holeAM2)Vtrue
+(holeAM2)P[2]2 or ~Vp8h2 or ~Vp9h2 or (holeAM2)Vfalse
+(holeAM2)P[2]2 or ~Vp8h2 or ~Vp9h2 or (holeAM2)Vfalse
+(holeAM2)P[2]2 or ~Vp8h2 or ~Vp9h2 or ~(holeAM2)Vtrue
+(holeAM2)P[2]2 or ~Vp8h2 or (holeAM2)Vfalse or (holeAM2)Vfalse
+(holeAM2)P[2]2 or ~Vp8h2 or (holeAM2)Vfalse or ~(holeAM2)Vtrue
+(holeAM2)P[2]2 or ~Vp8h2 or (holeAM2)Vfalse or ~(holeAM2)Vtrue
+(holeAM2)P[2]2 or ~Vp9h2 or (holeAM2)Vfalse or (holeAM2)Vfalse
+(holeAM2)P[2]2 or ~Vp9h2 or (holeAM2)Vfalse or ~(holeAM2)Vtrue
+(holeAM2)P[2]2 or ~Vp9h2 or (holeAM2)Vfalse or ~(holeAM2)Vtrue
+(holeAM2)P[2]2 or (holeAM2)Vfalse or (holeAM2)Vfalse or ~(holeAM2)Vtrue
+(holeAM2)P[2]3 or ~Vp7h2 or ~Vp8h2 or ~Vp9h2 or (holeAM2)Vfalse or (holeAM2)Vfalse
+(holeAM2)P[2]3 or ~Vp7h2 or ~Vp8h2 or ~Vp9h2 or (holeAM2)Vfalse or ~(holeAM2)Vtrue
+(holeAM2)P[2]3 or ~Vp7h2 or ~Vp8h2 or ~Vp9h2 or (holeAM2)Vfalse or ~(holeAM2)Vtrue
+(holeAM2)P[2]3 or ~Vp7h2 or ~Vp8h2 or (holeAM2)Vfalse or (holeAM2)Vfalse or ~(holeAM2)Vtrue
+(holeAM2)P[2]3 or ~Vp7h2 or ~Vp9h2 or (holeAM2)Vfalse or (holeAM2)Vfalse or ~(holeAM2)Vtrue
+(holeAM2)P[2]3 or ~Vp8h2 or ~Vp9h2 or (holeAM2)Vfalse or (holeAM2)Vfalse or ~(holeAM2)Vtrue
+~(holeAM2)Vfalse
+~(holeAM2)Vfalse
+(holeAM2)Vtrue
+~(holeAM3)P[1]1 or ~(holeAM3)P[1]2 or ~(holeAM3)P[1]3
+~(holeAM3)P[1]1 or ~(holeAM3)P[1]2 or ~(holeAM3)P[2]1
+~(holeAM3)P[1]1 or ~(holeAM3)P[1]2 or ~(holeAM3)P[2]2
+~(holeAM3)P[1]1 or ~(holeAM3)P[1]2 or ~(holeAM3)P[2]3
+~(holeAM3)P[1]1 or ~(holeAM3)P[1]3 or ~(holeAM3)P[2]1
+~(holeAM3)P[1]1 or ~(holeAM3)P[1]3 or ~(holeAM3)P[2]2
+~(holeAM3)P[1]1 or ~(holeAM3)P[1]3 or ~(holeAM3)P[2]3
+~(holeAM3)P[1]1 or ~(holeAM3)P[2]1 or ~(holeAM3)P[2]2
+~(holeAM3)P[1]1 or ~(holeAM3)P[2]1 or ~(holeAM3)P[2]3
+~(holeAM3)P[1]1 or ~(holeAM3)P[2]2 or ~(holeAM3)P[2]3
+~(holeAM3)P[1]2 or ~(holeAM3)P[1]3 or ~(holeAM3)P[2]1
+~(holeAM3)P[1]2 or ~(holeAM3)P[1]3 or ~(holeAM3)P[2]2
+~(holeAM3)P[1]2 or ~(holeAM3)P[1]3 or ~(holeAM3)P[2]3
+~(holeAM3)P[1]2 or ~(holeAM3)P[2]1 or ~(holeAM3)P[2]2
+~(holeAM3)P[1]2 or ~(holeAM3)P[2]1 or ~(holeAM3)P[2]3
+~(holeAM3)P[1]2 or ~(holeAM3)P[2]2 or ~(holeAM3)P[2]3
+~(holeAM3)P[1]3 or ~(holeAM3)P[2]1 or ~(holeAM3)P[2]2
+~(holeAM3)P[1]3 or ~(holeAM3)P[2]1 or ~(holeAM3)P[2]3
+~(holeAM3)P[1]3 or ~(holeAM3)P[2]2 or ~(holeAM3)P[2]3
+~(holeAM3)P[2]1 or ~(holeAM3)P[2]2 or ~(holeAM3)P[2]3
+~(holeAM3)P[1]2 or (holeAM3)P[1]1
+~(holeAM3)P[1]3 or (holeAM3)P[1]2
+~(holeAM3)P[2]2 or (holeAM3)P[2]1
+~(holeAM3)P[2]3 or (holeAM3)P[2]2
+(holeAM3)P[1]1 or ~Vp1h3
+(holeAM3)P[1]1 or ~Vp2h3
+(holeAM3)P[1]1 or ~Vp3h3
+(holeAM3)P[1]1 or ~Vp4h3
+(holeAM3)P[1]1 or ~Vp5h3
+(holeAM3)P[1]1 or ~Vp6h3
+(holeAM3)P[1]2 or ~Vp1h3 or ~Vp2h3 or ~Vp3h3
+(holeAM3)P[1]2 or ~Vp1h3 or ~Vp2h3 or ~Vp4h3
+(holeAM3)P[1]2 or ~Vp1h3 or ~Vp2h3 or ~Vp5h3
+(holeAM3)P[1]2 or ~Vp1h3 or ~Vp2h3 or ~Vp6h3
+(holeAM3)P[1]2 or ~Vp1h3 or ~Vp3h3 or ~Vp4h3
+(holeAM3)P[1]2 or ~Vp1h3 or ~Vp3h3 or ~Vp5h3
+(holeAM3)P[1]2 or ~Vp1h3 or ~Vp3h3 or ~Vp6h3
+(holeAM3)P[1]2 or ~Vp1h3 or ~Vp4h3 or ~Vp5h3
+(holeAM3)P[1]2 or ~Vp1h3 or ~Vp4h3 or ~Vp6h3
+(holeAM3)P[1]2 or ~Vp1h3 or ~Vp5h3 or ~Vp6h3
+(holeAM3)P[1]2 or ~Vp2h3 or ~Vp3h3 or ~Vp4h3
+(holeAM3)P[1]2 or ~Vp2h3 or ~Vp3h3 or ~Vp5h3
+(holeAM3)P[1]2 or ~Vp2h3 or ~Vp3h3 or ~Vp6h3
+(holeAM3)P[1]2 or ~Vp2h3 or ~Vp4h3 or ~Vp5h3
+(holeAM3)P[1]2 or ~Vp2h3 or ~Vp4h3 or ~Vp6h3
+(holeAM3)P[1]2 or ~Vp2h3 or ~Vp5h3 or ~Vp6h3
+(holeAM3)P[1]2 or ~Vp3h3 or ~Vp4h3 or ~Vp5h3
+(holeAM3)P[1]2 or ~Vp3h3 or ~Vp4h3 or ~Vp6h3
+(holeAM3)P[1]2 or ~Vp3h3 or ~Vp5h3 or ~Vp6h3
+(holeAM3)P[1]2 or ~Vp4h3 or ~Vp5h3 or ~Vp6h3
+(holeAM3)P[1]3 or ~Vp1h3 or ~Vp2h3 or ~Vp3h3 or ~Vp4h3 or ~Vp5h3
+(holeAM3)P[1]3 or ~Vp1h3 or ~Vp2h3 or ~Vp3h3 or ~Vp4h3 or ~Vp6h3
+(holeAM3)P[1]3 or ~Vp1h3 or ~Vp2h3 or ~Vp3h3 or ~Vp5h3 or ~Vp6h3
+(holeAM3)P[1]3 or ~Vp1h3 or ~Vp2h3 or ~Vp4h3 or ~Vp5h3 or ~Vp6h3
+(holeAM3)P[1]3 or ~Vp1h3 or ~Vp3h3 or ~Vp4h3 or ~Vp5h3 or ~Vp6h3
+(holeAM3)P[1]3 or ~Vp2h3 or ~Vp3h3 or ~Vp4h3 or ~Vp5h3 or ~Vp6h3
+(holeAM3)P[2]1 or ~Vp7h3
+(holeAM3)P[2]1 or ~Vp8h3
+(holeAM3)P[2]1 or ~Vp9h3
+(holeAM3)P[2]1 or (holeAM3)Vfalse
+(holeAM3)P[2]1 or (holeAM3)Vfalse
+(holeAM3)P[2]1 or ~(holeAM3)Vtrue
+(holeAM3)P[2]2 or ~Vp7h3 or ~Vp8h3 or ~Vp9h3
+(holeAM3)P[2]2 or ~Vp7h3 or ~Vp8h3 or (holeAM3)Vfalse
+(holeAM3)P[2]2 or ~Vp7h3 or ~Vp8h3 or (holeAM3)Vfalse
+(holeAM3)P[2]2 or ~Vp7h3 or ~Vp8h3 or ~(holeAM3)Vtrue
+(holeAM3)P[2]2 or ~Vp7h3 or ~Vp9h3 or (holeAM3)Vfalse
+(holeAM3)P[2]2 or ~Vp7h3 or ~Vp9h3 or (holeAM3)Vfalse
+(holeAM3)P[2]2 or ~Vp7h3 or ~Vp9h3 or ~(holeAM3)Vtrue
+(holeAM3)P[2]2 or ~Vp7h3 or (holeAM3)Vfalse or (holeAM3)Vfalse
+(holeAM3)P[2]2 or ~Vp7h3 or (holeAM3)Vfalse or ~(holeAM3)Vtrue
+(holeAM3)P[2]2 or ~Vp7h3 or (holeAM3)Vfalse or ~(holeAM3)Vtrue
+(holeAM3)P[2]2 or ~Vp8h3 or ~Vp9h3 or (holeAM3)Vfalse
+(holeAM3)P[2]2 or ~Vp8h3 or ~Vp9h3 or (holeAM3)Vfalse
+(holeAM3)P[2]2 or ~Vp8h3 or ~Vp9h3 or ~(holeAM3)Vtrue
+(holeAM3)P[2]2 or ~Vp8h3 or (holeAM3)Vfalse or (holeAM3)Vfalse
+(holeAM3)P[2]2 or ~Vp8h3 or (holeAM3)Vfalse or ~(holeAM3)Vtrue
+(holeAM3)P[2]2 or ~Vp8h3 or (holeAM3)Vfalse or ~(holeAM3)Vtrue
+(holeAM3)P[2]2 or ~Vp9h3 or (holeAM3)Vfalse or (holeAM3)Vfalse
+(holeAM3)P[2]2 or ~Vp9h3 or (holeAM3)Vfalse or ~(holeAM3)Vtrue
+(holeAM3)P[2]2 or ~Vp9h3 or (holeAM3)Vfalse or ~(holeAM3)Vtrue
+(holeAM3)P[2]2 or (holeAM3)Vfalse or (holeAM3)Vfalse or ~(holeAM3)Vtrue
+(holeAM3)P[2]3 or ~Vp7h3 or ~Vp8h3 or ~Vp9h3 or (holeAM3)Vfalse or (holeAM3)Vfalse
+(holeAM3)P[2]3 or ~Vp7h3 or ~Vp8h3 or ~Vp9h3 or (holeAM3)Vfalse or ~(holeAM3)Vtrue
+(holeAM3)P[2]3 or ~Vp7h3 or ~Vp8h3 or ~Vp9h3 or (holeAM3)Vfalse or ~(holeAM3)Vtrue
+(holeAM3)P[2]3 or ~Vp7h3 or ~Vp8h3 or (holeAM3)Vfalse or (holeAM3)Vfalse or ~(holeAM3)Vtrue
+(holeAM3)P[2]3 or ~Vp7h3 or ~Vp9h3 or (holeAM3)Vfalse or (holeAM3)Vfalse or ~(holeAM3)Vtrue
+(holeAM3)P[2]3 or ~Vp8h3 or ~Vp9h3 or (holeAM3)Vfalse or (holeAM3)Vfalse or ~(holeAM3)Vtrue
+~(holeAM3)Vfalse
+~(holeAM3)Vfalse
+(holeAM3)Vtrue
+~Vp1h1 or (pigeonAM1)R1_1
+~Vp1h2 or (pigeonAM1)R2_1
+~(pigeonAM1)R1_1 or (pigeonAM1)R2_1
+~Vp1h2 or ~(pigeonAM1)R1_1
+~Vp1h3 or ~(pigeonAM1)R2_1
+~Vp2h1 or (pigeonAM2)R1_1
+~Vp2h2 or (pigeonAM2)R2_1
+~(pigeonAM2)R1_1 or (pigeonAM2)R2_1
+~Vp2h2 or ~(pigeonAM2)R1_1
+~Vp2h3 or ~(pigeonAM2)R2_1
+~Vp3h1 or (pigeonAM3)R1_1
+~Vp3h2 or (pigeonAM3)R2_1
+~(pigeonAM3)R1_1 or (pigeonAM3)R2_1
+~Vp3h2 or ~(pigeonAM3)R1_1
+~Vp3h3 or ~(pigeonAM3)R2_1
+~Vp4h1 or (pigeonAM4)R1_1
+~Vp4h2 or (pigeonAM4)R2_1
+~(pigeonAM4)R1_1 or (pigeonAM4)R2_1
+~Vp4h2 or ~(pigeonAM4)R1_1
+~Vp4h3 or ~(pigeonAM4)R2_1
+~Vp5h1 or (pigeonAM5)R1_1
+~Vp5h2 or (pigeonAM5)R2_1
+~(pigeonAM5)R1_1 or (pigeonAM5)R2_1
+~Vp5h2 or ~(pigeonAM5)R1_1
+~Vp5h3 or ~(pigeonAM5)R2_1
+~Vp6h1 or (pigeonAM6)R1_1
+~Vp6h2 or (pigeonAM6)R2_1
+~(pigeonAM6)R1_1 or (pigeonAM6)R2_1
+~Vp6h2 or ~(pigeonAM6)R1_1
+~Vp6h3 or ~(pigeonAM6)R2_1
+~Vp7h1 or (pigeonAM7)R1_1
+~Vp7h2 or (pigeonAM7)R2_1
+~(pigeonAM7)R1_1 or (pigeonAM7)R2_1
+~Vp7h2 or ~(pigeonAM7)R1_1
+~Vp7h3 or ~(pigeonAM7)R2_1
+~Vp8h1 or (pigeonAM8)R1_1
+~Vp8h2 or (pigeonAM8)R2_1
+~(pigeonAM8)R1_1 or (pigeonAM8)R2_1
+~Vp8h2 or ~(pigeonAM8)R1_1
+~Vp8h3 or ~(pigeonAM8)R2_1
+~Vp9h1 or (pigeonAM9)R1_1
+~Vp9h2 or (pigeonAM9)R2_1
+~(pigeonAM9)R1_1 or (pigeonAM9)R2_1
+~Vp9h2 or ~(pigeonAM9)R1_1
+~Vp9h3 or ~(pigeonAM9)R2_1
+Vp1h1 or Vp1h2 or Vp1h3
+Vp2h1 or Vp2h2 or Vp2h3
+Vp3h1 or Vp3h2 or Vp3h3
+Vp4h1 or Vp4h2 or Vp4h3
+Vp5h1 or Vp5h2 or Vp5h3
+Vp6h1 or Vp6h2 or Vp6h3
+Vp7h1 or Vp7h2 or Vp7h3
+Vp8h1 or Vp8h2 or Vp8h3
+Vp9h1 or Vp9h2 or Vp9h3
