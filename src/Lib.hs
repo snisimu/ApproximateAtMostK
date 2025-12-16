@@ -43,6 +43,10 @@ strDIMACSwithTrue cnf ts = do
     vNumssToStr vNumss = unlines $ flip map vNumss \vNums ->
       intercalate " " $ map show $ vNums ++ [0]
 
+printDIMACS :: CNF -> IO ()
+printDIMACS cnf = do
+  strDIMACSwithTrue cnf [] >>= putStr
+
 generateDIMACSwithTrue :: CNF -> [Int] -> IO ()
 generateDIMACSwithTrue cnf ts = writeFile "the.cnf" =<< strDIMACSwithTrue cnf ts
   -- > wsl -- ./minisat the.cnf

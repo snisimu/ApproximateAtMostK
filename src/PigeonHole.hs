@@ -49,6 +49,13 @@ approxPracticalWith atMost vScope paramCNF xIns =
 
 pigeonHole :: (Int, Int) -> IO CNF
 pigeonHole (l, m) = do
+  let n = l * m
   (_, paramCNF) <- theBestEfficiency False True (l, l*m)
-  let approx vScope = approxPracticalWith binomial vScope paramCNF $ literalXs (l*m)
-  pure $ approx id
+  let approx vScope xs = approxPracticalWith binomial vScope paramCNF xs
+      lV i j = literal $ V $ "p" ++ show i ++ "h" ++ show j
+  let holeAM = concatMap (\j -> approx (Scope $ "holeAM" ++ show j) $ [ lV i j | i <- [1..n] ]) [1..m]
+      pigeonAM = concatMap (\i ->  (counter (Scope $ "pigeonAM" ++ show i) [ lV i j | j <- [1..m] ] 1)) [1..n]
+      pigeonAL = map (\i -> [ lV i j | j <- [1..m] ]) [1..n]
+  pure $ holeAM ++ pigeonAM ++ pigeonAL
+  -- > pigeonHole (3, 3) >>= printDIMACS
+  -- > pigeonHole (3, 3) >>= \cnf -> generateDIMACSwithTrue cnf []

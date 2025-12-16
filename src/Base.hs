@@ -127,8 +127,11 @@ isAux =  \case
 
 type Literal = (Bool, Var)
 
+literal :: Var -> Literal
+literal v = (True, v)
+
 literalXs :: Int -> [Literal]
-literalXs n = [ (True, X i) | i <- [1..n] ]
+literalXs n = [ literal (X i) | i <- [1..n] ]
 
 not :: Literal -> Literal
 not (bl, v) = (Prelude.not bl, v)
@@ -169,4 +172,3 @@ type HW = (Height, Width)
 type ParameterTree = ([HW], Int)
 
 type ParameterCNF = ((ParameterTree, Int), (Int {- False -}, Int {- True -}))
-
